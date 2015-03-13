@@ -1,7 +1,7 @@
 SQLAlchemy dialect for SAP HANA
 ===============================
 
-This dialect allows you to use the SAP HANA database with SQLAlchemy and ``pyhdb`` driver.
+This dialect allows you to use the SAP HANA database with SQLAlchemy and `pyhdb <https://github.com/SAP/PyHDB>`_ driver.
 
 The dialect is currently very experimental and doesn't support all possible features in SQLAlchemy with SAP HANA. 
 
@@ -10,7 +10,7 @@ Using python database interface delivered by hdbclient, is currently not support
 Prerequisites
 -------------
 
-At the moment the dialect only supports the pure Python database driver ``pyhdb``.
+At the moment the dialect only supports the pure Python database driver `pyhdb <https://github.com/SAP/PyHDB>`_.
 
 See the README of pyhdb about how you can install the driver.
 
