@@ -20,14 +20,14 @@ from sqlalchemy_hana import types as hana_types
 
 import pyhdb
 
-class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
+class HANAIdentifierPreparer(compiler.IdentifierPreparer):
     def format_constraint(self, constraint):
         """HANA doesn't support named constraint"""
         return None
 
-class HANAStatementCompiler(compiler.SQLCompiler):
 
+class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_sequence(self, seq):
         return self.dialect.identifier_preparer.format_sequence(seq) \
                + ".NEXTVAL"
@@ -35,8 +35,8 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def default_from(self):
         return " FROM DUMMY"
 
-class HANATypeCompiler(compiler.GenericTypeCompiler):
 
+class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_boolean(self, type_):
         return self.visit_TINYINT(type_)
 
@@ -49,8 +49,17 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
-class HANADDLCompiler(compiler.DDLCompiler):
+    def visit_text(self, type_, **kw):
+        return self.visit_CLOB(type_, **kw)
 
+    def visit_large_binary(self, type_, **kw):
+        return self.visit_BLOB(type_, **kw)
+
+    def visit_unicode_text(self, type_, **kw):
+        return self.visit_NCLOB(type_, **kw)
+
+
+class HANADDLCompiler(compiler.DDLCompiler):
     def visit_check_constraint(self, constraint):
         """HANA doesn't support check constraints."""
         return None
@@ -65,22 +74,25 @@ class HANADDLCompiler(compiler.DDLCompiler):
             if formatted_name is not None:
                 text += "CONSTRAINT %s " % formatted_name
         text += "UNIQUE (%s)" % (
-                ', '.join(self.preparer.quote(c.name)
-                          for c in constraint))
+            ', '.join(self.preparer.quote(c.name)
+                      for c in constraint))
         text += self.define_constraint_deferrability(constraint)
         return text
 
-class HANAExecutionContext(default.DefaultExecutionContext):
 
+class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq, type_):
         seq = self.dialect.identifier_preparer.format_sequence(seq)
-        return self._execute_scalar(
-            "SELECT %s.NEXTVAL FROM DUMMY" % seq,
-            type_
-        )
+        return self._execute_scalar("SELECT %s.NEXTVAL FROM DUMMY" % seq, type_)
+
+
+# ischema_names = {
+#     'BLOB': hana_types.BLOB,
+#     'CLOB': hana_types.CLOB,
+#     'NCLOB': hana_types.NCLOB,
+# }
 
 class HANADialect(default.DefaultDialect):
-
     name = "hana"
     driver = 'pyhdb'
 
@@ -99,12 +111,16 @@ class HANADialect(default.DefaultDialect):
     supports_sequences = True
     supports_native_decimal = True
 
-    ischema_names = {}
+    # ischema_names can be empty dict, not needed for reading lobs...
+    ischema_names = {}  # ischema_names
     colspecs = {
         types.Boolean: hana_types.BOOLEAN,
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
+        types.LargeBinary: hana_types.HanaBinary,
+        types.Text: hana_types.HanaText,
+        types.UnicodeText: hana_types.HanaUnicodeText
     }
 
     postfetch_lastrowid = False
@@ -112,9 +128,11 @@ class HANADialect(default.DefaultDialect):
     supports_empty_insert = False
     supports_native_boolean = False
     supports_default_values = False
-
-    # pyhdb
     supports_sane_multi_rowcount = False
+
+    def __init__(self, auto_convert_lobs=True, **kwargs):
+        super(HANADialect, self).__init__(**kwargs)
+        self.auto_convert_lobs = auto_convert_lobs
 
     @classmethod
     def dbapi(cls):
@@ -148,7 +166,7 @@ class HANADialect(default.DefaultDialect):
             return None
 
         if name.upper() == name and not \
-           self.identifier_preparer._requires_quotes(name.lower()):
+                self.identifier_preparer._requires_quotes(name.lower()):
             name = name.lower()
 
         return name
@@ -158,7 +176,7 @@ class HANADialect(default.DefaultDialect):
             return None
 
         if name.lower() == name and not \
-           self.identifier_preparer._requires_quotes(name.lower()):
+                self.identifier_preparer._requires_quotes(name.lower()):
             name = name.upper()
         return name
 
@@ -275,15 +293,15 @@ class HANADialect(default.DefaultDialect):
         foreign_keys = []
         for row in result:
             foreign_key = {
-                "name": None, # No named foreign key support
-                "constrained_columns": [self.normalize_name(row[0]),],
+                "name": None,  # No named foreign key support
+                "constrained_columns": [self.normalize_name(row[0])],
                 "referred_schema": None,
                 "referred_table": self.normalize_name(row[2]),
-                "referred_columns": [self.normalize_name(row[3]),],
+                "referred_columns": [self.normalize_name(row[3])],
             }
 
             if schema is not None or row[1] != self.default_schema_name:
-               foreign_key["referred_schema"] = row[1]
+                foreign_key["referred_schema"] = row[1]
 
             foreign_keys.append(foreign_key)
         return foreign_keys
@@ -315,7 +333,7 @@ class HANADialect(default.DefaultDialect):
                 indexes[name] = {
                     "name": name,
                     "unique": False,
-                    "column_names": [column,]
+                    "column_names": [column]
                 }
 
                 if constraint is not None:

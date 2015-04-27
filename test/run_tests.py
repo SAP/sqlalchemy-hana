@@ -12,11 +12,14 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+# configuration used when running tests via nose
+
 from sqlalchemy.dialects import registry
 
 registry.register("hana", "sqlalchemy_hana.dialect", "HANADialect")
 
 from sqlalchemy.testing import runner
+
 
 # use this in setup.py 'test_suite':
 # test_suite="run_tests.setup_py_test"

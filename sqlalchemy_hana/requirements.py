@@ -14,6 +14,7 @@
 
 from sqlalchemy.testing import exclusions, requirements
 
+
 class Requirements(requirements.SuiteRequirements):
 
     @property
