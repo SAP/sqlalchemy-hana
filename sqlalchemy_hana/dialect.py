@@ -29,8 +29,7 @@ class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
 class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_sequence(self, seq):
-        return self.dialect.identifier_preparer.format_sequence(seq) \
-               + ".NEXTVAL"
+        return self.dialect.identifier_preparer.format_sequence(seq) + ".NEXTVAL"
 
     def default_from(self):
         return " FROM DUMMY"
@@ -95,6 +94,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 class HANADialect(default.DefaultDialect):
     name = "hana"
     driver = 'pyhdb'
+    default_paramstyle = 'format'
 
     statement_compiler = HANAStatementCompiler
     type_compiler = HANATypeCompiler

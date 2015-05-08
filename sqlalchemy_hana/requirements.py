@@ -12,10 +12,21 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+import sys
 from sqlalchemy.testing import exclusions, requirements
 
 
 class Requirements(requirements.SuiteRequirements):
+
+    @property
+    def temporary_tables(self):
+        # TODO: HANA supports temporty table but only with GLOBAL or LOCAL specification
+        return exclusions.closed()
+
+    @property
+    def temp_table_reflection(self):
+        return exclusions.closed()
+
 
     @property
     def deferrable_or_no_constraints(self):
@@ -95,4 +106,81 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def two_phase_transactions(self):
         """Not supported by PYHDB"""
+        return exclusions.closed()
+
+    @property
+    def predictable_gc(self):
+        return exclusions.open()
+
+    @property
+    def cpython(self):
+        return exclusions.closed()
+
+    @property
+    def python3(self):
+        if sys.version_info < (3,):
+            return exclusions.closed()
+        return exclusions.open()
+
+    @property
+    def identity(self):
+        return exclusions.closed()
+
+    @property
+    def sane_rowcount(self):
+        return exclusions.closed()
+
+    @property
+    def sane_multi_rowcount(self):
+        return exclusions.closed()
+
+    @property
+    def check_constraints(self):
+        return exclusions.closed()
+
+    @property
+    def update_nowait(self):
+        return exclusions.closed()
+
+    @property
+    def independent_connections(self):
+        return exclusions.open()
+
+    @property
+    def non_broken_pickle(self):
+        return exclusions.closed()
+
+    @property
+    def independent_cursors(self):
+        return exclusions.open()
+
+    @property
+    def cross_schema_fk_reflection(self):
+        return exclusions.closed()
+
+    @property
+    def updateable_autoincrement_pks(self):
+        return exclusions.closed()
+
+    @property
+    def isolation_level(self):
+        # TODO: Check support in pyhdb
+        return exclusions.closed()
+
+    # Disable mysql tests
+    @property
+    def mssql_freetds(self):
+        return exclusions.closed()
+
+    # Disable postgresql tests
+    @property
+    def postgresql_utf8_server_encoding(self):
+        return exclusions.closed()
+
+    @property
+    def range_types(self):
+        return exclusions.closed()
+
+    @property
+    def hstore(self):
         return exclusions.closed()
