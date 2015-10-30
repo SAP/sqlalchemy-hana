@@ -28,7 +28,7 @@ setup(
     author="Christoph Heer",
     author_email="christoph.heer@sap.com",
     description="SQLAlchemy dialect for SAP HANA Database",
-    packages=find_packages(exclude=("tests", "tests.*",)),
+    packages=find_packages(exclude=("test", "test.*",)),
     zip_safe=False,
     tests_require=[
         "pytest>=2.5.2",
@@ -51,6 +51,9 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     entry_points = {
-     'sqlalchemy.dialects': ['hana = sqlalchemy_hana.dialect:HANADialect',]
+     'sqlalchemy.dialects': [
+         'hana = sqlalchemy_hana.dialect:HANAPyHDBDialect',
+         'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect'
+     ]
    },
 )

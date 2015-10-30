@@ -1,11 +1,16 @@
 Changelog
 =========
 
+0.1.2
+-----
+- Cleanup of setup.py
+- Release on PyPi
+
 0.1.0
 -----
-Added support for LOBs
+- Added support for LOBs
 
 
 0.0.1
 -----
-Initial version
+- Initial version
