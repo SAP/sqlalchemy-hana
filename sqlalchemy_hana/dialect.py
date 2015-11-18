@@ -15,24 +15,36 @@
 from sqlalchemy import sql, types, util
 from sqlalchemy.engine import default
 from sqlalchemy.sql import compiler
+from sqlalchemy.sql.elements import quoted_name
 
 from sqlalchemy_hana import types as hana_types
 
-import pyhdb
-
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
+
     def format_constraint(self, constraint):
         """HANA doesn't support named constraint"""
         return None
 
 
 class HANAStatementCompiler(compiler.SQLCompiler):
+
     def visit_sequence(self, seq):
         return self.dialect.identifier_preparer.format_sequence(seq) + ".NEXTVAL"
 
     def default_from(self):
         return " FROM DUMMY"
+
+    def limit_clause(self, select, **kw):
+        text = ""
+        if select._limit_clause is not None:
+            text += "\n LIMIT " + self.process(select._limit_clause, **kw)
+        if select._offset_clause is not None:
+            if select._limit_clause is None:
+                # Dirty Hack but HANA only support OFFSET with LIMIT <integer>
+                text += "\n LIMIT 999999"
+            text += " OFFSET " + self.process(select._offset_clause, **kw)
+        return text
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
@@ -47,6 +59,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
+
+    def visit_unicode(self, type_, **kw):
+        return self.visit_NVARCHAR(type_, **kw)
 
     def visit_text(self, type_, **kw):
         return self.visit_CLOB(type_, **kw)
@@ -91,9 +106,8 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 #     'NCLOB': hana_types.NCLOB,
 # }
 
-class HANADialect(default.DefaultDialect):
+class HANABaseDialect(default.DefaultDialect):
     name = "hana"
-    driver = 'pyhdb'
     default_paramstyle = 'format'
 
     statement_compiler = HANAStatementCompiler
@@ -131,12 +145,8 @@ class HANADialect(default.DefaultDialect):
     supports_sane_multi_rowcount = False
 
     def __init__(self, auto_convert_lobs=True, **kwargs):
-        super(HANADialect, self).__init__(**kwargs)
+        super(HANABaseDialect, self).__init__(**kwargs)
         self.auto_convert_lobs = auto_convert_lobs
-
-    @classmethod
-    def dbapi(cls):
-        return pyhdb
 
     def is_disconnect(self, error, connection, cursor):
         return connection.closed
@@ -153,7 +163,7 @@ class HANADialect(default.DefaultDialect):
         pass
 
     def _get_default_schema_name(self, connection):
-        return connection.engine.url.username.upper()
+        return self.normalize_name(connection.engine.url.username.upper())
 
     def _check_unicode_returns(self, connection):
         return True
@@ -166,8 +176,10 @@ class HANADialect(default.DefaultDialect):
             return None
 
         if name.upper() == name and not \
-                self.identifier_preparer._requires_quotes(name.lower()):
+           self.identifier_preparer._requires_quotes(name.lower()):
             name = name.lower()
+        elif name.lower() == name:
+            return quoted_name(name, quote=True)
 
         return name
 
@@ -176,7 +188,7 @@ class HANADialect(default.DefaultDialect):
             return None
 
         if name.lower() == name and not \
-                self.identifier_preparer._requires_quotes(name.lower()):
+           self.identifier_preparer._requires_quotes(name.lower()):
             name = name.upper()
         return name
 
@@ -299,11 +311,10 @@ class HANADialect(default.DefaultDialect):
                 "referred_table": self.normalize_name(row[2]),
                 "referred_columns": [self.normalize_name(row[3])],
             }
-
-            if schema is not None or row[1] != self.default_schema_name:
-                foreign_key["referred_schema"] = row[1]
-
+            if row[1] != self.denormalize_name(self.default_schema_name):
+                foreign_key["referred_schema"] = self.normalize_name(row[1])
             foreign_keys.append(foreign_key)
+
         return foreign_keys
 
     def get_indexes(self, connection, table_name, schema=None, **kwargs):
@@ -370,34 +381,13 @@ class HANADialect(default.DefaultDialect):
             "constrained_columns": constrained_columns
         }
 
-    # def get_unique_constraints(self, connection, table_name, schema=None,
-    #                            **kwargs):
-    #     schema = schema or self.default_schema_name
+class HANAPyHDBDialect(HANABaseDialect):
 
-    #     result = connection.execute(
-    #         sql.text(
-    #             "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
-    #             "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
-    #             "ORDER BY CONSTRAINT_NAME, POSITION"
-    #         ).bindparams(
-    #             schema=unicode(self.denormalize_name(schema)),
-    #             table=unicode(self.denormalize_name(table_name))
-    #         )
-    #     )
+    driver = 'pyhdb'
+    default_paramstyle = 'qmark'
 
-    #     constraints_order = []
-    #     constraints_columns = {}
-    #     for constraint, column_name in result.fetchall():
-    #         if constraint not in constraints_columns:
-    #             constraints_order.append(constraint)
-    #             constraints_columns[constraint] = [column_name,]
-    #         else:
-    #             constraints_columns[constraint].append(column_name)
-
-    #     constraints = []
-    #     for constraint in constraints_order:
-    #         constraints.append({
-    #             'name': constraint,
-    #             'column_names': constraints_columns[constraint]
-    #         })
-    #     return constraints
+    @classmethod
+    def dbapi(cls):
+        import pyhdb
+        pyhdb.paramstyle = cls.default_paramstyle
+        return pyhdb

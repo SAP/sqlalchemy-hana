@@ -163,6 +163,10 @@ class Requirements(requirements.SuiteRequirements):
         return exclusions.closed()
 
     @property
+    def bound_limit_offset(self):
+        return exclusions.closed()
+
+    @property
     def isolation_level(self):
         # TODO: Check support in pyhdb
         return exclusions.closed()
