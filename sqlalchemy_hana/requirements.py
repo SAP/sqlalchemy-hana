@@ -84,9 +84,13 @@ class Requirements(requirements.SuiteRequirements):
         return exclusions.closed()
 
     @property
+    def date_historic(self):
+        return exclusions.open()
+
+    @property
     def text_type(self):
         """Currently not supported by PYHDB"""
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def schemas(self):
