@@ -277,10 +277,12 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, "
-                "IS_NULLABLE, LENGTH, SCALE FROM SYS.COLUMNS "
-                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
-                "ORDER BY POSITION"
+                """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE FROM (
+    SELECT * FROM SYS.TABLE_COLUMNS
+    UNION ALL SELECT * FROM SYS.VIEW_COLUMNS
+) AS COLUMS
+WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table
+ORDER BY POSITION"""
             ).bindparams(
                 schema=unicode(self.denormalize_name(schema)),
                 table=unicode(self.denormalize_name(table_name))
