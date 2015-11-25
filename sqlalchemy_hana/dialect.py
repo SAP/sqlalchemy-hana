@@ -244,13 +244,41 @@ class HANABaseDialect(default.DefaultDialect):
         ])
         return tables
 
+    def get_view_names(self, connection, schema=None, **kwargs):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT VIEW_NAME FROM VIEWS WHERE SCHEMA_NAME=:schema",
+            ).bindparams(
+                schema=unicode(self.denormalize_name(schema)),
+            )
+        )
+
+        views = list([
+            self.normalize_name(row[0]) for row in result.fetchall()
+        ])
+        return views
+
+    def get_view_definition(self, connection, view_name, schema=None, **kwargs):
+        schema = schema or self.default_schema_name
+
+        return connection.execute(
+            sql.text(
+                "SELECT DEFINITION FROM VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
+            ).bindparams(
+                view_name=unicode(self.denormalize_name(view_name)),
+                schema=unicode(self.denormalize_name(schema)),
+            )
+        ).scalar().read()
+
     def get_columns(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
                 "SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, "
-                "IS_NULLABLE, LENGTH, SCALE FROM TABLE_COLUMNS "
+                "IS_NULLABLE, LENGTH, SCALE FROM SYS.COLUMNS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY POSITION"
             ).bindparams(
@@ -380,6 +408,7 @@ class HANABaseDialect(default.DefaultDialect):
             "name": self.normalize_name(constraint_name),
             "constrained_columns": constrained_columns
         }
+
 
 class HANAPyHDBDialect(HANABaseDialect):
 

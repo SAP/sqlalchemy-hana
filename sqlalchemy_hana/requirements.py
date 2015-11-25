@@ -27,6 +27,9 @@ class Requirements(requirements.SuiteRequirements):
     def temp_table_reflection(self):
         return exclusions.closed()
 
+    @property
+    def views(self):
+        return exclusions.open()
 
     @property
     def deferrable_or_no_constraints(self):
