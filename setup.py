@@ -30,6 +30,12 @@ setup(
     description="SQLAlchemy dialect for SAP HANA Database",
     packages=find_packages(exclude=("test", "test.*",)),
     zip_safe=False,
+    install_requires=[
+        "sqlalchemy"
+    ],
+    extras_require={
+        'pyhdb': ["pyhdb>=0.3.1"]
+    }, 
     tests_require=[
         "pytest>=2.5.2",
         "mock>=1.0.1"
