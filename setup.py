@@ -35,7 +35,7 @@ setup(
     ],
     extras_require={
         'pyhdb': ["pyhdb>=0.3.1"]
-    }, 
+    },
     tests_require=[
         "pytest>=2.5.2",
         "mock>=1.0.1"
@@ -59,7 +59,8 @@ setup(
     entry_points = {
      'sqlalchemy.dialects': [
          'hana = sqlalchemy_hana.dialect:HANAPyHDBDialect',
-         'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect'
+         'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect',
+         'hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect'
      ]
    },
 )

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.2.0
+-----
+- Added basic support for hdbcli driver
+
 0.1.2
 -----
 - Cleanup of setup.py

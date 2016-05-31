@@ -148,16 +148,8 @@ class HANABaseDialect(default.DefaultDialect):
         super(HANABaseDialect, self).__init__(**kwargs)
         self.auto_convert_lobs = auto_convert_lobs
 
-    def is_disconnect(self, error, connection, cursor):
-        return connection.closed
-
     def on_connect(self):
         return None
-
-    def create_connect_args(self, url):
-        kwargs = url.translate_connect_args(username="user")
-        kwargs.setdefault("port", 30015)
-        return (), kwargs
 
     def _get_server_version_info(self, connection):
         pass
@@ -270,7 +262,7 @@ class HANABaseDialect(default.DefaultDialect):
                 view_name=unicode(self.denormalize_name(view_name)),
                 schema=unicode(self.denormalize_name(schema)),
             )
-        ).scalar().read()
+        ).scalar()
 
     def get_columns(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
@@ -422,3 +414,33 @@ class HANAPyHDBDialect(HANABaseDialect):
         import pyhdb
         pyhdb.paramstyle = cls.default_paramstyle
         return pyhdb
+
+    def create_connect_args(self, url):
+        kwargs = url.translate_connect_args(username="user")
+        kwargs.setdefault("port", 30015)
+        return (), kwargs
+
+    def is_disconnect(self, error, connection, cursor):
+        return connection.closed
+
+
+class HANAHDBCLIDialect(HANABaseDialect):
+
+    driver = 'hdbcli'
+    default_paramstyle = 'qmark'
+
+    @classmethod
+    def dbapi(cls):
+        import hdbcli.dbapi
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle
+        return hdbcli.dbapi
+
+    def create_connect_args(self, url):
+        kwargs = url.translate_connect_args(host="address", username="user")
+        kwargs.setdefault("port", 30015)
+        return (), kwargs
+
+    def connect(self, *args, **kwargs):
+        connection = super(HANAHDBCLIDialect, self).connect(*args, **kwargs)
+        connection.setautocommit(False)
+        return connection
