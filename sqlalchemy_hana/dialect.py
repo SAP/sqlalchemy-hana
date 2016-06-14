@@ -93,6 +93,14 @@ class HANADDLCompiler(compiler.DDLCompiler):
         text += self.define_constraint_deferrability(constraint)
         return text
 
+    def visit_create_table(self, create):
+        table = create.element
+
+        table_type =  table.kwargs.get('hana_table_type')
+        if table_type:
+            table._prefixes.append(table_type.upper())
+
+        return super(HANADDLCompiler, self).visit_create_table(create)
 
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq, type_):

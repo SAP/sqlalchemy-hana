@@ -4,6 +4,7 @@ Changelog
 0.2.0
 -----
 - Added basic support for hdbcli driver
+- Allow specification of table type via ``hana_table_type``
 
 0.1.2
 -----
