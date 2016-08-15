@@ -15,7 +15,9 @@
 from sqlalchemy import event, Column, Sequence
 from sqlalchemy.dialects import registry
 
-registry.register("hana", "sqlalchemy_hana.dialect", "HANADialect")
+registry.register("hana", "sqlalchemy_hana.dialect", "HANAPyHDBDialect")
+registry.register("hana.pyhdb", "sqlalchemy_hana.dialect", "HANAPyHDBDialect")
+registry.register("hana.hdbcli", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
 
 @event.listens_for(Column, "after_parent_attach")
 def add_test_seq(column, table):
