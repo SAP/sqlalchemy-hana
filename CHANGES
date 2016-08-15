@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.2.1
+-----
+- Fix LOB handling with hdbcli driver
+
 0.2.0
 -----
 - Added basic support for hdbcli driver
