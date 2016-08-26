@@ -19,6 +19,7 @@ from sqlalchemy.sql.elements import quoted_name
 
 from sqlalchemy_hana import types as hana_types
 
+from builtins import str
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
