@@ -70,7 +70,7 @@ class _LOBMixin(object):
             return None
 
         def process(value):
-            if isinstance(value, (bytes, str, buffer)):
+            if isinstance(value, (bytes, str, memoryview)):
                 return value
             elif value is not None:
                 return value.read()
