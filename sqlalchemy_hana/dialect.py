@@ -21,10 +21,7 @@ from sqlalchemy_hana import types as hana_types
 
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
-
-    def format_constraint(self, constraint):
-        """HANA doesn't support named constraint"""
-        return None
+    pass
 
 
 class HANAStatementCompiler(compiler.SQLCompiler):
@@ -410,6 +407,37 @@ ORDER BY POSITION"""
             "name": self.normalize_name(constraint_name),
             "constrained_columns": constrained_columns
         }
+
+    def get_unique_constraints(self, connection, table_name, schema=None, **kwargs):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
+                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
+                "IS_UNIQUE_KEY='TRUE' "
+                "ORDER BY CONSTRAINT_NAME, POSITION"
+            ).bindparams(
+                schema=unicode(self.denormalize_name(schema)),
+                table=unicode(self.denormalize_name(table_name))
+            )
+        )
+
+        constraints = []
+        parsing_constraint = None
+        for constraint_name, column_name in result.fetchall():
+            if parsing_constraint != constraint_name:
+                # Start with new constraint
+                parsing_constraint = constraint_name
+
+                constraint = {'name': None, 'column_names': []}
+                if not constraint_name.startswith('_SYS'):
+                    # Constraint has user-defined name
+                    constraint['name'] = self.normalize_name(constraint_name)
+                constraints.append(constraint)
+            constraint['column_names'].append(self.normalize_name(column_name))
+
+        return constraints
 
 
 class HANAPyHDBDialect(HANABaseDialect):

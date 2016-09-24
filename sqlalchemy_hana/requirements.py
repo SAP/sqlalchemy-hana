@@ -43,8 +43,11 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def unique_constraint_reflection(self):
-        """There is no way to define a constraint name."""
-        return exclusions.closed()
+        return exclusions.open()
+
+    @property
+    def reflects_pk_names(self):
+        return exclusions.open()
 
     @property
     def self_referential_foreign_keys(self):
