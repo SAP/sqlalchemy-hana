@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.2.2
+-----
+- Support of named constraints
+- Reflection is now able to detect named constraints
+
 0.2.1
 -----
 - Fix LOB handling with hdbcli driver
