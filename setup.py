@@ -31,7 +31,8 @@ setup(
     packages=find_packages(exclude=("test", "test.*",)),
     zip_safe=False,
     install_requires=[
-        "sqlalchemy"
+        "sqlalchemy",
+        "pyhdb>=0.3.1"
     ],
     extras_require={
         'pyhdb': ["pyhdb>=0.3.1"]
