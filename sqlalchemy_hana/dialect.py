@@ -43,6 +43,20 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             text += " OFFSET " + self.process(select._offset_clause, **kw)
         return text
 
+    def for_update_clause(self, select, **kw):
+        tmp = " FOR UPDATE"
+
+        if select._for_update_arg.of:
+            tmp += " OF " + ", ".join(
+                self.process(elem, **kw) for elem
+                in select._for_update_arg.of
+            )
+
+        if select._for_update_arg.nowait:
+            tmp += " NOWAIT"
+
+        return tmp
+
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_boolean(self, type_):
