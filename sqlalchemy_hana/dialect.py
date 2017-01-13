@@ -93,11 +93,23 @@ class HANADDLCompiler(compiler.DDLCompiler):
     def visit_create_table(self, create):
         table = create.element
 
-        table_type =  table.kwargs.get('hana_table_type')
+        # The table._prefixes list outlives the current compilation, meaning changing the list
+        # will change it globally. To prevent adding the same prefix multiple times, it is
+        # removed again after the super-class'es visit_create_table call, which consumes the
+        # table prefixes.
+
+        table_type = table.kwargs.get('hana_table_type')
+        appended_index = None
         if table_type:
+            appended_index = len(table._prefixes)
             table._prefixes.append(table_type.upper())
 
-        return super(HANADDLCompiler, self).visit_create_table(create)
+        result = super(HANADDLCompiler, self).visit_create_table(create)
+
+        if appended_index is not None:
+            table._prefixes.pop(appended_index)
+
+        return result
 
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq, type_):
