@@ -6,6 +6,9 @@ Changelog
 - Support of named constraints
 - Reflection is now able to detect named constraints
 - Fixed reflection of view columns with newer SAP HANA versions
+- Allow construction of more complex SELECT FOR UPDATE statements
+- Fixed bug with table argument hana_table_type that could lead to
+  invalid CREATE TABLE statements
 
 0.2.1
 -----
