@@ -5,6 +5,7 @@ Changelog
 -----
 - Support of named constraints
 - Reflection is now able to detect named constraints
+- Fixed reflection of view columns with newer SAP HANA versions
 
 0.2.1
 -----
