@@ -19,6 +19,7 @@ from sqlalchemy.sql.elements import quoted_name
 
 from sqlalchemy_hana import types as hana_types
 
+from builtins import str
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
     pass
@@ -223,8 +224,8 @@ class HANABaseDialect(default.DefaultDialect):
                 "SELECT 1 FROM TABLES "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table",
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
-                table=unicode(self.denormalize_name(table_name))
+                schema=str(self.denormalize_name(schema)),
+                table=str(self.denormalize_name(table_name))
             )
         )
         return bool(result.first())
@@ -236,8 +237,8 @@ class HANABaseDialect(default.DefaultDialect):
                 "SELECT 1 FROM SEQUENCES "
                 "WHERE SCHEMA_NAME=:schema AND SEQUENCE_NAME=:sequence",
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
-                sequence=unicode(self.denormalize_name(sequence_name))
+                schema=str(self.denormalize_name(schema)),
+                sequence=str(self.denormalize_name(sequence_name))
             )
         )
         return bool(result.first())
@@ -258,7 +259,7 @@ class HANABaseDialect(default.DefaultDialect):
             sql.text(
                 "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema",
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
+                schema=str(self.denormalize_name(schema)),
             )
         )
 
@@ -274,7 +275,7 @@ class HANABaseDialect(default.DefaultDialect):
             sql.text(
                 "SELECT VIEW_NAME FROM VIEWS WHERE SCHEMA_NAME=:schema",
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
+                schema=str(self.denormalize_name(schema)),
             )
         )
 
@@ -290,8 +291,8 @@ class HANABaseDialect(default.DefaultDialect):
             sql.text(
                 "SELECT DEFINITION FROM VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
             ).bindparams(
-                view_name=unicode(self.denormalize_name(view_name)),
-                schema=unicode(self.denormalize_name(schema)),
+                view_name=str(self.denormalize_name(view_name)),
+                schema=str(self.denormalize_name(schema)),
             )
         ).scalar()
 
@@ -308,8 +309,8 @@ class HANABaseDialect(default.DefaultDialect):
 WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table
 ORDER BY POSITION"""
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
-                table=unicode(self.denormalize_name(table_name))
+                schema=str(self.denormalize_name(schema)),
+                table=str(self.denormalize_name(table_name))
             )
         )
 
@@ -351,8 +352,8 @@ ORDER BY POSITION"""
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
-                schema=unicode(self.denormalize_name(lookup_schema)),
-                table=unicode(self.denormalize_name(table_name))
+                schema=str(self.denormalize_name(lookup_schema)),
+                table=str(self.denormalize_name(table_name))
             )
         )
 
@@ -381,8 +382,8 @@ ORDER BY POSITION"""
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY POSITION"
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
-                table=unicode(self.denormalize_name(table_name))
+                schema=str(self.denormalize_name(schema)),
+                table=str(self.denormalize_name(table_name))
             )
         )
 
@@ -419,8 +420,8 @@ ORDER BY POSITION"""
                 "IS_PRIMARY_KEY='TRUE' "
                 "ORDER BY POSITION"
             ).bindparams(
-                schema=unicode(self.denormalize_name(schema)),
-                table=unicode(self.denormalize_name(table_name))
+                schema=str(self.denormalize_name(schema)),
+                table=str(self.denormalize_name(table_name))
             )
         )
 
