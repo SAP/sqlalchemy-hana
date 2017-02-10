@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.3.0.dev
+---------
+- Support of Python 3
+
 0.2.2
 -----
 - Support of named constraints

@@ -13,7 +13,7 @@
 # language governing permissions and limitations under the License.
 
 from sqlalchemy import types as sqltypes
-
+from sqlalchemy.util import compat
 
 class TINYINT(sqltypes.TypeEngine):
 
@@ -70,7 +70,9 @@ class _LOBMixin(object):
             return None
 
         def process(value):
-            if isinstance(value, (str, unicode, buffer)):
+            if isinstance(value, compat.string_types):
+                return value
+            elif compat.py2k and isinstance(value, buffer):
                 return value
             elif value is not None:
                 return value.read()
