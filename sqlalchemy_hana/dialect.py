@@ -20,8 +20,26 @@ from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy_hana import types as hana_types
 
 
+RESERVED_WORDS = set([
+    'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
+    'condition', 'connect', 'cross', 'cube', 'current_connection',
+    'current_date', 'current_schema', 'current_time', 'current_timestamp',
+    'current_transaction_isolation_level', 'current_user', 'current_utcdate',
+    'current_utctime', 'current_utctimestamp', 'currval', 'cursor',
+    'declare', 'distinct', 'else', 'elseif', 'end', 'except', 'exception',
+    'exec', 'false', 'for', 'from', 'full', 'group', 'having', 'if', 'in',
+    'inner', 'inout', 'intersect', 'into', 'is', 'join', 'leading', 'left',
+    'limit', 'loop', 'minus', 'natural', 'nchar', 'nextval', 'null', 'on',
+    'order', 'out', 'prior', 'return', 'returns', 'reverse', 'right',
+    'rollup', 'rowid', 'select', 'session_user', 'set', 'sql', 'start',
+    'sysuuid', 'tablesample', 'top', 'trailing', 'true', 'union', 'unknown',
+    'using', 'utctimestamp', 'values', 'when', 'where', 'while', 'with'
+])
+
+
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
-    pass
+
+    reserved_words = RESERVED_WORDS
 
 
 class HANAStatementCompiler(compiler.SQLCompiler):
@@ -59,6 +77,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
+
     def visit_boolean(self, type_):
         return self.visit_TINYINT(type_)
 

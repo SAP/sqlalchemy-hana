@@ -9,6 +9,8 @@ Changelog
 - Allow construction of more complex SELECT FOR UPDATE statements
 - Fixed bug with table argument hana_table_type that could lead to
   invalid CREATE TABLE statements
+- Replace standard reserved words with SAP HANA reserved words in
+  ``HANAIdentifierPreparer``
 
 0.2.1
 -----
