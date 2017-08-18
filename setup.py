@@ -58,9 +58,9 @@ setup(
     ],
     entry_points = {
      'sqlalchemy.dialects': [
-         'hana = sqlalchemy_hana.dialect:HANAPyHDBDialect',
-         'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect',
-         'hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect'
+         'hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect',
+         'hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect',
+         'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect'
      ]
    },
 )

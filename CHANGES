@@ -3,6 +3,7 @@ Changelog
 
 0.3.0.dev
 ---------
+- **Backward incompatible change:** The ``hana://`` DBURI schema will now use ``hdbcli`` by default.
 - Support of Python 3
 
 0.2.2
