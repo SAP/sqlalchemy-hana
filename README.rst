@@ -1,23 +1,22 @@
 SQLAlchemy dialect for SAP HANA
 ===============================
 
-This dialect allows you to use the SAP HANA database with SQLAlchemy and `pyhdb <https://github.com/SAP/PyHDB>`_ driver.
-
-The dialect is currently experimental and doesn't support all possible features in SQLAlchemy with SAP HANA.
-
-The usage of the python database interface delivered by hdbclient, is currently not supported.
+This dialect allows you to use the SAP HANA database with SQLAlchemy.
+It can use the supported SAP HANA Python Driver `hdbcli` (supported since SAP HANA SPS 2) or the
+open-source pure Python client `PyHDB`. Please notice that sqlalchemy-hana isn't a official SAP
+product and isn't covered by SAP support.
 
 Prerequisites
 -------------
 
-At the moment the dialect only supports the pure Python database driver `pyhdb <https://github.com/SAP/PyHDB>`_. It's recommended to use pyhdb version 0.3.1 or above.
+Python 2.7 or Python 3.X with installed SAP HANA DBAPI implementation.
 
-See the README of pyhdb about how you can install the driver.
+SAP HANA Python Driver see `SAP HANA Client Interface Programming Reference <https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/39eca89d94ca464ca52385ad50fc7dea.html>`_ or the install section of `PyHDB <https://github.com/SAP/PyHDB>`_.
 
 Install
 -------
 
-Install from Python Package Index (coming soon):
+Install from Python Package Index:
 
 .. code-block:: bash
 
@@ -35,14 +34,18 @@ You can also install the latest version direct from a cloned git repository.
 Getting started
 ---------------
 
-If you do not have access to a SAP HANA server, go to the `SAP HANA Developer Center <http://scn.sap.com/community/developer-center/hana>`_ and choose one of the options to `get your own trial SAP HANA Server <http://scn.sap.com/docs/DOC-31722>`_.
+If you do not have access to a SAP HANA server, you can also use the `SAP HANA Express edition <https://www.sap.com/germany/developer/topics/sap-hana-express.html>`_.
 
-Now you can create a engine with the usage of the HANA dialect. This engine works like all other engines of SQLAlchemy.
+After installation of sqlalchemy-hana, you can create a engine which connects to a SAP HANA
+instance. This engine works like all other engines of SQLAlchemy.
 
 .. code-block:: python
 
     from sqlalchemy import create_engine
     engine = create_engine('hana://username:password@example.de:30015')
+
+By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as underlying database driver.
+To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 
 Contribute
 ----------
