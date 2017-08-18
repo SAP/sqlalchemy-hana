@@ -503,6 +503,8 @@ class HANAPyHDBDialect(HANABaseDialect):
         return (), kwargs
 
     def is_disconnect(self, error, connection, cursor):
+        if connection is None:
+            return True
         return connection.closed
 
 
@@ -526,3 +528,11 @@ class HANAHDBCLIDialect(HANABaseDialect):
         connection = super(HANAHDBCLIDialect, self).connect(*args, **kwargs)
         connection.setautocommit(False)
         return connection
+
+    def is_disconnect(self, error, connection, cursor):
+        if connection:
+            return not connection.isconnected()
+        if isinstance(error, self.dbapi.Error):
+            if error.errorcode == -10709:
+                return True
+        return super(HANAHDBCLIDialect, self).is_disconnect(error, connection, cursor)

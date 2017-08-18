@@ -14,4 +14,34 @@
 
 # test/test_suite.py
 
+from sqlalchemy import testing
+from sqlalchemy.testing import engines
 from sqlalchemy.testing.suite import *
+from sqlalchemy.testing.exclusions import skip_if
+from sqlalchemy.testing.mock import Mock
+
+
+class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
+
+    @testing.only_on('hana')
+    @testing.skip_if('hana+pyhdb')
+    def test_detection_by_error_code(self):
+        from hdbcli.dbapi import Error
+
+        dialect = testing.db.dialect
+        assert dialect.is_disconnect(Error(-10709, 'Connect failed'), None, None)
+
+    @testing.only_on('hana')
+    @testing.skip_if('hana+pyhdb')
+    def test_detection_by_isconnected_function(self):
+        dialect = testing.db.dialect
+
+        mock_connection = Mock(
+            isconnected=Mock(return_value=False)
+        )
+        assert dialect.is_disconnect(None, mock_connection, None)
+
+        mock_connection = Mock(
+            isconnected=Mock(return_value=True)
+        )
+        assert not dialect.is_disconnect(None, mock_connection, None)
