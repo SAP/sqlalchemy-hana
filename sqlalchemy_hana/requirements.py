@@ -114,6 +114,23 @@ class Requirements(requirements.SuiteRequirements):
         return exclusions.closed()
 
     @property
+    def order_by_col_from_union(self):
+        return exclusions.open()
+
+    @property
+    def broken_cx_oracle6_numerics(self):
+        return exclusions.closed()
+
+    @property
+    def mysql_zero_date(self):
+        return exclusions.closed()
+
+    @property
+    def mysql_non_strict(self):
+        return exclusions.closed()
+
+
+    @property
     def two_phase_transactions(self):
         """Not supported by PYHDB"""
         return exclusions.closed()
@@ -197,4 +214,48 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def hstore(self):
+        return exclusions.closed()
+
+    @property
+    def array_type(self):
+        return exclusions.closed()
+
+    @property
+    def psycopg2_compatibility(self):
+        return exclusions.closed()
+
+    @property
+    def postgresql_jsonb(self):
+        return exclusions.closed()
+
+    @property
+    def savepoints_w_release(self):
+        return exclusions.closed()
+
+    @property
+    def non_broken_binary(self):
+        return exclusions.closed()
+
+    @property
+    def oracle5x(self):
+        return exclusions.closed()
+
+    @property
+    def psycopg2_or_pg8000_compatibility(self):
+        return exclusions.closed()
+
+    @property
+    def psycopg2_native_hstore(self):
+        return exclusions.closed()
+
+    @property
+    def psycopg2_native_json(self):
+        return exclusions.closed()
+
+    @property
+    def two_phase_recovery(self):
+        return exclusions.closed()
+
+    @property
+    def enforces_check_constraints(self):
         return exclusions.closed()
