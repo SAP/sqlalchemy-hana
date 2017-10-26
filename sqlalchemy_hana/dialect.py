@@ -20,7 +20,7 @@ from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy_hana import types as hana_types
 
 
-RESERVED_WORDS = set([
+RESERVED_WORDS = {
     'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
     'condition', 'connect', 'cross', 'cube', 'current_connection',
     'current_date', 'current_schema', 'current_time', 'current_timestamp',
@@ -34,7 +34,7 @@ RESERVED_WORDS = set([
     'rollup', 'rowid', 'select', 'session_user', 'set', 'sql', 'start',
     'sysuuid', 'tablesample', 'top', 'trailing', 'true', 'union', 'unknown',
     'using', 'utctimestamp', 'values', 'when', 'where', 'while', 'with'
-])
+}
 
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
