@@ -3,7 +3,7 @@ SQLAlchemy dialect for SAP HANA
 
 This dialect allows you to use the SAP HANA database with SQLAlchemy.
 It can use the supported SAP HANA Python Driver `hdbcli` (supported since SAP HANA SPS 2) or the
-open-source pure Python client `PyHDB`. Please notice that sqlalchemy-hana isn't a official SAP
+open-source pure Python client `PyHDB`. Please notice that sqlalchemy-hana isn't an official SAP
 product and isn't covered by SAP support.
 
 Prerequisites
@@ -50,5 +50,5 @@ To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 Contribute
 ----------
 
-If you found bugs or have other issues than you are welcome to create a GitHub Issue. If you have questions about usage or something similar please create a `Stack Overflow <http://stackoverflow.com/>`_ Question with tag `sqlalchemy <http://stackoverflow.com/questions/tagged/sqlalchemy>`_ and `hana <http://stackoverflow.com/questions/tagged/hana>`_.
+If you found bugs or have other issues, you are welcome to create a GitHub Issue. If you have questions about usage or something similar please create a `Stack Overflow <http://stackoverflow.com/>`_ Question with tag `sqlalchemy <http://stackoverflow.com/questions/tagged/sqlalchemy>`_ and `hana <http://stackoverflow.com/questions/tagged/hana>`_.
 
