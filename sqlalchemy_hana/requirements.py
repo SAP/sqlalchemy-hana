@@ -259,3 +259,10 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def enforces_check_constraints(self):
         return exclusions.closed()
+
+    @property
+    def duplicate_key_raises_integrity_error(self):
+        """pyhdb raises the integrity_error, whereas hdbcli raises DBAPIError,
+        the test test_integrity_error is known to fail when one connects to
+        hana with hdbcli."""
+        return exclusions.succeeds_if('hana+pyhdb')
