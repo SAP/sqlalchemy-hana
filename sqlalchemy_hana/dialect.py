@@ -26,7 +26,7 @@ RESERVED_WORDS = {
     'current_date', 'current_schema', 'current_time', 'current_timestamp',
     'current_transaction_isolation_level', 'current_user', 'current_utcdate',
     'current_utctime', 'current_utctimestamp', 'currval', 'cursor',
-    'declare', 'distinct', 'else', 'elseif', 'end', 'except', 'exception',
+    'declare', 'deferred', 'distinct', 'else', 'elseif', 'end', 'except', 'exception',
     'exec', 'false', 'for', 'from', 'full', 'group', 'having', 'if', 'in',
     'inner', 'inout', 'intersect', 'into', 'is', 'join', 'leading', 'left',
     'limit', 'loop', 'minus', 'natural', 'nchar', 'nextval', 'null', 'on',
