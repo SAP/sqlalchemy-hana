@@ -87,6 +87,10 @@ class Requirements(requirements.SuiteRequirements):
         return exclusions.closed()
 
     @property
+    def datetime_historic(self):
+        return exclusions.open()
+
+    @property
     def date_historic(self):
         return exclusions.open()
 
