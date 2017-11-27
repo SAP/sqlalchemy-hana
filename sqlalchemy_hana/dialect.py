@@ -104,10 +104,6 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
-    def visit_check_constraint(self, constraint):
-        """HANA doesn't support check constraints."""
-        return None
-
     def visit_unique_constraint(self, constraint):
         if len(constraint) == 0:
             return ''
@@ -485,6 +481,30 @@ ORDER BY POSITION"""
 
         return constraints
 
+    def get_check_constraints(self, connection, table_name, schema=None, **kw):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT CONSTRAINT_NAME, CHECK_CONDITION FROM CONSTRAINTS "
+                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
+                "CHECK_CONDITION IS NOT NULL"
+            ).bindparams(
+                schema=self.denormalize_name(schema),
+                table=self.denormalize_name(table_name)
+            )
+        )
+
+        check_conditions = []
+
+        for row in result.fetchall():
+            check_condition = {
+                "name": self.normalize_name(row[0]),
+                "sqltext": self.normalize_name(row[1])
+            }
+            check_conditions.append(check_condition)
+
+        return check_conditions
 
 class HANAPyHDBDialect(HANABaseDialect):
 
