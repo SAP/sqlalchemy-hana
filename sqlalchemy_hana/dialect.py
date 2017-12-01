@@ -360,8 +360,8 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
-                "REFERENCED_TABLE_NAME,  REFERENCED_COLUMN_NAME "
+                "SELECT  CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
+                "REFERENCED_TABLE_NAME,  REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
                 "FROM REFERENTIAL_CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
@@ -370,18 +370,23 @@ ORDER BY POSITION"""
                 table=self.denormalize_name(table_name)
             )
         )
-
         foreign_keys = []
+
         for row in result:
+
             foreign_key = {
-                "name": None,  # No named foreign key support
-                "constrained_columns": [self.normalize_name(row[0])],
-                "referred_schema": None,
-                "referred_table": self.normalize_name(row[2]),
-                "referred_columns": [self.normalize_name(row[3])],
+                "name": self.normalize_name(row[0]),
+                "constrained_columns": [self.normalize_name(row[1])],
+                "referred_schema": schema,
+                "referred_table": self.normalize_name(row[3]),
+                "referred_columns": [self.normalize_name(row[4])],
+                "options": {"onupdate": row[5],
+                            "ondelete": row[6]}
             }
-            if row[1] != self.denormalize_name(self.default_schema_name):
-                foreign_key["referred_schema"] = self.normalize_name(row[1])
+
+            if row[2] != self.denormalize_name(self.default_schema_name):
+                foreign_key["referred_schema"] = self.normalize_name(row[2])
+
             foreign_keys.append(foreign_key)
 
         return foreign_keys
