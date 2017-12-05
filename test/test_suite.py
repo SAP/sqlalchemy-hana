@@ -19,6 +19,8 @@ from sqlalchemy.testing import engines
 from sqlalchemy.testing.suite import *
 from sqlalchemy.testing.exclusions import skip_if
 from sqlalchemy.testing.mock import Mock
+from sqlalchemy import exc
+from sqlalchemy.testing.suite import ExceptionTest as _ExceptionTest
 
 
 class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
@@ -45,3 +47,26 @@ class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
             isconnected=Mock(return_value=True)
         )
         assert not dialect.is_disconnect(None, mock_connection, None)
+
+
+class ExceptionTest(_ExceptionTest):
+
+    @requirements.duplicate_key_raises_integrity_error
+    def test_integrity_error(self):
+
+        with config.db.begin() as conn:
+            conn.execute(
+                self.tables.manual_pk.insert(),
+                {'id': 1, 'data': 'd1'}
+            )
+            try:
+                assert_raises(
+                    exc.IntegrityError,
+                    conn.execute,
+                    self.tables.manual_pk.insert(),
+                    {'id': 1, 'data': 'd1'}
+                )
+
+            except exc.DBAPIError:
+                from hdbcli.dbapi import IntegrityError
+                raise IntegrityError

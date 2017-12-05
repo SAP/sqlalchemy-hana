@@ -263,3 +263,4 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def enforces_check_constraints(self):
         return exclusions.closed()
+
