@@ -519,6 +519,10 @@ class HANAPyHDBDialect(HANABaseDialect):
 
     def create_connect_args(self, url):
         kwargs = url.translate_connect_args(username="user")
+
+        if kwargs.get("database"):
+            raise NotImplementedError("no support for database parameter")
+
         kwargs.setdefault("port", 30015)
         return (), kwargs
 
@@ -540,8 +544,14 @@ class HANAHDBCLIDialect(HANABaseDialect):
         return hdbcli.dbapi
 
     def create_connect_args(self, url):
-        kwargs = url.translate_connect_args(host="address", username="user")
-        kwargs.setdefault("port", 30015)
+        kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
+
+        port = 30015
+        if kwargs.get("databaseName"):
+            port = 30013
+
+        kwargs.setdefault("port", port)
+
         return (), kwargs
 
     def connect(self, *args, **kwargs):
