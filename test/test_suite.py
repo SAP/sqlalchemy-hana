@@ -65,4 +65,4 @@ class HANAConnectUrlHasTenantTest(fixtures.TestBase):
 
         dialect = testing.db.dialect
 
-        assert_raises(NotImplementedError, dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT")))
+        assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"))
