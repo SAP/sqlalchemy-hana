@@ -511,6 +511,12 @@ ORDER BY POSITION"""
 
         return check_conditions
 
+    def set_isolation_level(self, connection, level):
+        if level == "AUTOCOMMIT":
+            connection.setautocommit(True)
+        else:
+            connection.setautocommit(False)
+
 class HANAPyHDBDialect(HANABaseDialect):
 
     driver = 'pyhdb'
