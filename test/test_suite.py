@@ -45,3 +45,24 @@ class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
             isconnected=Mock(return_value=True)
         )
         assert not dialect.is_disconnect(None, mock_connection, None)
+
+class HANAConnectUrlHasTenantTest(fixtures.TestBase):
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_tenant_url_parsing_hdbcli(self):
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"))
+        assert result_kwargs['databaseName'] == "TNT"
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+pyhdb')
+    def test_tenant_url_parsing_pyhdb(self):
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"))
