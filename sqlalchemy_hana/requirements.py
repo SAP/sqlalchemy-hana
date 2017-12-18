@@ -265,3 +265,8 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def implicitly_named_constraints(self):
         return exclusions.open()
+
+    @property
+    def autocommit(self):
+        return exclusions.open()
+
