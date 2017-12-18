@@ -20,12 +20,11 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def temporary_tables(self):
-        # TODO: HANA supports temporty table but only with GLOBAL or LOCAL specification
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def temp_table_reflection(self):
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def views(self):
