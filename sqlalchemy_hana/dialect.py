@@ -271,16 +271,32 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema",
+                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
         )
 
         tables = list([
-            self.normalize_name(row[0]) for row in result.fetchall()
+            self.normalize_name(row[0]) for row in result.fetchall() if row[1] == "FALSE"
         ])
         return tables
+
+    def get_temp_table_names(self, connection, schema=None, **kw):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT TABLE_NAME FROM M_TEMPORARY_TABLES ORDER BY NAME",
+            ).bindparams(
+                schema=self.denormalize_name(schema),
+            )
+        )
+
+        temp_table_names = list([
+            self.normalize_name(row[0]) for row in result.fetchall()
+        ])
+        return temp_table_names
 
     def get_view_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
