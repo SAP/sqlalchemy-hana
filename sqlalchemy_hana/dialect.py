@@ -13,10 +13,10 @@
 # language governing permissions and limitations under the License.
 
 from sqlalchemy import sql, types, util
-from sqlalchemy.engine import default
+from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler
 from sqlalchemy.sql.elements import quoted_name
-
+from sqlalchemy import exc
 from sqlalchemy_hana import types as hana_types
 
 
@@ -151,6 +151,17 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 #     'CLOB': hana_types.CLOB,
 #     'NCLOB': hana_types.NCLOB,
 # }
+class HANAInspector(reflection.Inspector):
+
+    def __init__(self, conn):
+        reflection.Inspector.__init__(self, conn)
+
+    def get_table_oid(self, table_name, schema=None):
+        """Return the OID for the given table name."""
+
+        return self.dialect.get_table_oid(self.bind, table_name, schema,
+                                          info_cache=self.info_cache)
+
 
 class HANABaseDialect(default.DefaultDialect):
     name = "hana"
@@ -161,6 +172,7 @@ class HANABaseDialect(default.DefaultDialect):
     ddl_compiler = HANADDLCompiler
     preparer = HANAIdentifierPreparer
     execution_ctx_cls = HANAExecutionContext
+    inspector = HANAInspector
 
     encoding = "cesu-8"
     convert_unicode = True
@@ -532,6 +544,25 @@ ORDER BY POSITION"""
             connection.setautocommit(True)
         else:
             connection.setautocommit(False)
+
+    def get_table_oid(self, connection, table_name, schema=None, **kw):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT TABLE_OID FROM TABLES "
+                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
+            ).bindparams(
+                schema=self.denormalize_name(schema),
+                table=self.denormalize_name(table_name)
+            )
+        )
+
+        table_oid = None
+        for row in result.fetchall():
+            table_oid = row[0]
+        return table_oid
+
 
 class HANAPyHDBDialect(HANABaseDialect):
 
