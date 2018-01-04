@@ -79,7 +79,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 class HANATypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_boolean(self, type_):
-        return self.visit_TINYINT(type_)
+        return "BOOLEAN"
 
     def visit_NUMERIC(self, type_):
         return self.visit_DECIMAL(type_)
@@ -186,7 +186,7 @@ class HANABaseDialect(default.DefaultDialect):
     postfetch_lastrowid = False
     implicit_returning = False
     supports_empty_insert = False
-    supports_native_boolean = False
+    supports_native_boolean = True
     supports_default_values = False
     supports_sane_multi_rowcount = False
 

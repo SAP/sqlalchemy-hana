@@ -27,8 +27,7 @@ class DOUBLE(sqltypes.Float):
 
 class BOOLEAN(sqltypes.Boolean):
 
-    def get_dbapi_type(self, dbapi):
-        return dbapi.NUMBER
+    __visit_name__ = "BOOLEAN"
 
 
 class DATE(sqltypes.Date):
