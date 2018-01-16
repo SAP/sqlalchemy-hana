@@ -154,13 +154,10 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 class HANAInspector(reflection.Inspector):
 
     def __init__(self, conn):
-        reflection.Inspector.__init__(self, conn)
+        super(HANAInspector, self).__init__(conn)
 
     def get_table_oid(self, table_name, schema=None):
-        """Return the OID for the given table name."""
-
-        return self.dialect.get_table_oid(self.bind, table_name, schema,
-                                          info_cache=self.info_cache)
+        return self.dialect.get_table_oid(self.bind, table_name, schema, info_cache=self.info_cache)
 
 
 class HANABaseDialect(default.DefaultDialect):
@@ -558,9 +555,7 @@ ORDER BY POSITION"""
             )
         )
 
-        table_oid = None
-        for row in result.fetchall():
-            table_oid = row[0]
+        table_oid = (result.fetchone())[0]
         return table_oid
 
 

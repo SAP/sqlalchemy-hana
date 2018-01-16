@@ -120,8 +120,6 @@ class ComponentReflectionTest(_ComponentReflectionTest):
     @testing.provide_metadata
     def _test_get_table_oid(self, table_name, schema=None):
         meta = self.metadata
-        users, addresses, dingalings = self.tables.users, \
-            self.tables.email_addresses, self.tables.dingalings
         insp = inspect(meta.bind)
         oid = insp.get_table_oid(table_name, schema)
         self.assert_(isinstance(oid, int))
