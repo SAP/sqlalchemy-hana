@@ -153,9 +153,6 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 # }
 class HANAInspector(reflection.Inspector):
 
-    def __init__(self, conn):
-        super(HANAInspector, self).__init__(conn)
-
     def get_table_oid(self, table_name, schema=None):
         return self.dialect.get_table_oid(self.bind, table_name, schema, info_cache=self.info_cache)
 
