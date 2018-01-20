@@ -116,3 +116,10 @@ class ComponentReflectionTest(_ComponentReflectionTest):
         for refl in reflected:
             refl.pop('duplicates_index', None)
         eq_(reflected, [{'column_names': ['name'], 'name': 'user_tmp_uq'}])
+
+    @testing.provide_metadata
+    def _test_get_table_oid(self, table_name, schema=None):
+        meta = self.metadata
+        insp = inspect(meta.bind)
+        oid = insp.get_table_oid(table_name, schema)
+        self.assert_(isinstance(oid, int))
