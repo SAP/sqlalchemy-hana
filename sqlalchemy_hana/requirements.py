@@ -191,7 +191,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def bound_limit_offset(self):
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def isolation_level(self):
