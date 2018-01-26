@@ -571,11 +571,8 @@ ORDER BY POSITION"""
                 table=self.denormalize_name(table_name),
             )
         )
-        text = {}
-        for row in result:
-            if row != None:
-                text["text"] = self.normalize_name(row[0])
-        return text
+
+        return {"text" : (result.fetchone())[0]}
 
 class HANAPyHDBDialect(HANABaseDialect):
 
