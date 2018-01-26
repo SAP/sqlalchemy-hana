@@ -269,3 +269,6 @@ class Requirements(requirements.SuiteRequirements):
     def autocommit(self):
         return exclusions.open()
 
+    @property
+    def comment_reflection(self):
+        return exclusions.open()

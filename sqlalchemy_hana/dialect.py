@@ -177,6 +177,8 @@ class HANABaseDialect(default.DefaultDialect):
     supports_sequences = True
     supports_native_decimal = True
 
+    supports_comments = True
+
     # ischema_names can be empty dict, not needed for reading lobs...
     ischema_names = {}  # ischema_names
     colspecs = {
@@ -337,10 +339,11 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE FROM (
-    SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE FROM SYS.TABLE_COLUMNS
+                """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM (
+    SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, 
+    COMMENTS FROM SYS.TABLE_COLUMNS 
     UNION ALL
-    SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE FROM SYS.VIEW_COLUMNS
+    SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM SYS.VIEW_COLUMNS
 ) AS COLUMS
 WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table
 ORDER BY POSITION"""
@@ -355,7 +358,9 @@ ORDER BY POSITION"""
             column = {
                 'name': self.normalize_name(row[0]),
                 'default': row[2],
-                'nullable': row[3] == "TRUE"
+                'nullable': row[3] == "TRUE",
+                'comment': row[6]
+
             }
 
             if hasattr(types, row[1]):
@@ -555,6 +560,19 @@ ORDER BY POSITION"""
         table_oid = (result.fetchone())[0]
         return table_oid
 
+    def get_table_comment(self, connection, table_name, schema=None, **kw):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT COMMENTS FROM TABLES WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
+            ).bindparams(
+                schema=self.denormalize_name(schema),
+                table=self.denormalize_name(table_name),
+            )
+        )
+
+        return {"text" : (result.fetchone())[0]}
 
 class HANAPyHDBDialect(HANABaseDialect):
 
