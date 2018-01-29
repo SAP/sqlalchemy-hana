@@ -101,7 +101,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def percent_schema_names(self):
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def savepoints(self):
