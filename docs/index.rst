@@ -1,0 +1,70 @@
+sqlalchemy-hana documentation
+=============================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
+This dialect allows you to use the SAP HANA database with SQLAlchemy.
+It can use the supported SAP HANA Python Driver `hdbcli` (supported since SAP HANA SPS 2) or the
+open-source pure Python client `PyHDB`. Please notice that sqlalchemy-hana isn't an official SAP
+product and isn't covered by SAP support.
+
+Prerequisites
+-------------
+
+Python 2.7 or Python 3 with installed SAP HANA DBAPI implementation.
+
+SAP HANA Python Driver see `SAP HANA Client Interface Programming Reference <https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/39eca89d94ca464ca52385ad50fc7dea.html>`_ or the install section of `PyHDB <https://github.com/SAP/PyHDB>`_.
+
+Install
+-------
+
+Install from Python Package Index:
+
+.. code-block:: bash
+
+    $ pip install sqlalchemy-hana
+
+You can also install the latest version direct from a cloned git repository.
+
+.. code-block:: bash
+
+    $ git clone https://github.com/SAP/sqlalchemy-hana.git
+    $ cd sqlalchemy-hana
+    $ python setup.py install
+
+
+Getting started
+---------------
+
+If you do not have access to a SAP HANA server, you can also use the `SAP HANA Express edition <https://www.sap.com/developer/topics/sap-hana-express.html>`_.
+
+After installation of sqlalchemy-hana, you can create a engine which connects to a SAP HANA
+instance. This engine works like all other engines of SQLAlchemy.
+
+.. code-block:: python
+
+    from sqlalchemy import create_engine
+    engine = create_engine('hana://username:password@example.de:30015')
+
+By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as underlying database driver.
+To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
+
+Contribute
+----------
+
+If you found bugs or have other issues, you are welcome to create a GitHub Issue.
+If you have questions about usage or something similar please create a
+`Stack Overflow <http://stackoverflow.com/>`_ question with tag
+`sqlalchemy <http://stackoverflow.com/questions/tagged/sqlalchemy>`_ and
+`hana <http://stackoverflow.com/questions/tagged/hana>`_.
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
