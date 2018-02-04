@@ -197,13 +197,39 @@ class HANABaseDialect(default.DefaultDialect):
     supports_native_boolean = False
     supports_default_values = False
     supports_sane_multi_rowcount = False
+    isolation_level = None
 
-    def __init__(self, auto_convert_lobs=True, **kwargs):
+    def __init__(self, isolation_level=None, auto_convert_lobs=True, **kwargs):
         super(HANABaseDialect, self).__init__(**kwargs)
+        self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
 
     def on_connect(self):
-        return None
+        if self.isolation_level is not None:
+            def connect(conn):
+                self.set_isolation_level(conn, self.isolation_level)
+            return connect
+        else:
+            return None
+
+    _isolation_lookup = {'SERIALIZABLE', 'READ UNCOMMITTED', 'READ COMMITTED', 'REPEATABLE READ'}
+
+    def set_isolation_level(self, connection, level):
+        if level == "AUTOCOMMIT":
+            connection.setautocommit(True)
+        else:
+            # no need to set autocommit false explicitly,since it is false by default
+            if level not in self._isolation_lookup:
+                raise exc.ArgumentError(
+                "Invalid value '%s' for isolation_level. "
+                "Valid isolation levels for %s are %s" %
+                (level, self.name, ", ".join(self._isolation_lookup))
+            )
+            else:
+                cursor = connection.cursor()
+                cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
+                cursor.execute("COMMIT")
+                cursor.close()
 
     def _get_server_version_info(self, connection):
         pass
@@ -537,12 +563,6 @@ ORDER BY POSITION"""
             check_conditions.append(check_condition)
 
         return check_conditions
-
-    def set_isolation_level(self, connection, level):
-        if level == "AUTOCOMMIT":
-            connection.setautocommit(True)
-        else:
-            connection.setautocommit(False)
 
     def get_table_oid(self, connection, table_name, schema=None, **kw):
         schema = schema or self.default_schema_name
