@@ -231,6 +231,14 @@ class HANABaseDialect(default.DefaultDialect):
                 cursor.execute("COMMIT")
                 cursor.close()
 
+    def get_isolation_level(self, connection):
+        result = connection.execute(
+            sql.text("SELECT ISOLATION_LEVEL FROM M_TRANSACTIONS WHERE CONNECTION_ID = CURRENT_CONNECTION")
+        )
+
+        val = (result.fetchone())[0]
+        return val
+    
     def _get_server_version_info(self, connection):
         pass
 
