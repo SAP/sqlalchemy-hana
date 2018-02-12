@@ -7,9 +7,7 @@ sqlalchemy-hana documentation
 
 
 This dialect allows you to use the SAP HANA database with SQLAlchemy.
-It can use the supported SAP HANA Python Driver `hdbcli` (supported since SAP HANA SPS 2) or the
-open-source pure Python client `PyHDB`. Please notice that sqlalchemy-hana isn't an official SAP
-product and isn't covered by SAP support.
+It can use the supported SAP HANA Python Driver `hdbcli` (supported since SAP HANA SPS 2) or the open-source pure Python client `PyHDB`. Please notice that sqlalchemy-hana is not an official SAP product and is not covered by SAP support.
 
 Prerequisites
 -------------
@@ -27,7 +25,7 @@ Install from Python Package Index:
 
     $ pip install sqlalchemy-hana
 
-You can also install the latest version direct from a cloned git repository.
+You can also install the latest version directly from a cloned git repository.
 
 .. code-block:: bash
 
@@ -41,36 +39,35 @@ Getting started
 
 If you do not have access to a SAP HANA server, you can also use the `SAP HANA Express edition <https://www.sap.com/developer/topics/sap-hana-express.html>`_.
 
-After installation of sqlalchemy-hana, you can create a engine which connects to a SAP HANA
-instance. This engine works like all other engines of SQLAlchemy.
+After installation of sqlalchemy-hana, you can create an engine which connects to a SAP HANA instance. This engine works like all other engines of SQLAlchemy.
 
 .. code-block:: python
 
     from sqlalchemy import create_engine
     engine = create_engine('hana://username:password@example.de:30015')
 
-By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as underlying database driver.
+By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as the underlying database driver.
 To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 
 Special CREATE TABLE argument 
 -----------------------------
 
-Sqlalchemy-hana provides a special argument called “hana table type” which can be used to specify the type of table one wants to create with SAP HANA (i.e. ROW/COLUMN). The default table type is ROW.
+Sqlalchemy-hana provides a special argument called “hana_table_type” which can be used to specify the type of table one wants to create with SAP HANA (i.e. ROW/COLUMN). The default table type is ROW.
 
 .. code-block:: python
 
     t = Table('mytable', metadata, Column('id', Integer), hana_table_type = 'COLUMN')
     t.create(engine)
 
-Case sensitivity
+Case Sensitivity
 ----------------
 
-In SAP HANA, all case insensitive identiﬁers are represented using uppercase text. In SQLAlchemy on the other hand all lower case identiﬁer names are considered to be case insensitive. The sqlalchemyhana dialect converts all case insensitive and case sensitive identiﬁers to the right casing during schema level communication. In the sqlalchemy-hana dialect, using an uppercase name on the SQLAlchemy side indicates a case sensitive identiﬁer, and SQLAlchemy will quote the name,which may cause case mismatches between data received from SAP HANA. Unless identiﬁer names have been truly created as case sensitive (i.e. using quoted names), all lowercase names should be used on the SQLAlchemy side.
+In SAP HANA, all case insensitive identiﬁers are represented using uppercase text. In SQLAlchemy on the other hand all lower case identiﬁer names are considered to be case insensitive. The sqlalchemy-hana dialect converts all case insensitive and case sensitive identiﬁers to the right casing during schema level communication. In the sqlalchemy-hana dialect, using an uppercase name on the SQLAlchemy side indicates a case sensitive identiﬁer, and SQLAlchemy will quote the name,which may cause case mismatches between data received from SAP HANA. Unless identiﬁer names have been truly created as case sensitive (i.e. using quoted names), all lowercase names should be used on the SQLAlchemy side.
 
 Auto Increment Behavior 
 -----------------------
 
-SQLAlchemy Table objects which include integer primary keys are usually assumed to have “autoincrementing”behavior, which means that primary key values can be automatically generated upon INSERT. Since SAP HANA has no “autoincrement” feature, SQLAlchemy relies upon sequences to automatically generate primary key values. 
+SQLAlchemy Table objects which include integer primary keys are usually assumed to have “auto incrementing” behavior, which means that primary key values can be automatically generated upon INSERT. Since SAP HANA has no “autoincrement” feature, SQLAlchemy relies upon sequences to automatically generate primary key values. 
 
 Sequences
 """""""""
@@ -82,7 +79,7 @@ With the sqlalchemy-hana dialect, a sequence must be explicitly speciﬁed to en
     t = Table('mytable', metadata, Column('id', Integer, Sequence('id_seq'), primary key=True)) 
     t.create(engine)
 
-IDENTITY feature 
+IDENTITY Feature 
 """"""""""""""""
 
 SAP HANA also comes with an option to have an IDENTITY column which can also be used to create new primary key values for integer-based primary key columns. Built-in support for rendering of IDENTITY is not available yet, however the following compilation hook may be used to make use of the IDENTITY feature.
@@ -93,24 +90,24 @@ SAP HANA also comes with an option to have an IDENTITY column which can also be 
     from sqlalchemy.ext.compiler import compiles
 
     @compiles(CreateColumn, 'hana') 
-    def use identity(element, compiler, **kw): 
-        text = compiler.visit create column(element, **kw)
+    def use_identity(element, compiler, **kw): 
+        text = compiler.visit_create_column(element, **kw)
         text = text.replace('NOT NULL', 'NOT NULL GENERATED BY DEFAULT AS IDENTITY') 
         return text 
 
-    t = Table('t', meta, Column('id', Integer, primary key=True), Column('data', String)) 
+    t = Table('t', meta, Column('id', Integer, primary_key=True), Column('data', String)) 
 
     t.create(engine)
 
-LIMIT/OFFSET support 
+LIMIT/OFFSET Support 
 --------------------
 
-SAP HANA supports both LIMIT and OFFSET, but it only supports OFFSET in conjunction with LIMIT i.e. in the select statement the oﬀset parameter cannot be set without the LIMIT clause, hence in sqlalchemy-hana if the user tries to use oﬀset without limit, a limit of 999999 would be set, this has been done so that the users can smoothly used LIMIT/OFFSET as in other databases that do not have this limitation.
+SAP HANA supports both LIMIT and OFFSET, but it only supports OFFSET in conjunction with LIMIT i.e. in the select statement the oﬀset parameter cannot be set without the LIMIT clause, hence in sqlalchemy-hana if the user tries to use oﬀset without limit, a limit of 999999 would be set, this has been done so that the users can smoothly use LIMIT/OFFSET as in other databases that do not have this limitation.
 
-RETURNING support 
+RETURNING Support 
 -----------------
 
-Sqlalchemy-hana does not support RETURNING in the INSERT, UPDATE and DELETE statements toretrieveresultsetsofmatchedrowsfromINSERT,UPDATEandDELETEstatementsbecausenewly generated primary key values are neither fetched nor returned automatically in SAP HANA and SAP HANA does not support the syntax: INSERT... RETURNING...
+Sqlalchemy-hana does not support RETURNING in the INSERT, UPDATE and DELETE statements to retrieve result sets of matched rows from INSERT, UPDATE and DELETE statements because newly generated primary key values are neither fetched nor returned automatically in SAP HANA and SAP HANA does not support the syntax: INSERT... RETURNING...
 
 Constraint Reﬂection  
 --------------------
@@ -126,7 +123,7 @@ Raw information regarding these constraints can be acquired using:
 
 When using reﬂection at the Table level, the Table will also include these constraints.
 
-Foreign key options 
+Foreign key Options 
 """""""""""""""""""
 
 In SAP HANA the following UPDATE and DELETE foreign key referential actions are available: 
@@ -138,7 +135,7 @@ In SAP HANA the following UPDATE and DELETE foreign key referential actions are 
 
 The foreign key referential option NO ACTION does not exist in SAP HANA. The default is RESTRICT.
 
-CHECK constraints 
+CHECK Constraints 
 """""""""""""""""
 
 Table level check constraints can be created as well as reﬂected in the sqlalchemy-hana dialect. Column level check constraints are not available in SAP HANA.
@@ -147,7 +144,7 @@ Table level check constraints can be created as well as reﬂected in the sqlalc
 
     t = Table('mytable', metadata, Column('id', Integer), Column(...), ..., CheckConstraint('id >5', name='my_check_const'))
 
-UNIQUE constraints 
+UNIQUE Constraints 
 """"""""""""""""""
 
 For each unique constraint an index is created in SAP HANA, this may lead to unexpected behaviour in programs using reﬂection. 
@@ -164,9 +161,9 @@ Return the OID(object id) for the given table name.
 
 .. code-block:: python
 
-    from sqlalchemy import create engine, inspect
+    from sqlalchemy import create_engine, inspect
 
-    engine = create engine("hana://username:password@example.de:30015") 
+    engine = create_engine("hana://username:password@example.de:30015") 
     insp = inspect(engine) 
     # will be a HANAInspector 
     print(insp.get_table_oid('mytable'))
@@ -178,12 +175,12 @@ As with all SQLAlchemy dialects, all UPPERCASE types that are known to be valid 
 
 BOOLEAN, NUMERIC, NVARCHAR, CLOB, BLOB, DATE, TIME, TIMESTAMP, CHAR, VARCHAR, VARBINARY, BIGINT, SMALLINT, INTEGER, FLOAT, TEXT
 
-DateTime compatibility  
+DateTime Compatibility  
 """"""""""""""""""""""
 
 SAP HANA has no data type known as DATETIME, it instead has the datatype TIMESTAMP, which can actually store the date and time value. For this reason, the sqlalchemy-hana dialect provides a type sqlalchemy-hana.TIMESTAMP which is a subclass of DateTime. 
 
-NUMERIC compatibility  
+NUMERIC Compatibility  
 """""""""""""""""""""
 
 SAP HANA does not have a data type known as NUMERIC, hence if a user has a column with data type numeric while using sqlalchemy-hana, it is stored as DECIMAL data type instead. 
@@ -191,14 +188,14 @@ SAP HANA does not have a data type known as NUMERIC, hence if a user has a colum
 TEXT datatype  
 """""""""""""
 
-SAP HANA only supports the datatype TEXT for column tables. It is not a valid data type for row tables. Hence, one must mention the hana table type=‘COLUMN’ 
+SAP HANA only supports the datatype TEXT for column tables. It is not a valid data type for row tables. Hence, one must mention hana_table_type=‘COLUMN’ 
 
 Bound Parameter Styles
 ----------------------
 
 The default parameter style for the sqlalchemy-hana dialect is “qmark”, where SQL is rendered using the following style:
 
-WHERE my column = ?
+WHERE my_column = ?
 
 Contribute
 ----------
