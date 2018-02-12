@@ -41,7 +41,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def unique_constraint_reflection(self):
-        return exclusions.open()
+        return exclusions.closed()
 
     @property
     def reflects_pk_names(self):
@@ -271,3 +271,8 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def comment_reflection(self):
         return exclusions.open()
+
+    @property
+    def sequences_optional(self):
+        return exclusions.open()
+
