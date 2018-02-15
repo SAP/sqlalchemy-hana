@@ -226,19 +226,14 @@ class HANABaseDialect(default.DefaultDialect):
                 (level, self.name, ", ".join(self._isolation_lookup))
             )
             else:
-                cursor = connection.cursor()
-                cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
-                cursor.execute("COMMIT")
-                cursor.close()
+                with connection.cursor() as cursor:
+                    cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
 
     def get_isolation_level(self, connection):
-        result = connection.execute(
-            sql.text("SELECT ISOLATION_LEVEL FROM M_TRANSACTIONS WHERE CONNECTION_ID = CURRENT_CONNECTION")
-        )
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
+        return cursor.fetchone()[0]
 
-        val = (result.fetchone())[0]
-        return val
-    
     def _get_server_version_info(self, connection):
         pass
 
