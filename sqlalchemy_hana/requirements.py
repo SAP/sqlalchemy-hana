@@ -271,3 +271,8 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def comment_reflection(self):
         return exclusions.open()
+
+    @property
+    def sequences_optional(self):
+        return exclusions.open()
+
