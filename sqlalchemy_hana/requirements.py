@@ -41,7 +41,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def unique_constraint_reflection(self):
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def reflects_pk_names(self):
