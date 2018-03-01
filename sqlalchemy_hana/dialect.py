@@ -232,7 +232,8 @@ class HANABaseDialect(default.DefaultDialect):
     def get_isolation_level(self, connection):
         with connection.cursor() as cursor:
             cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
-        return cursor.fetchone()[0]
+            result = cursor.fetchone()
+        return result[0]
 
     def _get_server_version_info(self, connection):
         pass
