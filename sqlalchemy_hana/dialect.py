@@ -504,7 +504,7 @@ ORDER BY POSITION"""
                 # Start with new constraint
                 parsing_constraint = constraint_name
 
-                constraint = {'name': None, 'column_names': [], 'duplicates_index': []}
+                constraint = {'name': None, 'column_names': [], 'duplicates_index': None}
                 if not constraint_name.startswith('_SYS'):
                     # Constraint has user-defined name
                     constraint['name'] = self.normalize_name(constraint_name)
