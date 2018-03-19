@@ -240,6 +240,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     def _get_default_schema_name(self, connection):
         return self.normalize_name(connection.engine.url.username.upper())
+        return self.normalize_name(connection.execute("SELECT CURRENT_USER FROM DUMMY").fetchone()[0])
 
     def _check_unicode_returns(self, connection):
         return True
@@ -637,13 +638,16 @@ class HANAHDBCLIDialect(HANABaseDialect):
         return hdbcli.dbapi
 
     def create_connect_args(self, url):
-        kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
-
-        port = 30015
-        if kwargs.get("databaseName"):
-            port = 30013
-
-        kwargs.setdefault("port", port)
+        if url.host and url.host.lower().startswith( 'userkey=' ):
+            kwargs = url.translate_connect_args(host="userkey")  
+            userkey = url.host[ len('userkey=') : len(url.host)]
+            kwargs["userkey"] = userkey
+        else:
+            kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
+            port = 30015
+            if kwargs.get("databaseName"):
+                port = 30013
+            kwargs.setdefault("port", port)
 
         return (), kwargs
 
