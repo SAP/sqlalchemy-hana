@@ -123,3 +123,15 @@ class ComponentReflectionTest(_ComponentReflectionTest):
         insp = inspect(meta.bind)
         oid = insp.get_table_oid(table_name, schema)
         self.assert_(isinstance(oid, int))
+
+class HANAConnectUrlUserHDBUserStoreTest(fixtures.TestBase):
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_tenant_url_parsing_hdbcli(self):
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://userkey=myhxe"))
+        assert result_kwargs['userkey'] == "myhxe"
