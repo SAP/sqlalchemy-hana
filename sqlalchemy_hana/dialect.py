@@ -239,7 +239,7 @@ class HANABaseDialect(default.DefaultDialect):
         pass
 
     def _get_default_schema_name(self, connection):
-        return self.normalize_name(connection.engine.url.username.upper())
+        # return self.normalize_name(connection.engine.url.username.upper())
         return self.normalize_name(connection.execute("SELECT CURRENT_USER FROM DUMMY").fetchone()[0])
 
     def _check_unicode_returns(self, connection):
