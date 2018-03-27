@@ -276,3 +276,6 @@ class Requirements(requirements.SuiteRequirements):
     def sequences_optional(self):
         return exclusions.open()
 
+    @property
+    def timestamp_microseconds(self):
+        return exclusions.skip_if('hana+pyhdb')
