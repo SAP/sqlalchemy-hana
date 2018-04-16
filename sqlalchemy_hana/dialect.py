@@ -309,7 +309,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema",
+                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema AND IS_USER_DEFINED_TYPE='FALSE'",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
