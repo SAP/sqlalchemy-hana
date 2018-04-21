@@ -248,3 +248,4 @@ class IsolationLevelTest(fixtures.TestBase):
                 self._non_default_isolation_level()
             )
         conn.close()
+
