@@ -109,19 +109,6 @@ class ComponentReflectionTest(_ComponentReflectionTest):
                 DDL("drop view user_tmp_v")
             )
 
-    @skip_if('hana')
-    @testing.requires.temp_table_reflection
-    @testing.requires.unique_constraint_reflection
-    def test_get_temp_table_unique_constraints(self):
-        insp = inspect(self.bind)
-        reflected = insp.get_unique_constraints('user_tmp')
-        for refl in reflected:
-            refl.pop('duplicates_index', None)
-        eq_(
-            reflected,
-            [{'column_names': ['name'], 'name': 'user_tmp_uq'}]
-           )
-
     @testing.provide_metadata
     def _test_get_table_oid(self, table_name, schema=None):
         meta = self.metadata
