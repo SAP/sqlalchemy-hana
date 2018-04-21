@@ -7,7 +7,6 @@ Changelog
 - Support for table comments
 - Support for setting and reflecting isolation level
 
-
 0.3.0
 -----
 - **Backward incompatible change:** The ``hana://`` DBURI schema will now use ``hdbcli`` by default.
