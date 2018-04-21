@@ -1,11 +1,22 @@
 Changelog
 =========
 
+0.4.0.dev
+---------
+- Support for inspection of table oid
+- Support for table comments
+- Support for setting and reflecting isolation level
+
+
 0.3.0
 -----
 - **Backward incompatible change:** The ``hana://`` DBURI schema will now use ``hdbcli`` by default.
 - Support of Python 3
+- Support for check constraints
+- Support for foreign key options and name
 - Support for tenant specification in connect URL and automatic sql port discovery
+- Support for autocommit
+- Support for temporary tables
 
 0.2.2
 -----
