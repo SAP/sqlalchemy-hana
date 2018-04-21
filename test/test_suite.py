@@ -14,8 +14,8 @@
 
 # test/test_suite.py
 
-from sqlalchemy import testing
-from sqlalchemy.testing import engines
+from sqlalchemy import testing, create_engine
+from sqlalchemy.testing import engines, assert_raises_message
 from sqlalchemy.testing.suite import *
 from sqlalchemy.testing.exclusions import skip_if
 from sqlalchemy.testing.mock import Mock
@@ -51,6 +51,7 @@ class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
         )
         assert not dialect.is_disconnect(None, mock_connection, None)
 
+
 class HANAConnectUrlHasTenantTest(fixtures.TestBase):
 
     @testing.only_on('hana')
@@ -71,6 +72,7 @@ class HANAConnectUrlHasTenantTest(fixtures.TestBase):
         dialect = testing.db.dialect
 
         assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"))
+
 
 class ComponentReflectionTest(_ComponentReflectionTest):
 
@@ -115,7 +117,10 @@ class ComponentReflectionTest(_ComponentReflectionTest):
         reflected = insp.get_unique_constraints('user_tmp')
         for refl in reflected:
             refl.pop('duplicates_index', None)
-        eq_(reflected, [{'column_names': ['name'], 'name': 'user_tmp_uq'}])
+        eq_(
+            reflected,
+            [{'column_names': ['name'], 'name': 'user_tmp_uq'}]
+           )
 
     @testing.provide_metadata
     def _test_get_table_oid(self, table_name, schema=None):
@@ -123,3 +128,123 @@ class ComponentReflectionTest(_ComponentReflectionTest):
         insp = inspect(meta.bind)
         oid = insp.get_table_oid(table_name, schema)
         self.assert_(isinstance(oid, int))
+
+
+class IsolationLevelTest(fixtures.TestBase):
+
+    def _default_isolation_level(self):
+        return 'READ COMMITTED'
+
+    def _non_default_isolation_level(self):
+        return 'SERIALIZABLE'
+
+    @testing.only_on('hana')
+    def test_get_isolation_level(self):
+        eng = engines.testing_engine(options=dict())
+        isolation_level = eng.dialect.get_isolation_level(
+            eng.connect().connection)
+        eq_(
+            isolation_level,
+            self._default_isolation_level()
+            )
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_set_isolation_level(self):
+        eng = engines.testing_engine(options=dict())
+        conn = eng.connect()
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._default_isolation_level()
+            )
+
+        eng.dialect.set_isolation_level(
+            conn.connection, self._non_default_isolation_level()
+            )
+
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._non_default_isolation_level()
+           )
+        conn.close()
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_reset_level(self):
+        eng = engines.testing_engine(options=dict())
+        conn = eng.connect()
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._default_isolation_level()
+        )
+
+        eng.dialect.set_isolation_level(
+            conn.connection, self._non_default_isolation_level()
+        )
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._non_default_isolation_level()
+        )
+
+        eng.dialect.reset_isolation_level(conn.connection)
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._default_isolation_level()
+        )
+        conn.close()
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_set_level_with_setting(self):
+        eng = engines.testing_engine(options=dict(isolation_level=self._non_default_isolation_level()))
+        conn = eng.connect()
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._non_default_isolation_level()
+           )
+
+        eng.dialect.set_isolation_level(conn.connection, self._default_isolation_level())
+        eq_(
+            eng.dialect.get_isolation_level(conn.connection),
+            self._default_isolation_level()
+           )
+        conn.close()
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_invalid_level(self):
+        eng = engines.testing_engine(options=dict(isolation_level='FOO'))
+        assert_raises_message(
+            exc.ArgumentError,
+            "Invalid value '%s' for isolation_level. "
+            "Valid isolation levels for %s are %s" %
+            ("FOO", eng.dialect.name, ", ".join(eng.dialect._isolation_lookup)), eng.connect
+        )
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_with_execution_options(self):
+        eng = create_engine(
+            testing.db.url,
+            execution_options={'isolation_level': self._non_default_isolation_level()}
+            )
+        conn = eng.connect()
+        eq_(
+                eng.dialect.get_isolation_level(conn.connection),
+                self._non_default_isolation_level()
+            )
+        conn.close()
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_with_isolation_level_in_create_engine(self):
+        eng = create_engine(
+            testing.db.url,
+            isolation_level=self._non_default_isolation_level()
+            )
+        conn = eng.connect()
+        eq_(
+                eng.dialect.get_isolation_level(conn.connection),
+                self._non_default_isolation_level()
+            )
+        conn.close()
