@@ -279,3 +279,7 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def temp_table_names(self):
         return exclusions.open()
+
+    @property
+    def tuple_in(self):
+        return exclusions.open()
