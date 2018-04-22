@@ -38,6 +38,7 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def named_constraints(self):
         return exclusions.open()
+    
 
     @property
     def unique_constraint_reflection(self):
