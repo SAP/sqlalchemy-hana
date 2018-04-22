@@ -276,3 +276,6 @@ class Requirements(requirements.SuiteRequirements):
     def sequences_optional(self):
         return exclusions.open()
 
+    @property
+    def temp_table_names(self):
+        return exclusions.open()

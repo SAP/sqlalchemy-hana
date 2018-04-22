@@ -320,19 +320,19 @@ class HANABaseDialect(default.DefaultDialect):
         ])
         return tables
 
-    def get_temp_table_names(self, connection, schema=None, **kw):
+    def get_temp_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM M_TEMPORARY_TABLES ORDER BY NAME",
+                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema ORDER BY TABLE_NAME",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
         )
 
         temp_table_names = list([
-            self.normalize_name(row[0]) for row in result.fetchall()
+            self.normalize_name(row[0]) for row in result.fetchall() if row[1] =="TRUE"
         ])
         return temp_table_names
 
@@ -544,7 +544,7 @@ ORDER BY POSITION"""
 
         return constraints
 
-    def get_check_constraints(self, connection, table_name, schema=None, **kw):
+    def get_check_constraints(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
