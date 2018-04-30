@@ -325,14 +325,15 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema ORDER BY TABLE_NAME",
+                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "IS_TEMPORARY='TRUE' ORDER BY TABLE_NAME",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
         )
 
         temp_table_names = list([
-            self.normalize_name(row[0]) for row in result.fetchall() if row[1] =="TRUE"
+            self.normalize_name(row[0]) for row in result.fetchall()
         ])
         return temp_table_names
 
