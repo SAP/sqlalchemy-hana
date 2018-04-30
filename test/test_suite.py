@@ -135,3 +135,18 @@ class HANAConnectUrlUserHDBUserStoreTest(fixtures.TestBase):
 
         _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://userkey=myhxe"))
         assert result_kwargs['userkey'] == "myhxe"
+
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+pyhdb')
+    def test_tenant_url_parsing_pyhdb(self):
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana+pyhdb://userkey=myhxe"))
+        
+        # _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana+pyhdb://userkey=myhxe"))
+        # assert result_kwargs['userkey'] == "myhxe"
+        # assert dialect.is_disconnect(Error(-10709, 'Connect failed'), None, None)
+        # assert_raises_message(NotImplementedError, 'no support for HDB user store')

@@ -230,20 +230,23 @@ class HANABaseDialect(default.DefaultDialect):
                     cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
 
     def get_isolation_level(self, connection):
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
-            result = cursor.fetchone()
+        # In this case the 'with' statement on connection.cursor() as cursor is not 
+        # working for pyHDB.
+        cursor = connection.cursor()
+        cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
+        result = cursor.fetchone()
         return result[0]
 
     def _get_server_version_info(self, connection):
         pass
 
     def _get_default_schema_name(self, connection):
-        # return self.normalize_name(connection.engine.url.username.upper())
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT CURRENT_USER FROM DUMMY")
-            result = cursor.fetchone()
-        return result[0]
+        # In this case, the SQLAlchemy Connection object is not yet "ready".
+        # Therefore we need to use the raw DBAPI connection object
+        cursor = connection.connection.cursor()
+        cursor.execute("SELECT CURRENT_USER FROM DUMMY")
+        result = cursor.fetchone()
+        return self.normalize_name(result[0])
 
     def _check_unicode_returns(self, connection):
         return True
@@ -310,7 +313,6 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
-
         result = connection.execute(
             sql.text(
                 "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema",
@@ -619,10 +621,12 @@ class HANAPyHDBDialect(HANABaseDialect):
 
         if kwargs.get("database"):
             raise NotImplementedError("no support for database parameter")
-
+        if url.host and url.host.lower().startswith( 'userkey=' ):
+            raise NotImplementedError("no support for HDB user store")
+            
         kwargs.setdefault("port", 30015)
         return (), kwargs
-
+    
     def is_disconnect(self, error, connection, cursor):
         if connection is None:
             return True
