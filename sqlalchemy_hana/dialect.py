@@ -18,7 +18,7 @@ from sqlalchemy.sql import compiler
 from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy import exc
 from sqlalchemy_hana import types as hana_types
-
+from contextlib import closing
 
 RESERVED_WORDS = {
     'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
@@ -140,6 +140,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
         return result
 
+
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq, type_):
         seq = self.dialect.identifier_preparer.format_sequence(seq)
@@ -214,6 +215,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     _isolation_lookup = {'SERIALIZABLE', 'READ UNCOMMITTED', 'READ COMMITTED', 'REPEATABLE READ'}
 
+    # does not work with pyhdb currently
     def set_isolation_level(self, connection, level):
         if level == "AUTOCOMMIT":
             connection.setautocommit(True)
@@ -230,7 +232,7 @@ class HANABaseDialect(default.DefaultDialect):
                     cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
 
     def get_isolation_level(self, connection):
-        with connection.cursor() as cursor:
+        with closing(connection.cursor()) as cursor:
             cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
             result = cursor.fetchone()
         return result[0]
