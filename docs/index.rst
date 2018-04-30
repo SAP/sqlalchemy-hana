@@ -49,10 +49,17 @@ After installation of sqlalchemy-hana, you can create an engine which connects t
 By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as the underlying database driver.
 To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 
+In case of a tenant database, you may use:
+
+.. code-block:: python
+
+    from sqlalchemy import create_engine
+    engine = engine = create_engine('hana://user:pass@host/tenant_db_name')
+
 Special CREATE TABLE argument 
 -----------------------------
 
-Sqlalchemy-hana provides a special argument called “hana_table_type” which can be used to specify the type of table one wants to create with SAP HANA (i.e. ROW/COLUMN). The default table type is ROW.
+Sqlalchemy-hana provides a special argument called “hana_table_type” which can be used to specify the type of table one wants to create with SAP HANA (i.e. ROW/COLUMN). The default table type depends on your HANA configuration.
 
 .. code-block:: python
 
