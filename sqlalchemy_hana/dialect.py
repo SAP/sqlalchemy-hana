@@ -322,12 +322,13 @@ class HANABaseDialect(default.DefaultDialect):
         ])
         return tables
 
-    def get_temp_table_names(self, connection, schema=None, **kw):
+    def get_temp_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM M_TEMPORARY_TABLES ORDER BY NAME",
+                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "IS_TEMPORARY='TRUE' ORDER BY TABLE_NAME",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
@@ -541,12 +542,12 @@ ORDER BY POSITION"""
                     # Constraint has user-defined name
                     constraint['name'] = self.normalize_name(constraint_name)
                     constraint['duplicates_index'] = self.normalize_name(constraint_name)
-                constraints.append(constraint)
+                    constraints.append(constraint)
             constraint['column_names'].append(self.normalize_name(column_name))
 
         return constraints
 
-    def get_check_constraints(self, connection, table_name, schema=None, **kw):
+    def get_check_constraints(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
