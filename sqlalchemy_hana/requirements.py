@@ -38,7 +38,6 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def named_constraints(self):
         return exclusions.open()
-    
 
     @property
     def unique_constraint_reflection(self):
@@ -129,7 +128,6 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def mysql_non_strict(self):
         return exclusions.closed()
-
 
     @property
     def two_phase_transactions(self):
@@ -276,6 +274,10 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def sequences_optional(self):
         return exclusions.open()
+
+    @property
+    def timestamp_microseconds(self):
+        return exclusions.skip_if('hana+pyhdb')
 
     @property
     def temp_table_names(self):
