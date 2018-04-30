@@ -133,7 +133,7 @@ class IsolationLevelTest(fixtures.TestBase):
         eq_(
             isolation_level,
             self._default_isolation_level()
-            )
+        )
 
     @testing.only_on('hana')
     @testing.only_if('hana+hdbcli')
@@ -143,16 +143,16 @@ class IsolationLevelTest(fixtures.TestBase):
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
             self._default_isolation_level()
-            )
+        )
 
         eng.dialect.set_isolation_level(
             conn.connection, self._non_default_isolation_level()
-            )
+        )
 
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
             self._non_default_isolation_level()
-           )
+        )
         conn.close()
 
     @testing.only_on('hana')
@@ -188,13 +188,13 @@ class IsolationLevelTest(fixtures.TestBase):
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
             self._non_default_isolation_level()
-           )
+        )
 
         eng.dialect.set_isolation_level(conn.connection, self._default_isolation_level())
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
             self._default_isolation_level()
-           )
+        )
         conn.close()
 
     @testing.only_on('hana')
@@ -217,9 +217,9 @@ class IsolationLevelTest(fixtures.TestBase):
             )
         conn = eng.connect()
         eq_(
-                eng.dialect.get_isolation_level(conn.connection),
-                self._non_default_isolation_level()
-            )
+            eng.dialect.get_isolation_level(conn.connection),
+            self._non_default_isolation_level()
+        )
         conn.close()
 
     @testing.only_on('hana')
@@ -231,8 +231,8 @@ class IsolationLevelTest(fixtures.TestBase):
             )
         conn = eng.connect()
         eq_(
-                eng.dialect.get_isolation_level(conn.connection),
-                self._non_default_isolation_level()
-            )
+            eng.dialect.get_isolation_level(conn.connection),
+            self._non_default_isolation_level()
+        )
         conn.close()
 
