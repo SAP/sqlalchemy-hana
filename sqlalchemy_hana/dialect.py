@@ -18,7 +18,7 @@ from sqlalchemy.sql import compiler
 from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy import exc
 from sqlalchemy_hana import types as hana_types
-
+from contextlib import closing
 
 RESERVED_WORDS = {
     'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
@@ -140,6 +140,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
         return result
 
+
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq, type_):
         seq = self.dialect.identifier_preparer.format_sequence(seq)
@@ -214,6 +215,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     _isolation_lookup = {'SERIALIZABLE', 'READ UNCOMMITTED', 'READ COMMITTED', 'REPEATABLE READ'}
 
+    # does not work with pyhdb currently
     def set_isolation_level(self, connection, level):
         if level == "AUTOCOMMIT":
             connection.setautocommit(True)
@@ -230,11 +232,9 @@ class HANABaseDialect(default.DefaultDialect):
                     cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
 
     def get_isolation_level(self, connection):
-        # In this case the 'with' statement on connection.cursor() as cursor is not 
-        # working for pyHDB.
-        cursor = connection.cursor()
-        cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
-        result = cursor.fetchone()
+        with closing(connection.cursor()) as cursor:
+            cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
+            result = cursor.fetchone()
         return result[0]
 
     def _get_server_version_info(self, connection):
@@ -243,9 +243,9 @@ class HANABaseDialect(default.DefaultDialect):
     def _get_default_schema_name(self, connection):
         # In this case, the SQLAlchemy Connection object is not yet "ready".
         # Therefore we need to use the raw DBAPI connection object
-        cursor = connection.connection.cursor()
-        cursor.execute("SELECT CURRENT_USER FROM DUMMY")
-        result = cursor.fetchone()
+        with closing(connection.connection.cursor()) as cursor:
+            cursor.execute("SELECT CURRENT_USER FROM DUMMY")
+            result = cursor.fetchone()
         return self.normalize_name(result[0])
 
     def _check_unicode_returns(self, connection):
@@ -313,9 +313,10 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema",
+                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema AND IS_USER_DEFINED_TYPE='FALSE'",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
@@ -326,12 +327,13 @@ class HANABaseDialect(default.DefaultDialect):
         ])
         return tables
 
-    def get_temp_table_names(self, connection, schema=None, **kw):
+    def get_temp_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM M_TEMPORARY_TABLES ORDER BY NAME",
+                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "IS_TEMPORARY='TRUE' ORDER BY TABLE_NAME",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
@@ -545,12 +547,12 @@ ORDER BY POSITION"""
                     # Constraint has user-defined name
                     constraint['name'] = self.normalize_name(constraint_name)
                     constraint['duplicates_index'] = self.normalize_name(constraint_name)
-                constraints.append(constraint)
+                    constraints.append(constraint)
             constraint['column_names'].append(self.normalize_name(column_name))
 
         return constraints
 
-    def get_check_constraints(self, connection, table_name, schema=None, **kw):
+    def get_check_constraints(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
@@ -621,12 +623,13 @@ class HANAPyHDBDialect(HANABaseDialect):
 
         if kwargs.get("database"):
             raise NotImplementedError("no support for database parameter")
+
         if url.host and url.host.lower().startswith( 'userkey=' ):
             raise NotImplementedError("no support for HDB user store")
-            
+
         kwargs.setdefault("port", 30015)
         return (), kwargs
-    
+
     def is_disconnect(self, error, connection, cursor):
         if connection is None:
             return True
