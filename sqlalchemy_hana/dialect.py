@@ -50,23 +50,23 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def default_from(self):
         return " FROM DUMMY"
 
-    def limit_clause(self, select, **kw):
+    def limit_clause(self, select, **kwargs):
         text = ""
         if select._limit_clause is not None:
-            text += "\n LIMIT " + self.process(select._limit_clause, **kw)
+            text += "\n LIMIT " + self.process(select._limit_clause, **kwargs)
         if select._offset_clause is not None:
             if select._limit_clause is None:
                 # Dirty Hack but HANA only support OFFSET with LIMIT <integer>
                 text += "\n LIMIT 999999"
-            text += " OFFSET " + self.process(select._offset_clause, **kw)
+            text += " OFFSET " + self.process(select._offset_clause, **kwargs)
         return text
 
-    def for_update_clause(self, select, **kw):
+    def for_update_clause(self, select, **kwargs):
         tmp = " FOR UPDATE"
 
         if select._for_update_arg.of:
             tmp += " OF " + ", ".join(
-                self.process(elem, **kw) for elem
+                self.process(elem, **kwargs) for elem
                 in select._for_update_arg.of
             )
 
@@ -90,17 +90,17 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
-    def visit_unicode(self, type_, **kw):
-        return self.visit_NVARCHAR(type_, **kw)
+    def visit_unicode(self, type_, **kwargs):
+        return self.visit_NVARCHAR(type_, **kwargs)
 
-    def visit_text(self, type_, **kw):
-        return self.visit_CLOB(type_, **kw)
+    def visit_text(self, type_, **kwargs):
+        return self.visit_CLOB(type_, **kwargs)
 
-    def visit_large_binary(self, type_, **kw):
-        return self.visit_BLOB(type_, **kw)
+    def visit_large_binary(self, type_, **kwargs):
+        return self.visit_BLOB(type_, **kwargs)
 
-    def visit_unicode_text(self, type_, **kw):
-        return self.visit_NCLOB(type_, **kw)
+    def visit_unicode_text(self, type_, **kwargs):
+        return self.visit_NCLOB(type_, **kwargs)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -374,13 +374,10 @@ class HANABaseDialect(default.DefaultDialect):
         result = connection.execute(
             sql.text(
                 """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM (
-    SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, 
-    COMMENTS FROM SYS.TABLE_COLUMNS 
-    UNION ALL
-    SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM SYS.VIEW_COLUMNS
-) AS COLUMS
-WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table
-ORDER BY POSITION"""
+                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, 
+                   LENGTH, SCALE, COMMENTS FROM SYS.TABLE_COLUMNS UNION ALL SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME,
+                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM 
+                   SYS.VIEW_COLUMNS) AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION"""
             ).bindparams(
                 schema=self.denormalize_name(schema),
                 table=self.denormalize_name(table_name)
@@ -573,7 +570,7 @@ ORDER BY POSITION"""
 
         return check_conditions
 
-    def get_table_oid(self, connection, table_name, schema=None, **kw):
+    def get_table_oid(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
@@ -589,7 +586,7 @@ ORDER BY POSITION"""
         table_oid = (result.fetchone())[0]
         return table_oid
 
-    def get_table_comment(self, connection, table_name, schema=None, **kw):
+    def get_table_comment(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
