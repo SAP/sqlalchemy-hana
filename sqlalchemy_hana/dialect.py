@@ -522,7 +522,7 @@ ORDER BY POSITION"""
             sql.text(
                 "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
-                "IS_UNIQUE_KEY='TRUE' "
+                "IS_UNIQUE_KEY='TRUE' AND IS_PRIMARY_KEY='FALSE'"
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -542,7 +542,7 @@ ORDER BY POSITION"""
                     # Constraint has user-defined name
                     constraint['name'] = self.normalize_name(constraint_name)
                     constraint['duplicates_index'] = self.normalize_name(constraint_name)
-                    constraints.append(constraint)
+                constraints.append(constraint)
             constraint['column_names'].append(self.normalize_name(column_name))
 
         return constraints
