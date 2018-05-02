@@ -286,3 +286,8 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def tuple_in(self):
         return exclusions.open()
+
+    @property
+    def foreign_key_constraint_option_reflection(self):
+        return exclusions.open()
+
