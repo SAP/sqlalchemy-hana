@@ -275,7 +275,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT 1 FROM TABLES "
+                "SELECT 1 FROM SYS.TABLES "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -288,7 +288,7 @@ class HANABaseDialect(default.DefaultDialect):
         schema = schema or self.default_schema_name
         result = connection.execute(
             sql.text(
-                "SELECT 1 FROM SEQUENCES "
+                "SELECT 1 FROM SYS.SEQUENCES "
                 "WHERE SCHEMA_NAME=:schema AND SEQUENCE_NAME=:sequence",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -299,7 +299,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_schema_names(self, connection, **kwargs):
         result = connection.execute(
-            sql.text("SELECT SCHEMA_NAME FROM SCHEMAS")
+            sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS")
         )
 
         return list([
@@ -311,7 +311,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "SELECT TABLE_NAME FROM SYS.TABLES WHERE SCHEMA_NAME=:schema AND "
                 "IS_USER_DEFINED_TYPE='FALSE' AND IS_TEMPORARY='FALSE' ",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -328,7 +328,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "SELECT TABLE_NAME FROM SYS.TABLES WHERE SCHEMA_NAME=:schema AND "
                 "IS_TEMPORARY='TRUE' ORDER BY TABLE_NAME",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -345,7 +345,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT VIEW_NAME FROM VIEWS WHERE SCHEMA_NAME=:schema",
+                "SELECT VIEW_NAME FROM SYS.VIEWS WHERE SCHEMA_NAME=:schema",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
@@ -361,7 +361,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         return connection.execute(
             sql.text(
-                "SELECT DEFINITION FROM VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
+                "SELECT DEFINITION FROM SYS.VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
             ).bindparams(
                 view_name=self.denormalize_name(view_name),
                 schema=self.denormalize_name(schema),
@@ -423,7 +423,7 @@ ORDER BY POSITION"""
             sql.text(
                 "SELECT  CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
                 "REFERENCED_TABLE_NAME,  REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
-                "FROM REFERENTIAL_CONSTRAINTS "
+                "FROM SYS.REFERENTIAL_CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
@@ -458,7 +458,7 @@ ORDER BY POSITION"""
         result = connection.execute(
             sql.text(
                 'SELECT "INDEX_NAME", "COLUMN_NAME", "CONSTRAINT" '
-                "FROM INDEX_COLUMNS "
+                "FROM SYS.INDEX_COLUMNS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY POSITION"
             ).bindparams(
@@ -495,7 +495,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
                 "IS_PRIMARY_KEY='TRUE' "
                 "ORDER BY POSITION"
@@ -521,7 +521,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
                 "IS_UNIQUE_KEY='TRUE' AND IS_PRIMARY_KEY='FALSE'"
                 "ORDER BY CONSTRAINT_NAME, POSITION"
@@ -553,7 +553,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT CONSTRAINT_NAME, CHECK_CONDITION FROM CONSTRAINTS "
+                "SELECT CONSTRAINT_NAME, CHECK_CONDITION FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
                 "CHECK_CONDITION IS NOT NULL"
             ).bindparams(
@@ -578,7 +578,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_OID FROM TABLES "
+                "SELECT TABLE_OID FROM SYS.TABLES "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -594,7 +594,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT COMMENTS FROM TABLES WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
+                "SELECT COMMENTS FROM SYS.TABLES WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
             ).bindparams(
                 schema=self.denormalize_name(schema),
                 table=self.denormalize_name(table_name),
