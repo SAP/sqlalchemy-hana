@@ -311,14 +311,15 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema AND IS_USER_DEFINED_TYPE='FALSE'",
+                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "IS_USER_DEFINED_TYPE='FALSE' AND IS_TEMPORARY='FALSE' ",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
         )
 
         tables = list([
-            self.normalize_name(row[0]) for row in result.fetchall() if row[1] == "FALSE"
+            self.normalize_name(row[0]) for row in result.fetchall()
         ])
         return tables
 
