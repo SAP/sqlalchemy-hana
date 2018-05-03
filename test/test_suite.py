@@ -78,10 +78,12 @@ class ComponentReflectionTest(_ComponentReflectionTest):
 
     @classmethod
     def define_temp_tables(cls, metadata):
+        # the definition of temporary tables in the temporary table tests needs to be overwritten,
+        # because similar to oracle, in HANA one needs to mention GLOBAL or LOCAL in the temporary table definition
+
         if testing.against("hana"):
             kw = {
                 'prefixes': ["GLOBAL TEMPORARY"],
-                'oracle_on_commit': 'PRESERVE ROWS'
             }
         else:
             kw = {
@@ -119,6 +121,10 @@ class ComponentReflectionTest(_ComponentReflectionTest):
     @testing.requires.foreign_key_constraint_option_reflection
     @testing.provide_metadata
     def test_get_foreign_key_options(self):
+        # this tests needs to be overwritten, because
+        # In no case in SQLAlchemy-hana an empty dictionary is returned for foreign key options.
+        # Also if the user does not explicitly mention the referential actions to be used in the
+        # create table statement, the default values of the referential actions in HANA (RESTRICT) are reflected.
         meta = self.metadata
 
         Table(
