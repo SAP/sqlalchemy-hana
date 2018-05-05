@@ -291,3 +291,6 @@ class Requirements(requirements.SuiteRequirements):
     def foreign_key_constraint_option_reflection(self):
         return exclusions.open()
 
+    @property
+    def check_constraint_reflection(self):
+        return exclusions.open()
