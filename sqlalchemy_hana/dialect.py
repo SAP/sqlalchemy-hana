@@ -187,7 +187,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
                 except AttributeError:
                     if effective_schema is not None:
                         seq_qry = "SELECT SEQUENCE_NAME FROM SYS.SEQUENCES S " \
-                            "JOIN SYS.COLUMNS C ON S.SEQUENCE_NAME LIKE '%%'||TO_VARCHAR(C.COLUMN_ID)||'%%' " \
+                            "JOIN SYS.TABLE_COLUMNS C ON S.SEQUENCE_NAME LIKE '%%'||TO_VARCHAR(C.COLUMN_ID)||'%%' " \
                             "WHERE C.SCHEMA_NAME='%s' AND C.TABLE_NAME='%s' AND C.COLUMN_NAME='%s'" % (
                             self.dialect.denormalize_name(effective_schema),
                             self.dialect.denormalize_name(column.table.name),
@@ -195,7 +195,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
                         )
                     else:
                         seq_qry = "SELECT SEQUENCE_NAME FROM SYS.SEQUENCES S " \
-                            "JOIN SYS.COLUMNS C ON S.SEQUENCE_NAME LIKE '%%'||TO_VARCHAR(C.COLUMN_ID)||'%%' " \
+                            "JOIN SYS.TABLE_COLUMNS C ON S.SEQUENCE_NAME LIKE '%%'||TO_VARCHAR(C.COLUMN_ID)||'%%' " \
                             "WHERE C.TABLE_NAME='%s' AND C.COLUMN_NAME='%s'" % (
                             self.dialect.denormalize_name(column.table.name),
                             self.dialect.denormalize_name(column.name)
@@ -205,12 +205,12 @@ class HANAExecutionContext(default.DefaultExecutionContext):
                     column._hana_seq_name = seq_name = name
 
                 if effective_schema is not None:
-                    exc = "select \"%s\".\"%s\".NEXTVAL FROM DUMMY" % \
+                    seq_sel = "select \"%s\".\"%s\".NEXTVAL FROM DUMMY" % \
                         (self.dialect.denormalize_name(effective_schema), seq_name)
                 else:
-                    exc = "SELECT %s.NEXTVAL FROM DUMMY" % (seq_name, )
+                    seq_sel = "SELECT %s.NEXTVAL FROM DUMMY" % (seq_name, )
 
-                return self._execute_scalar(exc, column.type)
+                return self._execute_scalar(seq_sel, column.type)
 
         return super(HANAExecutionContext, self).get_insert_default(column)
 
