@@ -16,9 +16,12 @@ import os
 from setuptools import setup, find_packages
 
 source_location = os.path.abspath(os.path.dirname(__file__))
+
+
 def get_version():
     with open(os.path.join(source_location, "VERSION")) as version:
         return version.readline().strip()
+
 
 setup(
     name="sqlalchemy-hana",
@@ -40,7 +43,9 @@ setup(
         "pytest>=2.5.2",
         "mock>=1.0.1"
     ],
-    classifiers=[ # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    setup_requires=['pytest-runner'],
+    test_suite="test.test_suite",
+    classifiers=[  # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
@@ -56,10 +61,10 @@ setup(
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-     entry_points = {  
+    entry_points={
          'sqlalchemy.dialects': 
          ['hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect',         
           'hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect',         
           'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect']   
-     },
+    },
 )
