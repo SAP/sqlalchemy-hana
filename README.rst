@@ -60,6 +60,13 @@ You can create your user key in the user store using the following command:
 By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as underlying database driver.
 To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 
+In case of a tenant database, you may use:
+
+.. code-block:: python
+
+    from sqlalchemy import create_engine
+    engine = engine = create_engine('hana://user:pass@host/tenant_db_name')
+
 Contribute
 ----------
 

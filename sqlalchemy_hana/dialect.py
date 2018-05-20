@@ -50,23 +50,23 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def default_from(self):
         return " FROM DUMMY"
 
-    def limit_clause(self, select, **kw):
+    def limit_clause(self, select, **kwargs):
         text = ""
         if select._limit_clause is not None:
-            text += "\n LIMIT " + self.process(select._limit_clause, **kw)
+            text += "\n LIMIT " + self.process(select._limit_clause, **kwargs)
         if select._offset_clause is not None:
             if select._limit_clause is None:
                 # Dirty Hack but HANA only support OFFSET with LIMIT <integer>
                 text += "\n LIMIT 999999"
-            text += " OFFSET " + self.process(select._offset_clause, **kw)
+            text += " OFFSET " + self.process(select._offset_clause, **kwargs)
         return text
 
-    def for_update_clause(self, select, **kw):
+    def for_update_clause(self, select, **kwargs):
         tmp = " FOR UPDATE"
 
         if select._for_update_arg.of:
             tmp += " OF " + ", ".join(
-                self.process(elem, **kw) for elem
+                self.process(elem, **kwargs) for elem
                 in select._for_update_arg.of
             )
 
@@ -90,17 +90,17 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
-    def visit_unicode(self, type_, **kw):
-        return self.visit_NVARCHAR(type_, **kw)
+    def visit_unicode(self, type_, **kwargs):
+        return self.visit_NVARCHAR(type_, **kwargs)
 
-    def visit_text(self, type_, **kw):
-        return self.visit_CLOB(type_, **kw)
+    def visit_text(self, type_, **kwargs):
+        return self.visit_CLOB(type_, **kwargs)
 
-    def visit_large_binary(self, type_, **kw):
-        return self.visit_BLOB(type_, **kw)
+    def visit_large_binary(self, type_, **kwargs):
+        return self.visit_BLOB(type_, **kwargs)
 
-    def visit_unicode_text(self, type_, **kw):
-        return self.visit_NCLOB(type_, **kw)
+    def visit_unicode_text(self, type_, **kwargs):
+        return self.visit_NCLOB(type_, **kwargs)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -280,7 +280,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT 1 FROM TABLES "
+                "SELECT 1 FROM SYS.TABLES "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -293,7 +293,7 @@ class HANABaseDialect(default.DefaultDialect):
         schema = schema or self.default_schema_name
         result = connection.execute(
             sql.text(
-                "SELECT 1 FROM SEQUENCES "
+                "SELECT 1 FROM SYS.SEQUENCES "
                 "WHERE SCHEMA_NAME=:schema AND SEQUENCE_NAME=:sequence",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -304,7 +304,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_schema_names(self, connection, **kwargs):
         result = connection.execute(
-            sql.text("SELECT SCHEMA_NAME FROM SCHEMAS")
+            sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS")
         )
 
         return list([
@@ -316,14 +316,15 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME, IS_TEMPORARY FROM TABLES WHERE SCHEMA_NAME=:schema AND IS_USER_DEFINED_TYPE='FALSE'",
+                "SELECT TABLE_NAME FROM SYS.TABLES WHERE SCHEMA_NAME=:schema AND "
+                "IS_USER_DEFINED_TYPE='FALSE' AND IS_TEMPORARY='FALSE' ",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
         )
 
         tables = list([
-            self.normalize_name(row[0]) for row in result.fetchall() if row[1] == "FALSE"
+            self.normalize_name(row[0]) for row in result.fetchall()
         ])
         return tables
 
@@ -332,7 +333,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_NAME FROM TABLES WHERE SCHEMA_NAME=:schema AND "
+                "SELECT TABLE_NAME FROM SYS.TABLES WHERE SCHEMA_NAME=:schema AND "
                 "IS_TEMPORARY='TRUE' ORDER BY TABLE_NAME",
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -349,7 +350,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT VIEW_NAME FROM VIEWS WHERE SCHEMA_NAME=:schema",
+                "SELECT VIEW_NAME FROM SYS.VIEWS WHERE SCHEMA_NAME=:schema",
             ).bindparams(
                 schema=self.denormalize_name(schema),
             )
@@ -365,7 +366,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         return connection.execute(
             sql.text(
-                "SELECT DEFINITION FROM VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
+                "SELECT DEFINITION FROM SYS.VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
             ).bindparams(
                 view_name=self.denormalize_name(view_name),
                 schema=self.denormalize_name(schema),
@@ -378,13 +379,10 @@ class HANABaseDialect(default.DefaultDialect):
         result = connection.execute(
             sql.text(
                 """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM (
-    SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, 
-    COMMENTS FROM SYS.TABLE_COLUMNS 
-    UNION ALL
-    SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM SYS.VIEW_COLUMNS
-) AS COLUMS
-WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table
-ORDER BY POSITION"""
+                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, 
+                   LENGTH, SCALE, COMMENTS FROM SYS.TABLE_COLUMNS UNION ALL SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME,
+                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM 
+                   SYS.VIEW_COLUMNS) AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION"""
             ).bindparams(
                 schema=self.denormalize_name(schema),
                 table=self.denormalize_name(table_name)
@@ -427,7 +425,7 @@ ORDER BY POSITION"""
             sql.text(
                 "SELECT  CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
                 "REFERENCED_TABLE_NAME,  REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
-                "FROM REFERENTIAL_CONSTRAINTS "
+                "FROM SYS.REFERENTIAL_CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
@@ -462,7 +460,7 @@ ORDER BY POSITION"""
         result = connection.execute(
             sql.text(
                 'SELECT "INDEX_NAME", "COLUMN_NAME", "CONSTRAINT" '
-                "FROM INDEX_COLUMNS "
+                "FROM SYS.INDEX_COLUMNS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY POSITION"
             ).bindparams(
@@ -499,7 +497,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
                 "IS_PRIMARY_KEY='TRUE' "
                 "ORDER BY POSITION"
@@ -525,9 +523,9 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM CONSTRAINTS "
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
-                "IS_UNIQUE_KEY='TRUE' "
+                "IS_UNIQUE_KEY='TRUE' AND IS_PRIMARY_KEY='FALSE'"
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -557,7 +555,7 @@ ORDER BY POSITION"""
 
         result = connection.execute(
             sql.text(
-                "SELECT CONSTRAINT_NAME, CHECK_CONDITION FROM CONSTRAINTS "
+                "SELECT CONSTRAINT_NAME, CHECK_CONDITION FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
                 "CHECK_CONDITION IS NOT NULL"
             ).bindparams(
@@ -577,12 +575,12 @@ ORDER BY POSITION"""
 
         return check_conditions
 
-    def get_table_oid(self, connection, table_name, schema=None, **kw):
+    def get_table_oid(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
-                "SELECT TABLE_OID FROM TABLES "
+                "SELECT TABLE_OID FROM SYS.TABLES "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -593,12 +591,12 @@ ORDER BY POSITION"""
         table_oid = (result.fetchone())[0]
         return table_oid
 
-    def get_table_comment(self, connection, table_name, schema=None, **kw):
+    def get_table_comment(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
-                "SELECT COMMENTS FROM TABLES WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
+                "SELECT COMMENTS FROM SYS.TABLES WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
             ).bindparams(
                 schema=self.denormalize_name(schema),
                 table=self.denormalize_name(table_name),

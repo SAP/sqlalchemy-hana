@@ -129,7 +129,6 @@ class Requirements(requirements.SuiteRequirements):
     def mysql_non_strict(self):
         return exclusions.closed()
 
-
     @property
     def two_phase_transactions(self):
         """Not supported by PYHDB"""
@@ -274,5 +273,21 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def sequences_optional(self):
+        return exclusions.open()
+
+    @property
+    def timestamp_microseconds(self):
+        return exclusions.skip_if('hana+pyhdb')
+
+    @property
+    def temp_table_names(self):
+        return exclusions.open()
+
+    @property
+    def tuple_in(self):
+        return exclusions.open()
+
+    @property
+    def foreign_key_constraint_option_reflection(self):
         return exclusions.open()
 
