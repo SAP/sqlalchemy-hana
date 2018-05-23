@@ -109,7 +109,7 @@ SAP HANA also comes with an option to have an IDENTITY column which can also be 
 LIMIT/OFFSET Support 
 --------------------
 
-SAP HANA supports both LIMIT and OFFSET, but it only supports OFFSET in conjunction with LIMIT i.e. in the select statement the oﬀset parameter cannot be set without the LIMIT clause, hence in sqlalchemy-hana if the user tries to use oﬀset without limit, a limit of 2147384648 would be set, this has been done so that the users can smoothly use LIMIT/OFFSET as in other databases that do not have this limitation. 2147384648 was chosen, because it is the maximum number of records that a non-partitioned table can have.
+SAP HANA supports both LIMIT and OFFSET, but it only supports OFFSET in conjunction with LIMIT i.e. in the select statement the oﬀset parameter cannot be set without the LIMIT clause, hence in sqlalchemy-hana if the user tries to use oﬀset without limit, a limit of 2147384648 would be set, this has been done so that the users can smoothly use LIMIT/OFFSET as in other databases that do not have this limitation. 2147384648 was chosen, because it is the maximum number of records per result set.
 
 RETURNING Support 
 -----------------
