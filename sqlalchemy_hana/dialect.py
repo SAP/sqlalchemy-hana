@@ -56,8 +56,8 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             text += "\n LIMIT " + self.process(select._limit_clause, **kwargs)
         if select._offset_clause is not None:
             if select._limit_clause is None:
-                # Dirty Hack but HANA only support OFFSET with LIMIT <integer>
-                text += "\n LIMIT 999999"
+                # 2147384648 is the max. no. of records per result set
+                text += "\n LIMIT 2147384648"
             text += " OFFSET " + self.process(select._offset_clause, **kwargs)
         return text
 
