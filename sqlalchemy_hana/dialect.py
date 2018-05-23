@@ -241,7 +241,12 @@ class HANABaseDialect(default.DefaultDialect):
         pass
 
     def _get_default_schema_name(self, connection):
-        return self.normalize_name(connection.engine.url.username.upper())
+        # In this case, the SQLAlchemy Connection object is not yet "ready".
+        # Therefore we need to use the raw DBAPI connection object
+        with closing(connection.connection.cursor()) as cursor:
+            cursor.execute("SELECT CURRENT_USER FROM DUMMY")
+            result = cursor.fetchone()
+        return self.normalize_name(result[0])
 
     def _check_unicode_returns(self, connection):
         return True
@@ -617,6 +622,9 @@ class HANAPyHDBDialect(HANABaseDialect):
         if kwargs.get("database"):
             raise NotImplementedError("no support for database parameter")
 
+        if url.host and url.host.lower().startswith( 'userkey=' ):
+            raise NotImplementedError("no support for HDB user store")
+
         kwargs.setdefault("port", 30015)
         return (), kwargs
 
@@ -638,13 +646,16 @@ class HANAHDBCLIDialect(HANABaseDialect):
         return hdbcli.dbapi
 
     def create_connect_args(self, url):
-        kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
-
-        port = 30015
-        if kwargs.get("databaseName"):
-            port = 30013
-
-        kwargs.setdefault("port", port)
+        if url.host and url.host.lower().startswith( 'userkey=' ):
+            kwargs = url.translate_connect_args(host="userkey")  
+            userkey = url.host[ len('userkey=') : len(url.host)]
+            kwargs["userkey"] = userkey
+        else:
+            kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
+            port = 30015
+            if kwargs.get("databaseName"):
+                port = 30013
+            kwargs.setdefault("port", port)
 
         return (), kwargs
 

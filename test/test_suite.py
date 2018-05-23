@@ -161,8 +161,6 @@ class ComponentReflectionTest(_ComponentReflectionTest):
             ),
             {'onupdate': 'SET NULL', 'ondelete': 'CASCADE'}
         )
-
-
 class IsolationLevelTest(fixtures.TestBase):
 
     def _default_isolation_level(self):
@@ -282,3 +280,24 @@ class IsolationLevelTest(fixtures.TestBase):
         )
         conn.close()
 
+class HANAConnectUrlUserHDBUserStoreTest(fixtures.TestBase):
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_parsing_userkey_hdbcli(self):
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://userkey=myhxe"))
+        assert result_kwargs['userkey'] == "myhxe"
+
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+pyhdb')
+    def test_parsing_userkey_pyhdb(self):
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana+pyhdb://userkey=myhxe"))

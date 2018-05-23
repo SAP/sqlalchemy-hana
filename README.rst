@@ -44,6 +44,19 @@ instance. This engine works like all other engines of SQLAlchemy.
     from sqlalchemy import create_engine
     engine = create_engine('hana://username:password@example.de:30015')
 
+Alternatively, you can use HDB User Store to avoid entering connection-related information manually each time you want to establish a connection to an SAP HANA database:
+
+.. code-block:: python
+
+    from sqlalchemy import create_engine
+    engine = create_engine('hana://userkey=my_user_store_key')
+
+You can create your user key in the user store using the following command:
+
+.. code-block:: 
+
+	hdbuserstore SET <KEY> <host:port> <USERNAME> <PASSWORD>
+
 By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as underlying database driver.
 To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 
