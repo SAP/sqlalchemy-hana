@@ -545,7 +545,7 @@ class HANABaseDialect(default.DefaultDialect):
                     # Constraint has user-defined name
                     constraint['name'] = self.normalize_name(constraint_name)
                     constraint['duplicates_index'] = self.normalize_name(constraint_name)
-                    constraints.append(constraint)
+                constraints.append(constraint)
             constraint['column_names'].append(self.normalize_name(column_name))
 
         return constraints
