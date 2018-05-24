@@ -66,7 +66,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def precision_numerics_retains_significant_digits(self):
-        return exclusions.open()
+        return exclusions.closed()
 
     @property
     def datetime_literals(self):
