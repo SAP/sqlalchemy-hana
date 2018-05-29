@@ -367,6 +367,7 @@ class HANAMiscTest(fixtures.TestBase):
         for string, result in [
             ("2.00.020.00.1500920972", (2, 0, 20, 0, 1500920972)),
             ("2.00.023.00.1513691289", (2, 0, 23, 0, 1513691289)),
+            ("Not a valid version", None),
         ]:
             mock_connection = Mock(
                 execute=Mock(
