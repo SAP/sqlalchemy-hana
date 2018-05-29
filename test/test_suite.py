@@ -358,3 +358,30 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
+
+
+class HANAMiscTest(fixtures.TestBase):
+
+    @testing.only_on('hana')
+    def test_server_version_parsing(self):
+        for string, result in [
+            ("2.00.020.00.1500920972", (2, 0, 20, 0, 1500920972)),
+            ("2.00.023.00.1513691289", (2, 0, 23, 0, 1513691289)),
+        ]:
+            mock_connection = Mock(
+                execute=Mock(
+                    return_value=Mock(
+                        scalar=Mock(
+                            return_value=string
+                        )
+                    )
+                )
+            )
+            eq_(
+                testing.db.dialect._get_server_version_info(mock_connection),
+                result
+            )
+
+    @testing.only_on('hana')
+    def test_get_server_version(self):
+        assert isinstance(testing.db.dialect.server_version_info, tuple)
