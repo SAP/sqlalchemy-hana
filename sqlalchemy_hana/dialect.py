@@ -654,6 +654,7 @@ class HANAHDBCLIDialect(HANABaseDialect):
             kwargs["userkey"] = userkey
         else:
             kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
+            kwargs.update(url.query)
             port = 30015
             if kwargs.get("databaseName"):
                 port = 30013
