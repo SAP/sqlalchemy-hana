@@ -301,3 +301,22 @@ class HANAConnectUrlUserHDBUserStoreTest(fixtures.TestBase):
         dialect = testing.db.dialect
 
         assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana+pyhdb://userkey=myhxe"))
+
+
+class HANAConnectUrlParsing(fixtures.TestBase):
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_pass_uri_query_as_kwargs(self):
+        """Verify sqlalchemy-hana passes all uri query parameters to hdbcli"""
+        import sqlalchemy.engine.url
+
+        dialect = testing.db.dialect
+
+        _, kwargs = dialect.create_connect_args(
+            sqlalchemy.engine.url.make_url(
+                "hana+hdbcli://user:password@example.com/my-database?encrypt=true&compress=true"
+            )
+        )
+        assert kwargs["encrypt"] == "true"
+        assert kwargs["compress"] == "true"
