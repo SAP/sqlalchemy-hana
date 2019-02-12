@@ -13,6 +13,7 @@
 # language governing permissions and limitations under the License.
 
 from functools import wraps
+import json
 
 from sqlalchemy import sql, types, util
 from sqlalchemy.engine import default, reflection
@@ -21,6 +22,8 @@ from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy import exc
 from sqlalchemy_hana import types as hana_types
 from contextlib import closing
+
+
 
 RESERVED_WORDS = {
     'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
@@ -381,9 +384,9 @@ class HANABaseDialect(default.DefaultDialect):
         result = connection.execute(
             sql.text(
                 """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM (
-                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, 
+                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE,
                    LENGTH, SCALE, COMMENTS FROM SYS.TABLE_COLUMNS UNION ALL SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME,
-                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM 
+                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM
                    SYS.VIEW_COLUMNS) AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION"""
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -649,7 +652,7 @@ class HANAHDBCLIDialect(HANABaseDialect):
 
     def create_connect_args(self, url):
         if url.host and url.host.lower().startswith( 'userkey=' ):
-            kwargs = url.translate_connect_args(host="userkey")  
+            kwargs = url.translate_connect_args(host="userkey")
             userkey = url.host[ len('userkey=') : len(url.host)]
             kwargs["userkey"] = userkey
         else:
@@ -674,6 +677,16 @@ class HANAHDBCLIDialect(HANABaseDialect):
             if error.errorcode == -10709:
                 return True
         return super(HANAHDBCLIDialect, self).is_disconnect(error, connection, cursor)
+
+    def _json_serializer(self, value):
+        return json.dumps(value)
+
+    def _json_deserializer(self, value):
+        if value:
+            try:
+                return json.loads(value)
+            except ValueError:
+                return value
 
 
 def _fix_integrity_error(f):
