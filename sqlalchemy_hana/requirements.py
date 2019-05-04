@@ -13,6 +13,8 @@
 # language governing permissions and limitations under the License.
 
 import sys
+
+import sqlalchemy
 from sqlalchemy.testing import exclusions, requirements
 
 
@@ -293,6 +295,9 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def check_constraint_reflection(self):
+        if sqlalchemy.__version__.startswith('1.1.'):
+            # Skip reflection tests in SQLAlchemy~=1.1.0 due missing normalization
+            return exclusions.closed()
         return exclusions.open()
 
     @property
