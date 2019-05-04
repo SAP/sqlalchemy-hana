@@ -27,39 +27,42 @@ setup(
     url="https://github.com/SAP/sqlalchemy-hana/",
     author="Christoph Heer",
     author_email="christoph.heer@sap.com",
-    description="SQLAlchemy dialect for SAP HANA Database",
+    description="SQLAlchemy dialect for SAP HANA",
     packages=find_packages(exclude=("test", "test.*",)),
     zip_safe=False,
     install_requires=[
-        "sqlalchemy"
+        "sqlalchemy>=1.0.0"
     ],
     extras_require={
-        'pyhdb': ["pyhdb>=0.3.1"]
+        "test": [
+            "pytest>=2.5.2",
+            "mock>=1.0.1"
+        ],
+        "pyhdb": [
+            "pyhdb>=0.3.1"
+        ]
     },
-    tests_require=[
-        "pytest>=2.5.2",
-        "mock>=1.0.1"
-    ],
     classifiers=[ # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Programming Language :: SQL',
-        'Topic :: Database',
-        'Topic :: Database :: Front-Ends',
-        'Topic :: Software Development',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: SQL",
+        "Topic :: Database",
+        "Topic :: Database :: Front-Ends",
+        "Topic :: Software Development",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-     entry_points = {  
-         'sqlalchemy.dialects': 
-         ['hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect',         
-          'hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect',         
-          'hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect']   
+    entry_points = {
+        "sqlalchemy.dialects": [
+            "hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
+            "hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
+            "hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect"
+        ]
      },
 )
