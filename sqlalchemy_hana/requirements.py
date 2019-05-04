@@ -294,3 +294,8 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def check_constraint_reflection(self):
         return exclusions.open()
+
+    @property
+    def implicit_decimal_binds(self):
+        # See SQLAlchemy ticket 4036
+        return exclusions.closed()
