@@ -49,6 +49,11 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_sequence(self, seq):
         return self.dialect.identifier_preparer.format_sequence(seq) + ".NEXTVAL"
 
+    def visit_empty_set_expr(self, element_types):
+        return "SELECT %s FROM DUMMY WHERE 1 != 1" % (
+            ', '.join(['1' for _ in element_types])
+        )
+
     def default_from(self):
         return " FROM DUMMY"
 
