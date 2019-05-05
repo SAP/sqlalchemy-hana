@@ -304,3 +304,7 @@ class Requirements(requirements.SuiteRequirements):
     def implicit_decimal_binds(self):
         # See SQLAlchemy ticket 4036
         return exclusions.closed()
+
+    @property
+    def expressions_against_unbounded_text(self):
+        return exclusions.closed()
