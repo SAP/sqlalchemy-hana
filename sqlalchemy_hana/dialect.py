@@ -386,9 +386,9 @@ class HANABaseDialect(default.DefaultDialect):
         result = connection.execute(
             sql.text(
                 """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM (
-                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, 
+                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE,
                    LENGTH, SCALE, COMMENTS FROM SYS.TABLE_COLUMNS UNION ALL SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME,
-                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM 
+                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM
                    SYS.VIEW_COLUMNS) AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION"""
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -654,7 +654,7 @@ class HANAHDBCLIDialect(HANABaseDialect):
 
     def create_connect_args(self, url):
         if url.host and url.host.lower().startswith( 'userkey=' ):
-            kwargs = url.translate_connect_args(host="userkey")  
+            kwargs = url.translate_connect_args(host="userkey")
             userkey = url.host[ len('userkey=') : len(url.host)]
             kwargs["userkey"] = userkey
         else:
