@@ -149,16 +149,12 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
 
 class HANAExecutionContext(default.DefaultExecutionContext):
+
     def fire_sequence(self, seq, type_):
         seq = self.dialect.identifier_preparer.format_sequence(seq)
         return self._execute_scalar("SELECT %s.NEXTVAL FROM DUMMY" % seq, type_)
 
 
-# ischema_names = {
-#     'BLOB': hana_types.BLOB,
-#     'CLOB': hana_types.CLOB,
-#     'NCLOB': hana_types.NCLOB,
-# }
 class HANAInspector(reflection.Inspector):
 
     def get_table_oid(self, table_name, schema=None):
@@ -187,8 +183,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     supports_comments = True
 
-    # ischema_names can be empty dict, not needed for reading lobs...
-    ischema_names = {}  # ischema_names
+    ischema_names = {}
     colspecs = {
         types.Boolean: hana_types.BOOLEAN,
         types.Date: hana_types.DATE,

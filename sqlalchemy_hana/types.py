@@ -61,23 +61,25 @@ class TIMESTAMP(sqltypes.DateTime):
         return process
 
 
-# LOB stuff setup matches lob code in sqlalchemy/dialects/oracle/cx_oracle.py
-
 class _LOBMixin(object):
+
     def result_processor(self, dialect, coltype):
         if not dialect.auto_convert_lobs:
-            # return the cx_oracle.LOB directly.
+            # Disable processor and return raw DBAPI LOB type
             return None
 
         def process(value):
+            if value is None:
+                return None
             if isinstance(value, compat.string_types):
                 return value
-            elif compat.py2k and isinstance(value, buffer):
+            if isinstance(value, memoryview):
+                return value.obj
+            if compat.py2k and isinstance(value, buffer):
                 return value
-            elif value is not None:
+            if hasattr(value, "read"):
                 return value.read()
-            else:
-                return value
+            raise NotImplementedError
         return process
 
 
