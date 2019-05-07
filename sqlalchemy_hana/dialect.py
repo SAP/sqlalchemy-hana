@@ -594,9 +594,7 @@ class HANABaseDialect(default.DefaultDialect):
                 table=self.denormalize_name(table_name)
             )
         )
-
-        table_oid = (result.fetchone())[0]
-        return table_oid
+        return result.scalar()
 
     def get_table_comment(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
@@ -610,7 +608,7 @@ class HANABaseDialect(default.DefaultDialect):
             )
         )
 
-        return {"text" : (result.fetchone())[0]}
+        return {"text" : result.scalar()}
 
 class HANAPyHDBDialect(HANABaseDialect):
 
