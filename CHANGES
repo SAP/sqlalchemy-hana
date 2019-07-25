@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.4.0.dev
----------
+0.4.0
+-----
 - Support for inspection of table oid
 - Support for table comments
 - Support for setting and reflecting isolation level
