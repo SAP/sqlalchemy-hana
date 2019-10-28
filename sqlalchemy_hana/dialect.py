@@ -69,16 +69,19 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         return text
 
     def for_update_clause(self, select, **kwargs):
-        tmp = " FOR UPDATE"
+        if select._for_update_arg.read:
+            tmp = " FOR SHARE LOCK"
+        else:
+            tmp = " FOR UPDATE"
 
-        if select._for_update_arg.of:
-            tmp += " OF " + ", ".join(
-                self.process(elem, **kwargs) for elem
-                in select._for_update_arg.of
-            )
+            if select._for_update_arg.of:
+                tmp += " OF " + ", ".join(
+                    self.process(elem, **kwargs) for elem
+                    in select._for_update_arg.of
+                )
 
-        if select._for_update_arg.nowait:
-            tmp += " NOWAIT"
+            if select._for_update_arg.nowait:
+                tmp += " NOWAIT"
 
         return tmp
 
