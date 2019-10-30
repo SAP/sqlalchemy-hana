@@ -15,12 +15,14 @@
 # test/test_suite.py
 
 from sqlalchemy import testing, create_engine
+from sqlalchemy import column, table
 from sqlalchemy.testing import engines, assert_raises_message
 from sqlalchemy.testing.suite import *
 from sqlalchemy.testing.exclusions import skip_if
 from sqlalchemy.testing.mock import Mock
 from sqlalchemy import event
 from sqlalchemy.schema import DDL
+from sqlalchemy.testing.assertions import AssertsCompiledSQL
 from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflectionTest
 import sqlalchemy as sa
 from sqlalchemy import inspect
@@ -320,3 +322,33 @@ class HANAConnectUrlParsing(fixtures.TestBase):
         )
         assert kwargs["encrypt"] == "true"
         assert kwargs["compress"] == "true"
+
+
+class  HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
+
+    __dialect__ = testing.db.dialect
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_sql_row_locking(self):
+        table1 = table(
+            "mytable", column("myid"), column("name"), column("description")
+        )
+
+        self.assert_compile(
+            table1.select().with_for_update(),
+            "SELECT mytable.myid, mytable.name, mytable.description "
+            "FROM mytable FOR UPDATE",
+        )
+
+        self.assert_compile(
+            table1.select().with_for_update(nowait=True),
+            "SELECT mytable.myid, mytable.name, mytable.description "
+            "FROM mytable FOR UPDATE NOWAIT",
+        )
+
+        self.assert_compile(
+            table1.select().with_for_update(read=True),
+            "SELECT mytable.myid, mytable.name, mytable.description "
+            "FROM mytable FOR SHARE LOCK",
+        )

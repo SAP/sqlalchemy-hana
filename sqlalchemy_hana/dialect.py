@@ -69,16 +69,21 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         return text
 
     def for_update_clause(self, select, **kwargs):
-        tmp = " FOR UPDATE"
+        if select._for_update_arg.read:
+            # The HANA does not allow other parameters for FOR SHARE LOCK
+            # see: https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.03/en-US/20fcf24075191014a89e9dc7b8408b26.html
+            tmp = " FOR SHARE LOCK"
+        else:
+            tmp = " FOR UPDATE"
 
-        if select._for_update_arg.of:
-            tmp += " OF " + ", ".join(
-                self.process(elem, **kwargs) for elem
-                in select._for_update_arg.of
-            )
+            if select._for_update_arg.of:
+                tmp += " OF " + ", ".join(
+                    self.process(elem, **kwargs) for elem
+                    in select._for_update_arg.of
+                )
 
-        if select._for_update_arg.nowait:
-            tmp += " NOWAIT"
+            if select._for_update_arg.nowait:
+                tmp += " NOWAIT"
 
         return tmp
 
