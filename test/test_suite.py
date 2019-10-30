@@ -330,7 +330,7 @@ class  HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
 
     @testing.only_on('hana')
     @testing.only_if('hana+hdbcli')
-    def test_for_update(self):
+    def test_sql_row_locking(self):
         table1 = table(
             "mytable", column("myid"), column("name"), column("description")
         )
