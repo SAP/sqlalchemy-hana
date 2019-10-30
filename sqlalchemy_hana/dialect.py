@@ -68,8 +68,10 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             text += " OFFSET " + self.process(select._offset_clause, **kwargs)
         return text
 
-    def for_update_clause(self, select, **kwargs):
+    def for_update_clause(self, select, **kwargs):        
         if select._for_update_arg.read:
+            # The HANA does not allow other parameters for FOR SHARE LOCK
+            # see: https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.03/en-US/20fcf24075191014a89e9dc7b8408b26.html
             tmp = " FOR SHARE LOCK"
         else:
             tmp = " FOR UPDATE"
