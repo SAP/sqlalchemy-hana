@@ -324,7 +324,7 @@ class HANAConnectUrlParsing(fixtures.TestBase):
         assert kwargs["compress"] == "true"
 
 
-class  HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
+class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
 
     __dialect__ = testing.db.dialect
 
@@ -351,4 +351,10 @@ class  HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
             table1.select().with_for_update(read=True),
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR SHARE LOCK",
+        )
+
+        self.assert_compile(
+            table1.select().with_for_update(ignore_locked=True),
+            "SELECT mytable.myid, mytable.name, mytable.description "
+            "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
