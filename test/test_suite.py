@@ -354,7 +354,7 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
         )
 
         self.assert_compile(
-            table1.select().with_for_update(ignore_locked=True),
+            table1.select().with_for_update(skip_locked=True),
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
