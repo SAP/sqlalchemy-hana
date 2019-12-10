@@ -85,7 +85,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             if select._for_update_arg.nowait:
                 tmp += " NOWAIT"
 
-            if select._for_update_arg.ignore_locked:
+            if select._for_update_arg.skip_locked:
                 tmp += " IGNORE LOCKED"
 
         return tmp
