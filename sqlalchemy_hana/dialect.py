@@ -22,6 +22,8 @@ from sqlalchemy import exc
 from sqlalchemy_hana import types as hana_types
 from contextlib import closing
 
+from sqlalchemy_hana.exc import RowLockAcquisitionError
+
 RESERVED_WORDS = {
     'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
     'condition', 'connect', 'cross', 'cube', 'current_connection',
@@ -701,6 +703,23 @@ def _fix_integrity_error(f):
             raise
     return wrapper
 
+
+def _row_lock_acquisition_error(f):
+    """Ensure raising of RowLockAcquisitionError on resource busy and NOWAIT specified.
+    """
+
+    @wraps(f)
+    def wrapper(dialect, *args, **kwargs):
+        try:
+            return f(dialect, *args, **kwargs)
+        except dialect.dbapi.Error as exc:
+            if exc.errorcode == 146:
+                raise RowLockAcquisitionError(exc)
+            raise
+    return wrapper
+
+
 for method in ('do_execute', 'do_executemany', 'do_execute_no_params'):
     setattr(HANAHDBCLIDialect, method, _fix_integrity_error(getattr(HANAHDBCLIDialect, method)))
+    setattr(HANAHDBCLIDialect, method, _row_lock_acquisition_error(getattr(HANAHDBCLIDialect, method)))
 

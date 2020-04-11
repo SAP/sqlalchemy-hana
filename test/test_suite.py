@@ -14,8 +14,11 @@
 
 # test/test_suite.py
 
+import contextlib
+
 from sqlalchemy import testing, create_engine
 from sqlalchemy import column, table
+from sqlalchemy.orm import Session
 from sqlalchemy.testing import engines, assert_raises_message
 from sqlalchemy.testing.suite import *
 from sqlalchemy.testing.exclusions import skip_if
@@ -27,6 +30,7 @@ from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflec
 import sqlalchemy as sa
 from sqlalchemy import inspect
 
+from sqlalchemy_hana.exc import RowLockAcquisitionError
 
 class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
 
@@ -358,3 +362,64 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
+
+
+class HANAForUpdateForLockingTest(fixtures.DeclarativeMappedTest):
+    __only_on__ = "hana"
+    __dialect__ = testing.db.dialect
+
+    @classmethod
+    def setup_classes(cls):
+        Base = cls.DeclarativeBasic
+
+        class A(Base):
+            __tablename__ = "a"
+            __table_args__ = {"hana_table_type": "COLUMN"}
+            id = Column(Integer, primary_key=True)
+            x = Column(Integer)
+            y = Column(Integer)
+
+    @classmethod
+    def insert_data(cls):
+        A = cls.classes.A
+
+        s = Session()
+        s.add_all(
+                [
+                    A(id=1, x=5, y=5),
+                    A(id=2, x=7, y=5),
+                    ]
+                )
+        s.commit()
+
+    @contextlib.contextmanager
+    def run_test(self):
+        connection = testing.db.connect()
+        main_trans = connection.begin()
+
+        try:
+            yield Session(bind=connection)
+        finally:
+            main_trans.rollback()
+            connection.close()
+
+    def _assert_row_is_locked(self, x, should_be_locked):
+        A = self.classes.A
+        connection = testing.db.connect()
+        session = Session(bind=connection)
+
+        try:
+            session.query(A).filter(A.x == x).with_for_update(nowait=True).first()
+        except RowLockAcquisitionError:
+            assert should_be_locked
+        else:
+            assert not should_be_locked
+
+    def test_basic_row_lock(self):
+        A = self.classes.A
+
+        with self.run_test() as s:
+            s.query(A).filter(A.x == 5).with_for_update(nowait=True).first()
+            self._assert_row_is_locked(5, True)
+            self._assert_row_is_locked(7, False)
+
