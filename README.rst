@@ -67,6 +67,16 @@ In case of a tenant database, you may use:
     from sqlalchemy import create_engine
     engine = engine = create_engine('hana://user:pass@host/tenant_db_name')
 
+Tests
+-----
+
+You can test sqlalchemy-hana dialect using the pytest plugin.
+
+.. code-block::
+
+    $ pytest --dburi hana://user:pass@host:port --requirements sqlalchemy_hana.requirements:Requirements --dropfirst --log-debug sqlalchemy
+
+
 Contribute
 ----------
 
