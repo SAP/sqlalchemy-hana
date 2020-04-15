@@ -74,7 +74,17 @@ You can test sqlalchemy-hana dialect using the pytest plugin.
 
 .. code-block::
 
-    $ pytest --dburi hana://user:pass@host:port --requirements sqlalchemy_hana.requirements:Requirements --dropfirst --log-debug sqlalchemy
+    $ py.test --dburi hana://user:pass@host:port --requirements sqlalchemy_hana.requirements:Requirements \
+      --dropfirst
+
+You can also run a subset of tests for sqlalchemy-hana. 
+
+.. code-block::
+
+    $ py.test --dburi hana://user:pass@host:port --requirements sqlalchemy_hana.requirements:Requirements \
+      --dropfirst test/test_suite.py::HANAConnectionIsDisconnectedTest
+
+Above will run all the tests for HANAConnectionIsDisconnectedTest in the test/test_suit.py.
 
 
 Contribute
