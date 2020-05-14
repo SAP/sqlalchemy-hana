@@ -105,6 +105,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
+    def visit_SMALLDECIMAL(self, type_):
+        return "SMALLDECIMAL"
+
     def visit_unicode(self, type_, **kwargs):
         return self.visit_NVARCHAR(type_, **kwargs)
 

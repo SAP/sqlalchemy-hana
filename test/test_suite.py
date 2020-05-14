@@ -14,6 +14,7 @@
 
 # test/test_suite.py
 
+import decimal
 from sqlalchemy import testing, create_engine
 from sqlalchemy import column, table
 from sqlalchemy.testing import engines, assert_raises_message
@@ -26,6 +27,7 @@ from sqlalchemy.testing.assertions import AssertsCompiledSQL
 from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflectionTest
 import sqlalchemy as sa
 from sqlalchemy import inspect
+from sqlalchemy_hana.types import SMALLDECIMAL
 
 
 class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
@@ -358,3 +360,31 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
+
+
+class NumericTest(fixtures.TestBase):
+    __backend__ = True
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    @testing.provide_metadata
+    def test_smalldecimal(self):
+        t = Table("t", self.metadata, Column("x", SMALLDECIMAL))
+        t.create()
+
+        with testing.db.connect() as conn:
+            ins = (t.insert()
+                    .values(x=1.01)
+                    .compile(
+                        dialect=testing.db.dialect
+                        )
+                    )
+            conn.execute(ins)
+
+            stmt = t.select()
+            stmt = stmt.compile(
+                    dialect=testing.db.dialect
+                    )
+            for row in conn.execute(stmt):
+                value = row[0]
+                assert value == decimal.Decimal("1.01")

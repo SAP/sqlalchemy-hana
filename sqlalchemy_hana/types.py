@@ -25,6 +25,10 @@ class DOUBLE(sqltypes.Float):
     __visit_name__ = "DOUBLE"
 
 
+class SMALLDECIMAL(sqltypes.DECIMAL):
+    __visit_name__ = "SMALLDECIMAL"
+
+
 class BOOLEAN(sqltypes.Boolean):
 
     def get_dbapi_type(self, dbapi):
