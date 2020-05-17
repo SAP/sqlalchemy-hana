@@ -70,7 +70,7 @@ In case of a tenant database, you may use:
 Tests
 -----
 
-You can test sqlalchemy-hana dialect using the pytest plugin.
+You can test the sqlalchemy-hana dialect using pytest.
 
 .. code-block::
 
