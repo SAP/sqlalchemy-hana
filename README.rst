@@ -34,7 +34,7 @@ You can also install the latest version direct from a cloned git repository.
 Getting started
 ---------------
 
-If you do not have access to a SAP HANA server, you can also use the `SAP HANA Express edition <https://www.sap.com/germany/developer/topics/sap-hana-express.html>`_.
+If you do not have access to a SAP HANA server, you can also use the `SAP HANA Express edition <https://www.sap.com/cmp/td/sap-hana-express-edition.html>`_.
 
 After installation of sqlalchemy-hana, you can create a engine which connects to a SAP HANA
 instance. This engine works like all other engines of SQLAlchemy.
