@@ -60,11 +60,11 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def limit_clause(self, select, **kwargs):
         text = ""
         if select._limit_clause is not None:
-            text += "\n LIMIT " + self.process(select._limit_clause, **kwargs)
+            text += "\nLIMIT " + self.process(select._limit_clause, **kwargs)
         if select._offset_clause is not None:
             if select._limit_clause is None:
                 # 2147384648 is the max. no. of records per result set
-                text += "\n LIMIT 2147384648"
+                text += "\nLIMIT 2147384648"
             text += " OFFSET " + self.process(select._offset_clause, **kwargs)
         return text
 
