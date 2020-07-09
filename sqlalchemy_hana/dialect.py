@@ -90,11 +90,24 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
         return tmp
 
+    def visit_true(self, expr, **kw):
+        return "TRUE"
+
+    def visit_false(self, expr, **kw):
+        return "FALSE"
+
+    # SAP HANA supports native boolean types but it doesn't support a reduced
+    # where clause like:
+    #   SELECT 1 FROM DUMMY WHERE TRUE
+    #   SELECT 1 FROM DUMMY WHERE FALSE
+    def visit_istrue_unary_operator(self, element, operator, **kw):
+        return "%s = TRUE" % self.process(element.element, **kw)
+
+    def visit_isfalse_unary_operator(self, element, operator, **kw):
+        return "%s = FALSE" % self.process(element.element, **kw)
+
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
-
-    def visit_boolean(self, type_):
-        return self.visit_TINYINT(type_)
 
     def visit_NUMERIC(self, type_):
         return self.visit_DECIMAL(type_)
@@ -205,7 +218,7 @@ class HANABaseDialect(default.DefaultDialect):
     postfetch_lastrowid = False
     implicit_returning = False
     supports_empty_insert = False
-    supports_native_boolean = False
+    supports_native_boolean = True
     supports_default_values = False
     supports_sane_multi_rowcount = False
     isolation_level = None
