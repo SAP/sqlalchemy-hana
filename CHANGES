@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.5.0
+-----
+- Improved support for ''SELECT FOR UPDATE'' statements.
+
 0.4.0
 -----
 - Support for inspection of table oid
