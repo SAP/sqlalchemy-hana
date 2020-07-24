@@ -27,6 +27,7 @@ from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflec
 import sqlalchemy as sa
 from sqlalchemy import inspect
 
+from .test_alembic import *
 
 class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
 

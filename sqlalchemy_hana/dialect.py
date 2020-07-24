@@ -22,6 +22,14 @@ from sqlalchemy import exc
 from sqlalchemy_hana import types as hana_types
 from contextlib import closing
 
+try:
+    import alembic
+except ImportError:
+    pass
+else:
+    import sqlalchemy_hana.alembic
+
+
 RESERVED_WORDS = {
     'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
     'condition', 'connect', 'cross', 'cube', 'current_connection',

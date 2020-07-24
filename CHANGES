@@ -3,7 +3,8 @@ Changelog
 
 0.6.0
 -----
-- Support native boolean type
+- Support native boolean type.
+- SQLAlchemy-HANA now provides an initial implementation for database migration tool Alembic.
 
 0.5.0
 -----
