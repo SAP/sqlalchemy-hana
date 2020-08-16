@@ -118,6 +118,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
+    def visit_SHORTTEXT(self, type_, **kwargs):
+        return "SHORTTEXT(%d)" % type_.length
+
     def visit_unicode(self, type_, **kwargs):
         return self.visit_NVARCHAR(type_, **kwargs)
 

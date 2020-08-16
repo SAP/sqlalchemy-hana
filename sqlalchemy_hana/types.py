@@ -24,6 +24,12 @@ class DOUBLE(sqltypes.Float):
 
     __visit_name__ = "DOUBLE"
 
+class SHORTTEXT(sqltypes.NVARCHAR):
+
+    __visit_name__ = "SHORTTEXT"
+
+    def __init__(self, length=None, **kwargs):
+        super(sqltypes.NVARCHAR, self).__init__(length=length, **kwargs)
 
 class BOOLEAN(sqltypes.Boolean):
 

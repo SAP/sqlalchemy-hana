@@ -26,7 +26,7 @@ from sqlalchemy.testing.assertions import AssertsCompiledSQL
 from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflectionTest
 import sqlalchemy as sa
 from sqlalchemy import inspect
-
+from sqlalchemy_hana.types import SHORTTEXT
 
 class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
 
@@ -358,3 +358,31 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
+
+
+class HANACharacterStringTest(fixtures.TestBase):
+    __backend__ = True
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    @testing.provide_metadata
+    def test_shorttext(self):
+        t = Table("t", self.metadata, Column("x", SHORTTEXT(10)))
+        t.create()
+
+        with testing.db.connect() as conn:
+            ins = (t.insert()
+                    .values(x=u"x1y2z3")
+                    .compile(
+                        dialect=testing.db.dialect
+            )
+            )
+            conn.execute(ins)
+
+            stmt = t.select()
+            stmt = stmt.compile(
+                dialect=testing.db.dialect
+            )
+            for row in conn.execute(stmt):
+                value = row[0]
+                assert value == "x1y2z3"
