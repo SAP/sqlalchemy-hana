@@ -26,6 +26,7 @@ from sqlalchemy.testing.assertions import AssertsCompiledSQL
 from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflectionTest
 import sqlalchemy as sa
 from sqlalchemy import inspect
+from sqlalchemy_hana.ddl import DropView
 
 
 class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
@@ -357,4 +358,19 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
             table1.select().with_for_update(skip_locked=True),
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
+        )
+
+
+class HANAViewTest(fixtures.TestBase, AssertsCompiledSQL):
+
+    __dialect__ = testing.db.dialect
+
+    @testing.only_on('hana')
+    @testing.only_if('hana+hdbcli')
+    def test_drop_view(self):
+        view = DropView('v1')
+
+        self.assert_compile(
+            view,
+            "DROP VIEW v1"
         )
