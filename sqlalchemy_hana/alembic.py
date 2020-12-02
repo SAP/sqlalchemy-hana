@@ -39,12 +39,6 @@ class HANAImpl(DefaultImpl):
     __dialect__ = "hana"
     transactional_ddl = True
 
-    def add_constraint(self, const):
-        if isinstance(const, schema.CheckConstraint):
-            # HANA doesn't support check constraints
-            return
-        super().add_constraint(const)
-
     def start_migrations(self):
         # Activate transactional DDL statements
         self.execute("SET TRANSACTION AUTOCOMMIT DDL OFF")
