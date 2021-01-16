@@ -46,6 +46,21 @@ class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
 class HANAStatementCompiler(compiler.SQLCompiler):
 
+    def visit_bindparam(self, bindparam, **kwargs):
+        # SAP HANA supports bindparameters within the columns clause of SELECT statements
+        # but it will always treat such columns as NVARCHAR(5000).
+        # With the effect that "select([literal(1)])" will return the string '1' instead of
+        # an interger. Therefore the following special logic for detecting such requests
+        # and rewriting the bindparam into a normal literal.
+
+        if kwargs.get("within_columns_clause") and kwargs.get("within_label_clause"):
+            if bindparam.value and bindparam.callable is None and not getattr(bindparam, "expanding", False):
+                return self.render_literal_bindparam(
+                    bindparam, **kwargs
+                )
+
+        return super(HANAStatementCompiler, self).visit_bindparam(bindparam, **kwargs)
+
     def visit_sequence(self, seq, **kwargs):
         return self.dialect.identifier_preparer.format_sequence(seq) + ".NEXTVAL"
 
@@ -717,4 +732,3 @@ def _fix_integrity_error(f):
 
 for method in ('do_execute', 'do_executemany', 'do_execute_no_params'):
     setattr(HANAHDBCLIDialect, method, _fix_integrity_error(getattr(HANAHDBCLIDialect, method)))
-
