@@ -462,8 +462,8 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT  CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
-                "REFERENCED_TABLE_NAME,  REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
+                "REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
                 "FROM SYS.REFERENTIAL_CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
@@ -472,26 +472,36 @@ class HANABaseDialect(default.DefaultDialect):
                 table=self.denormalize_name(table_name)
             )
         )
-        foreign_keys = []
+        foreign_keys = {}
+        foreign_keys_list = []
 
         for row in result:
+            foreign_key_name = self.normalize_name(row[0])
 
-            foreign_key = {
-                "name": self.normalize_name(row[0]),
-                "constrained_columns": [self.normalize_name(row[1])],
-                "referred_schema": schema,
-                "referred_table": self.normalize_name(row[3]),
-                "referred_columns": [self.normalize_name(row[4])],
-                "options": {"onupdate": row[5],
-                            "ondelete": row[6]}
-            }
+            if foreign_key_name in foreign_keys:
+                foreign_key = foreign_keys[foreign_key_name]
+                foreign_key["constrained_columns"].append(self.normalize_name(row[1]))
+                foreign_key["referred_columns"].append(self.normalize_name(row[4]))
+            else:
+                foreign_key = {
+                    "name": foreign_key_name,
+                    "constrained_columns": [self.normalize_name(row[1])],
+                    "referred_schema": schema,
+                    "referred_table": self.normalize_name(row[3]),
+                    "referred_columns": [self.normalize_name(row[4])],
+                    "options": {
+                        "onupdate": row[5],
+                        "ondelete": row[6]
+                    }
+                }
 
-            if row[2] != self.denormalize_name(self.default_schema_name):
-                foreign_key["referred_schema"] = self.normalize_name(row[2])
+                if row[2] != self.denormalize_name(self.default_schema_name):
+                    foreign_key["referred_schema"] = self.normalize_name(row[2])
 
-            foreign_keys.append(foreign_key)
+                foreign_keys[foreign_key_name] = foreign_key
+                foreign_keys_list.append(foreign_key)
 
-        return foreign_keys
+        return foreign_keys_list
 
     def get_indexes(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
