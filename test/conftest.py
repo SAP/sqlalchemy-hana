@@ -12,8 +12,12 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+import logging
+
 from sqlalchemy import event, Column, Sequence
 from sqlalchemy.dialects import registry
+
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
 registry.register("hana", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
 registry.register("hana.hdbcli", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
