@@ -4,6 +4,15 @@ Changelog
 0.6.0
 -----
 - Support native boolean type
+- **Backward incompatible change:** Columns of SQLAlchemy type String are now created with the HANA SQL type NVARCHAR.
+  The previously used HANA SQL type VARCHAR has been only designed for 7-bit ASCII character data. Storing other
+  non-ASCII characters in a different encoding like UTF-8 was sometimes possible but never intended or recommended.
+  It may cause unexpected behavior for certain database-side operations like sorting or failures with string functions.
+  With the introduction of SAP HANA Cloud, the SQL type VARCHAR is also only an alias for NVARCHAR.
+  Please consider a migration from VARCHAR to NVARCHAR.
+- **Backward incompatible change:** Columns of SQLAlchemy type Text are now created with the HANA SQL type NCLOB instead of CLOB.
+  Like the HANA SQL type VARCHAR, CLOB was designed for 7-bit ASCII character data. This change also ensures consistency and
+  compatibility with SAP HANA Cloud, where CLOB is just an alias for NCLOB. Please consider a migration from CLOB to NCLOB.
 - Fixed a bug with SQLAlchemy's custom AUTOCOMIT isolation level. If the user changed the isolation
   level from AUTOCOMMIT to something else, the dialect didn't notified the underlying database
   connection and it stayed in autocommit mode while the user expected the typical transaction

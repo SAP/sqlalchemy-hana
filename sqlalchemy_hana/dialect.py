@@ -145,11 +145,14 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
+    def visit_string(self, type_, **kwargs):
+        return self.visit_NVARCHAR(type_, **kwargs)
+
     def visit_unicode(self, type_, **kwargs):
         return self.visit_NVARCHAR(type_, **kwargs)
 
     def visit_text(self, type_, **kwargs):
-        return self.visit_CLOB(type_, **kwargs)
+        return self.visit_NCLOB(type_, **kwargs)
 
     def visit_large_binary(self, type_, **kwargs):
         return self.visit_BLOB(type_, **kwargs)
@@ -220,8 +223,10 @@ class HANABaseDialect(default.DefaultDialect):
     execution_ctx_cls = HANAExecutionContext
     inspector = HANAInspector
 
-    encoding = "cesu-8"
-    convert_unicode = True
+    # The Python clients for SAP HANA are responsible and optimized
+    # for encoding and decoding Python unicode objects. SQLAlchemy
+    # will rely on their capabilities.
+    convert_unicode = False
     supports_unicode_statements = True
     supports_unicode_binds = True
     requires_name_normalize = True
@@ -447,7 +452,6 @@ class HANABaseDialect(default.DefaultDialect):
                 'default': row[2],
                 'nullable': row[3] == "TRUE",
                 'comment': row[6]
-
             }
 
             if hasattr(types, row[1]):
@@ -464,6 +468,8 @@ class HANABaseDialect(default.DefaultDialect):
                 column['type'] = types.DECIMAL(row[4], row[5])
             elif column['type'] == types.VARCHAR:
                 column['type'] = types.VARCHAR(row[4])
+            elif column['type'] == types.NVARCHAR:
+                column['type'] = types.NVARCHAR(row[4])
 
             columns.append(column)
 
