@@ -199,6 +199,16 @@ class Requirements(requirements.SuiteRequirements):
         # TODO: Check support in pyhdb
         return exclusions.closed()
 
+    def get_isolation_levels(self, config):
+        return {
+            "default": "READ COMMITTED",
+            "supported": [
+                "SERIALIZABLE", "READ UNCOMMITTED",
+                "READ COMMITTED", "REPEATABLE READ",
+                "AUTOCOMMIT"
+            ]
+        }
+
     # Disable mysql tests
     @property
     def mssql_freetds(self):

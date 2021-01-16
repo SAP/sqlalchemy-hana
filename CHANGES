@@ -4,6 +4,10 @@ Changelog
 0.6.0
 -----
 - Support native boolean type
+- Fixed a bug with SQLAlchemy's custom AUTOCOMIT isolation level. If the user changed the isolation
+  level from AUTOCOMMIT to something else, the dialect didn't notified the underlying database
+  connection and it stayed in autocommit mode while the user expected the typical transaction
+  behavior and the defined isolation level.
 
 0.5.0
 -----

@@ -243,13 +243,14 @@ class HANABaseDialect(default.DefaultDialect):
         if level == "AUTOCOMMIT":
             connection.setautocommit(True)
         else:
-            # no need to set autocommit false explicitly,since it is false by default
+            connection.setautocommit(False)
+
             if level not in self._isolation_lookup:
                 raise exc.ArgumentError(
-                "Invalid value '%s' for isolation_level. "
-                "Valid isolation levels for %s are %s" %
-                (level, self.name, ", ".join(self._isolation_lookup))
-            )
+                    "Invalid value '%s' for isolation_level. "
+                    "Valid isolation levels for %s are %s" %
+                    (level, self.name, ", ".join(self._isolation_lookup))
+                )
             else:
                 with connection.cursor() as cursor:
                     cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
