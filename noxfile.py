@@ -33,5 +33,6 @@ def test(session, sqlalchemy, hana_driver):
         'pytest',
         '--dburi', dburi,
         '--requirements', 'sqlalchemy_hana.requirements:Requirements',
+        '--dropfirst',
         *session.posargs
     )
