@@ -31,7 +31,7 @@ setup(
     packages=find_packages(exclude=("test", "test.*",)),
     zip_safe=False,
     install_requires=[
-        "sqlalchemy>=1.0.0"
+        "sqlalchemy>=1.2.0"
     ],
     extras_require={
         "test": [
@@ -47,10 +47,9 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Programming Language :: SQL",
         "Topic :: Database",
