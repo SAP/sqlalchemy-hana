@@ -121,6 +121,18 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_isfalse_unary_operator(self, element, operator, **kw):
         return "%s = FALSE" % self.process(element.element, **kw)
 
+    # SAP HANA doesn't support the "IS DISTINCT FROM" operator but it is
+    # possible to rewrite the expression.
+    # https://answers.sap.com/questions/642124/hana-and-'is-distinct-from'-operator.html
+    def visit_is_distinct_from_binary(self, binary, operator, **kw):
+        return "(({left} <> {right} OR {left} IS NULL OR {right} IS NULL) AND NOT ({left} IS NULL AND {right} IS NULL))".format(
+            left=self.process(binary.left), right=self.process(binary.right)
+        )
+
+    def visit_isnot_distinct_from_binary(self, binary, operator, **kw):
+        return "(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR ({left} IS NULL AND {right} IS NULL))".format(
+            left=self.process(binary.left), right=self.process(binary.right)
+        )
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
 
