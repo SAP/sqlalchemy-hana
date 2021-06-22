@@ -103,3 +103,12 @@ class AlembicHANAOperationTest(fixtures.TestBase):
             new_column_name="column_a"
         )
         context.assert_("""RENAME COLUMN "strange Table nAme"."colume A 1" TO column_a""")
+
+    def test_create_check_constraint(self):
+        context = op_fixture("hana")
+        op.create_check_constraint(
+            "ck_constraint_name",
+            "some_table",
+            sqlalchemy.column("age") > 0
+        )
+        context.assert_("""ALTER TABLE some_table ADD CONSTRAINT ck_constraint_name CHECK (age > 0)""")
