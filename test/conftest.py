@@ -1,4 +1,4 @@
-# Copyright 2015 SAP SE.
+# Copyright 2021 SAP SE.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,12 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+import logging
+
 from sqlalchemy import event, Column, Sequence
 from sqlalchemy.dialects import registry
+
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
 registry.register("hana", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
 registry.register("hana.hdbcli", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")

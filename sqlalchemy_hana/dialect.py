@@ -46,6 +46,21 @@ class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
 class HANAStatementCompiler(compiler.SQLCompiler):
 
+    def visit_bindparam(self, bindparam, **kwargs):
+        # SAP HANA supports bindparameters within the columns clause of SELECT statements
+        # but it will always treat such columns as NVARCHAR(5000).
+        # With the effect that "select([literal(1)])" will return the string '1' instead of
+        # an interger. Therefore the following special logic for detecting such requests
+        # and rewriting the bindparam into a normal literal.
+
+        if kwargs.get("within_columns_clause") and kwargs.get("within_label_clause"):
+            if bindparam.value and bindparam.callable is None and not getattr(bindparam, "expanding", False):
+                return self.render_literal_bindparam(
+                    bindparam, **kwargs
+                )
+
+        return super(HANAStatementCompiler, self).visit_bindparam(bindparam, **kwargs)
+
     def visit_sequence(self, seq, **kwargs):
         return self.dialect.identifier_preparer.format_sequence(seq) + ".NEXTVAL"
 
@@ -106,6 +121,18 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_isfalse_unary_operator(self, element, operator, **kw):
         return "%s = FALSE" % self.process(element.element, **kw)
 
+    # SAP HANA doesn't support the "IS DISTINCT FROM" operator but it is
+    # possible to rewrite the expression.
+    # https://answers.sap.com/questions/642124/hana-and-'is-distinct-from'-operator.html
+    def visit_is_distinct_from_binary(self, binary, operator, **kw):
+        return "(({left} <> {right} OR {left} IS NULL OR {right} IS NULL) AND NOT ({left} IS NULL AND {right} IS NULL))".format(
+            left=self.process(binary.left), right=self.process(binary.right)
+        )
+
+    def visit_isnot_distinct_from_binary(self, binary, operator, **kw):
+        return "(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR ({left} IS NULL AND {right} IS NULL))".format(
+            left=self.process(binary.left), right=self.process(binary.right)
+        )
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
 
@@ -118,11 +145,14 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_DOUBLE(self, type_):
         return "DOUBLE"
 
+    def visit_string(self, type_, **kwargs):
+        return self.visit_NVARCHAR(type_, **kwargs)
+
     def visit_unicode(self, type_, **kwargs):
         return self.visit_NVARCHAR(type_, **kwargs)
 
     def visit_text(self, type_, **kwargs):
-        return self.visit_CLOB(type_, **kwargs)
+        return self.visit_NCLOB(type_, **kwargs)
 
     def visit_large_binary(self, type_, **kwargs):
         return self.visit_BLOB(type_, **kwargs)
@@ -193,8 +223,10 @@ class HANABaseDialect(default.DefaultDialect):
     execution_ctx_cls = HANAExecutionContext
     inspector = HANAInspector
 
-    encoding = "cesu-8"
-    convert_unicode = True
+    # The Python clients for SAP HANA are responsible and optimized
+    # for encoding and decoding Python unicode objects. SQLAlchemy
+    # will rely on their capabilities.
+    convert_unicode = False
     supports_unicode_statements = True
     supports_unicode_binds = True
     requires_name_normalize = True
@@ -223,6 +255,8 @@ class HANABaseDialect(default.DefaultDialect):
     supports_sane_multi_rowcount = False
     isolation_level = None
 
+    max_identifier_length = 127
+
     def __init__(self, isolation_level=None, auto_convert_lobs=True, **kwargs):
         super(HANABaseDialect, self).__init__(**kwargs)
         self.isolation_level = isolation_level
@@ -243,13 +277,14 @@ class HANABaseDialect(default.DefaultDialect):
         if level == "AUTOCOMMIT":
             connection.setautocommit(True)
         else:
-            # no need to set autocommit false explicitly,since it is false by default
+            connection.setautocommit(False)
+
             if level not in self._isolation_lookup:
                 raise exc.ArgumentError(
-                "Invalid value '%s' for isolation_level. "
-                "Valid isolation levels for %s are %s" %
-                (level, self.name, ", ".join(self._isolation_lookup))
-            )
+                    "Invalid value '%s' for isolation_level. "
+                    "Valid isolation levels for %s are %s" %
+                    (level, self.name, ", ".join(self._isolation_lookup))
+                )
             else:
                 with connection.cursor() as cursor:
                     cursor.execute("SET TRANSACTION ISOLATION LEVEL %s" % level)
@@ -419,7 +454,6 @@ class HANABaseDialect(default.DefaultDialect):
                 'default': row[2],
                 'nullable': row[3] == "TRUE",
                 'comment': row[6]
-
             }
 
             if hasattr(types, row[1]):
@@ -436,6 +470,8 @@ class HANABaseDialect(default.DefaultDialect):
                 column['type'] = types.DECIMAL(row[4], row[5])
             elif column['type'] == types.VARCHAR:
                 column['type'] = types.VARCHAR(row[4])
+            elif column['type'] == types.NVARCHAR:
+                column['type'] = types.NVARCHAR(row[4])
 
             columns.append(column)
 
@@ -446,8 +482,8 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                "SELECT  CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
-                "REFERENCED_TABLE_NAME,  REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
+                "SELECT CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_SCHEMA_NAME, "
+                "REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, UPDATE_RULE, DELETE_RULE "
                 "FROM SYS.REFERENTIAL_CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
@@ -456,26 +492,36 @@ class HANABaseDialect(default.DefaultDialect):
                 table=self.denormalize_name(table_name)
             )
         )
-        foreign_keys = []
+        foreign_keys = {}
+        foreign_keys_list = []
 
         for row in result:
+            foreign_key_name = self.normalize_name(row[0])
 
-            foreign_key = {
-                "name": self.normalize_name(row[0]),
-                "constrained_columns": [self.normalize_name(row[1])],
-                "referred_schema": schema,
-                "referred_table": self.normalize_name(row[3]),
-                "referred_columns": [self.normalize_name(row[4])],
-                "options": {"onupdate": row[5],
-                            "ondelete": row[6]}
-            }
+            if foreign_key_name in foreign_keys:
+                foreign_key = foreign_keys[foreign_key_name]
+                foreign_key["constrained_columns"].append(self.normalize_name(row[1]))
+                foreign_key["referred_columns"].append(self.normalize_name(row[4]))
+            else:
+                foreign_key = {
+                    "name": foreign_key_name,
+                    "constrained_columns": [self.normalize_name(row[1])],
+                    "referred_schema": schema,
+                    "referred_table": self.normalize_name(row[3]),
+                    "referred_columns": [self.normalize_name(row[4])],
+                    "options": {
+                        "onupdate": row[5],
+                        "ondelete": row[6]
+                    }
+                }
 
-            if row[2] != self.denormalize_name(self.default_schema_name):
-                foreign_key["referred_schema"] = self.normalize_name(row[2])
+                if row[2] != self.denormalize_name(self.default_schema_name):
+                    foreign_key["referred_schema"] = self.normalize_name(row[2])
 
-            foreign_keys.append(foreign_key)
+                foreign_keys[foreign_key_name] = foreign_key
+                foreign_keys_list.append(foreign_key)
 
-        return foreign_keys
+        return foreign_keys_list
 
     def get_indexes(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
@@ -716,4 +762,3 @@ def _fix_integrity_error(f):
 
 for method in ('do_execute', 'do_executemany', 'do_execute_no_params'):
     setattr(HANAHDBCLIDialect, method, _fix_integrity_error(getattr(HANAHDBCLIDialect, method)))
-

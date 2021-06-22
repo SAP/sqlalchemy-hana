@@ -196,8 +196,18 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def isolation_level(self):
-        # TODO: Check support in pyhdb
-        return exclusions.closed()
+        return exclusions.open()
+
+    def get_isolation_levels(self, config):
+        return {
+            "default": "READ COMMITTED",
+            "supported": [
+                "READ COMMITTED",
+                "SERIALIZABLE",
+                "REPEATABLE READ",
+                "AUTOCOMMIT"
+            ]
+        }
 
     # Disable mysql tests
     @property
@@ -307,4 +317,9 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def expressions_against_unbounded_text(self):
+        return exclusions.closed()
+
+    @property
+    def temporary_views(self):
+        # SAP HANA doesn't support temporary views only temporary tables.
         return exclusions.closed()

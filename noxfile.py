@@ -6,8 +6,8 @@ import nox
 PIP_INDEX_URL = os.environ.get('NOX_PIP_INDEX_URL', None)
 
 
-@nox.session(python=['2.7', '3.4', '3.6', '3.7'], reuse_venv=True)
-@nox.parametrize('sqlalchemy', ['1.0', '1.1', '1.2', '1.3'])
+@nox.session(python=['2.7', '3.6', '3.7'], reuse_venv=True)
+@nox.parametrize('sqlalchemy', ['1.2', '1.3'])
 @nox.parametrize('hana_driver', ['hdbcli', 'pyhdb'])
 def test(session, sqlalchemy, hana_driver):
     if 'NOX_SAP_HANA_URI' not in os.environ:
@@ -24,7 +24,11 @@ def test(session, sqlalchemy, hana_driver):
             'PIP_TRUSTED_HOST': urlparse(PIP_INDEX_URL).netloc
         }
 
-    session.install('sqlalchemy~={}.0'.format(sqlalchemy))
+    if sqlalchemy in ('1.2', '1.3'):
+        session.install('sqlalchemy~={}.0'.format(sqlalchemy))
+    else:
+        session.install('sqlalchemy=={}'.format(sqlalchemy))
+
     session.install(hana_driver, env=pip_env)
     session.install('.[test]')
 
@@ -33,5 +37,6 @@ def test(session, sqlalchemy, hana_driver):
         'pytest',
         '--dburi', dburi,
         '--requirements', 'sqlalchemy_hana.requirements:Requirements',
+        '--dropfirst',
         *session.posargs
     )
