@@ -105,12 +105,6 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
         return tmp
 
-    def visit_true(self, expr, **kw):
-        return "TRUE"
-
-    def visit_false(self, expr, **kw):
-        return "FALSE"
-
     # SAP HANA supports native boolean types but it doesn't support a reduced
     # where clause like:
     #   SELECT 1 FROM DUMMY WHERE TRUE
@@ -159,6 +153,11 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_unicode_text(self, type_, **kwargs):
         return self.visit_NCLOB(type_, **kwargs)
+
+    def visit_boolean(self, type_):
+        if self.dialect.supports_native_boolean:
+            return self.visit_BOOLEAN(type_)
+        return self.visit_TINYINT(type_)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -257,10 +256,11 @@ class HANABaseDialect(default.DefaultDialect):
 
     max_identifier_length = 127
 
-    def __init__(self, isolation_level=None, auto_convert_lobs=True, **kwargs):
+    def __init__(self, isolation_level=None, auto_convert_lobs=True, supports_native_boolean=True, **kwargs):
         super(HANABaseDialect, self).__init__(**kwargs)
         self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
+        self.supports_native_boolean = supports_native_boolean
 
     def on_connect(self):
         if self.isolation_level is not None:

@@ -1,7 +1,3 @@
-# Created by http://www.gitignore.io
-
-#!! ERROR: Python is undefined. Use list command to see defined gitignore types !!#
-
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -147,3 +143,7 @@ sftp-config.json
 ### VisualStudioCode ###
 .vscode/*
 *.code-workspace
+
+
+### venv ###
+venv/
