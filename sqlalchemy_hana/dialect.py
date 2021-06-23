@@ -188,6 +188,9 @@ class HANADDLCompiler(compiler.DDLCompiler):
         table_type = table.kwargs.get('hana_table_type')
         appended_index = None
         if table_type:
+            # https://github.com/SAP/sqlalchemy-hana/issues/84
+            if table._prefixes is None:
+                table._prefixes = []
             appended_index = len(table._prefixes)
             table._prefixes.append(table_type.upper())
 
