@@ -118,3 +118,8 @@ class HanaBinary(_LOBMixin, sqltypes.LargeBinary):
 
 class NCLOB(sqltypes.Text):
     __visit_name__ = 'NCLOB'
+
+
+class HanaJSON(sqltypes.JSON):
+    # this uses the default implementation which uses the dialect._json_(de)serializer methods
+    pass

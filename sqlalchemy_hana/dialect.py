@@ -11,7 +11,7 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-
+import json
 from functools import wraps
 
 from sqlalchemy import sql, types, util
@@ -138,6 +138,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_unicode_text(self, type_, **kwargs):
         return self.visit_NCLOB(type_, **kwargs)
 
+    def visit_JSON(self, type_, **kwargs):
+        return self.visit_CLOB(type_, **kwargs)
+
 
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(self, constraint):
@@ -220,7 +223,8 @@ class HANABaseDialect(default.DefaultDialect):
         types.DateTime: hana_types.TIMESTAMP,
         types.LargeBinary: hana_types.HanaBinary,
         types.Text: hana_types.HanaText,
-        types.UnicodeText: hana_types.HanaUnicodeText
+        types.UnicodeText: hana_types.HanaUnicodeText,
+        types.JSON: hana_types.HanaJSON,
     }
 
     postfetch_lastrowid = False
@@ -230,6 +234,8 @@ class HANABaseDialect(default.DefaultDialect):
     supports_default_values = False
     supports_sane_multi_rowcount = False
     isolation_level = None
+    _json_deserializer = lambda _, v: json.loads(v)
+    _json_serializer = lambda _, v: json.dumps(v)
 
     def __init__(self, isolation_level=None, auto_convert_lobs=True, **kwargs):
         super(HANABaseDialect, self).__init__(**kwargs)
