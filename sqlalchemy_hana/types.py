@@ -170,3 +170,8 @@ __all__ = (
     "VARBINARY",
     "VARCHAR",
 )
+
+
+class HanaJSON(sqltypes.JSON):
+    # this uses the default implementation which uses the dialect._json_(de)serializer methods
+    pass

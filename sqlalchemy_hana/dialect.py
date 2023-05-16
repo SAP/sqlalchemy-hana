@@ -1,5 +1,6 @@
 """Dialect for SAP HANA."""
 
+import json
 from __future__ import annotations
 
 import contextlib
@@ -385,6 +386,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
         return self._render_string_type(type_, "NVARCHAR", length_override=32)
 
+    def visit_JSON(self, type_, **kwargs):
+        return self.visit_CLOB(type_, **kwargs)
+
 
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(
@@ -520,6 +524,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         # these classes extend a mapped class (left side of this map); without listing them here,
         # the wrong class will be used
         hana_types.SECONDDATE: hana_types.SECONDDATE,
+        types.JSON: hana_types.HanaJSON
     }
     types_with_length = [
         hana_types.VARCHAR,
@@ -532,6 +537,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     isolation_level = None
     default_schema_name: str  # this is always set for us
+    _json_deserializer = lambda _, v: json.loads(v)
+    _json_serializer = lambda _, v: json.dumps(v)
 
     def __init__(
         self,
