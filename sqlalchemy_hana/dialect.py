@@ -510,7 +510,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
                 id_sel = "SELECT %s.CURRVAL FROM DUMMY" % seq
             else:
                 id_sel = "SELECT CURRENT_IDENTITY_VALUE() AS lastrowid FROM %s.%s" % (
-                    self.dialect.denormalize_name(tbl.schema),
+                    self.dialect.denormalize_name(tbl.schema) or self.dialect.default_schema_name,
                     self.dialect.denormalize_name(tbl.name)
                 )
             self._lastrowid = self._execute_scalar(id_sel, autoinc_col.type)
