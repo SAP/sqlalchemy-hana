@@ -29,7 +29,7 @@ from alembic.ddl.base import (
     format_type,
     format_server_default,
     ColumnNullable,
-    ColumnDefault
+    ColumnDefault,
 )
 
 
@@ -107,5 +107,7 @@ def visit_column_default(element, compiler):
         alter_table(compiler, element.table_name, element.schema),
         format_column_name(compiler, element.column_name),
         format_type(compiler, element.existing_type),
-        format_server_default(compiler, element.default) if element.default is not None else "NULL"
+        format_server_default(compiler, element.default)
+        if element.default is not None
+        else "NULL",
     )

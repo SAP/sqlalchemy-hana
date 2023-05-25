@@ -29,56 +29,56 @@ from sqlalchemy import inspect
 
 from .test_alembic import *
 
-class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
 
-    @testing.only_on('hana')
-    @testing.skip_if('hana+pyhdb')
+class HANAConnectionIsDisconnectedTest(fixtures.TestBase):
+    @testing.only_on("hana")
+    @testing.skip_if("hana+pyhdb")
     def test_detection_by_error_code(self):
         from hdbcli.dbapi import Error
 
         dialect = testing.db.dialect
-        assert dialect.is_disconnect(Error(-10709, 'Connect failed'), None, None)
+        assert dialect.is_disconnect(Error(-10709, "Connect failed"), None, None)
 
-    @testing.only_on('hana')
-    @testing.skip_if('hana+pyhdb')
+    @testing.only_on("hana")
+    @testing.skip_if("hana+pyhdb")
     def test_detection_by_isconnected_function(self):
         dialect = testing.db.dialect
 
-        mock_connection = Mock(
-            isconnected=Mock(return_value=False)
-        )
+        mock_connection = Mock(isconnected=Mock(return_value=False))
         assert dialect.is_disconnect(None, mock_connection, None)
 
-        mock_connection = Mock(
-            isconnected=Mock(return_value=True)
-        )
+        mock_connection = Mock(isconnected=Mock(return_value=True))
         assert not dialect.is_disconnect(None, mock_connection, None)
 
 
 class HANAConnectUrlHasTenantTest(fixtures.TestBase):
-
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_tenant_url_parsing_hdbcli(self):
         import sqlalchemy.engine.url
 
         dialect = testing.db.dialect
 
-        _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"))
-        assert result_kwargs['databaseName'] == "TNT"
+        _, result_kwargs = dialect.create_connect_args(
+            sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT")
+        )
+        assert result_kwargs["databaseName"] == "TNT"
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+pyhdb')
+    @testing.only_on("hana")
+    @testing.only_if("hana+pyhdb")
     def test_tenant_url_parsing_pyhdb(self):
         import sqlalchemy.engine.url
 
         dialect = testing.db.dialect
 
-        assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"))
+        assert_raises(
+            NotImplementedError,
+            dialect.create_connect_args,
+            sqlalchemy.engine.url.make_url("hana://USER:PASS@HOST/TNT"),
+        )
 
 
 class ComponentReflectionTest(_ComponentReflectionTest):
-
     @classmethod
     def define_temp_tables(cls, metadata):
         # the definition of temporary tables in the temporary table tests needs to be overwritten,
@@ -86,33 +86,33 @@ class ComponentReflectionTest(_ComponentReflectionTest):
 
         if testing.against("hana"):
             kw = {
-                'prefixes': ["GLOBAL TEMPORARY"],
+                "prefixes": ["GLOBAL TEMPORARY"],
             }
         else:
             kw = {
-                'prefixes': ["TEMPORARY"],
+                "prefixes": ["TEMPORARY"],
             }
 
         user_tmp = Table(
-            "user_tmp", metadata,
+            "user_tmp",
+            metadata,
             Column("id", sa.INT, primary_key=True),
-            Column('name', sa.VARCHAR(50)),
-            Column('foo', sa.INT),
-            sa.UniqueConstraint('name', name='user_tmp_uq'),
+            Column("name", sa.VARCHAR(50)),
+            Column("foo", sa.INT),
+            sa.UniqueConstraint("name", name="user_tmp_uq"),
             sa.Index("user_tmp_ix", "foo"),
             **kw
         )
-        if testing.requires.view_reflection.enabled and \
-                testing.requires.temporary_views.enabled:
+        if (
+            testing.requires.view_reflection.enabled
+            and testing.requires.temporary_views.enabled
+        ):
             event.listen(
-                user_tmp, "after_create",
-                DDL("create temporary view user_tmp_v as "
-                    "select * from user_tmp")
+                user_tmp,
+                "after_create",
+                DDL("create temporary view user_tmp_v as " "select * from user_tmp"),
             )
-            event.listen(
-                user_tmp, "before_drop",
-                DDL("drop view user_tmp_v")
-            )
+            event.listen(user_tmp, "before_drop", DDL("drop view user_tmp_v"))
 
     @testing.provide_metadata
     def _test_get_table_oid(self, table_name, schema=None):
@@ -130,66 +130,65 @@ class ComponentReflectionTest(_ComponentReflectionTest):
         # create table statement, the default values of the referential actions in HANA (RESTRICT) are reflected.
         meta = self.metadata
 
+        Table("x", meta, Column("id", Integer, primary_key=True), test_needs_fk=True)
+
         Table(
-            'x', meta,
-            Column('id', Integer, primary_key=True),
-            test_needs_fk=True
+            "table",
+            meta,
+            Column("id", Integer, primary_key=True),
+            Column("x_id", Integer, sa.ForeignKey("x.id", name="xid")),
+            Column("test", String(10)),
+            test_needs_fk=True,
         )
 
-        Table('table', meta,
-              Column('id', Integer, primary_key=True),
-              Column('x_id', Integer, sa.ForeignKey('x.id', name='xid')),
-              Column('test', String(10)),
-              test_needs_fk=True)
-
-        Table('user', meta,
-              Column('id', Integer, primary_key=True),
-              Column('name', String(50), nullable=False),
-              Column('tid', Integer),
-              sa.ForeignKeyConstraint(
-                  ['tid'], ['table.id'],
-                  name='myfk',
-                  onupdate="SET NULL", ondelete="CASCADE"),
-                  test_needs_fk=True)
+        Table(
+            "user",
+            meta,
+            Column("id", Integer, primary_key=True),
+            Column("name", String(50), nullable=False),
+            Column("tid", Integer),
+            sa.ForeignKeyConstraint(
+                ["tid"],
+                ["table.id"],
+                name="myfk",
+                onupdate="SET NULL",
+                ondelete="CASCADE",
+            ),
+            test_needs_fk=True,
+        )
 
         meta.create_all()
 
         insp = inspect(meta.bind)
 
-        opts = insp.get_foreign_keys('user')[0]['options']
+        opts = insp.get_foreign_keys("user")[0]["options"]
         eq_(
-            dict(
-                (k, opts[k])
-                for k in opts if opts[k]
-            ),
-            {'onupdate': 'SET NULL', 'ondelete': 'CASCADE'}
+            dict((k, opts[k]) for k in opts if opts[k]),
+            {"onupdate": "SET NULL", "ondelete": "CASCADE"},
         )
-class IsolationLevelTest(fixtures.TestBase):
 
+
+class IsolationLevelTest(fixtures.TestBase):
     def _default_isolation_level(self):
-        return 'READ COMMITTED'
+        return "READ COMMITTED"
 
     def _non_default_isolation_level(self):
-        return 'SERIALIZABLE'
+        return "SERIALIZABLE"
 
-    @testing.only_on('hana')
+    @testing.only_on("hana")
     def test_get_isolation_level(self):
         eng = engines.testing_engine(options=dict())
-        isolation_level = eng.dialect.get_isolation_level(
-            eng.connect().connection)
-        eq_(
-            isolation_level,
-            self._default_isolation_level()
-        )
+        isolation_level = eng.dialect.get_isolation_level(eng.connect().connection)
+        eq_(isolation_level, self._default_isolation_level())
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_set_isolation_level(self):
         eng = engines.testing_engine(options=dict())
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._default_isolation_level()
+            self._default_isolation_level(),
         )
 
         eng.dialect.set_isolation_level(
@@ -198,18 +197,18 @@ class IsolationLevelTest(fixtures.TestBase):
 
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._non_default_isolation_level()
+            self._non_default_isolation_level(),
         )
         conn.close()
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_reset_level(self):
         eng = engines.testing_engine(options=dict())
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._default_isolation_level()
+            self._default_isolation_level(),
         )
 
         eng.dialect.set_isolation_level(
@@ -217,99 +216,107 @@ class IsolationLevelTest(fixtures.TestBase):
         )
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._non_default_isolation_level()
+            self._non_default_isolation_level(),
         )
 
         eng.dialect.reset_isolation_level(conn.connection)
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._default_isolation_level()
+            self._default_isolation_level(),
         )
         conn.close()
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_set_level_with_setting(self):
-        eng = engines.testing_engine(options=dict(isolation_level=self._non_default_isolation_level()))
+        eng = engines.testing_engine(
+            options=dict(isolation_level=self._non_default_isolation_level())
+        )
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._non_default_isolation_level()
+            self._non_default_isolation_level(),
         )
 
-        eng.dialect.set_isolation_level(conn.connection, self._default_isolation_level())
+        eng.dialect.set_isolation_level(
+            conn.connection, self._default_isolation_level()
+        )
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._default_isolation_level()
+            self._default_isolation_level(),
         )
         conn.close()
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_invalid_level(self):
-        eng = engines.testing_engine(options=dict(isolation_level='FOO'))
+        eng = engines.testing_engine(options=dict(isolation_level="FOO"))
         assert_raises_message(
             exc.ArgumentError,
             "Invalid value '%s' for isolation_level. "
-            "Valid isolation levels for %s are %s" %
-            ("FOO", eng.dialect.name, ", ".join(eng.dialect._isolation_lookup)), eng.connect
+            "Valid isolation levels for %s are %s"
+            % ("FOO", eng.dialect.name, ", ".join(eng.dialect._isolation_lookup)),
+            eng.connect,
         )
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_with_execution_options(self):
         eng = create_engine(
             testing.db.url,
-            execution_options={'isolation_level': self._non_default_isolation_level()}
-            )
+            execution_options={"isolation_level": self._non_default_isolation_level()},
+        )
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._non_default_isolation_level()
+            self._non_default_isolation_level(),
         )
         conn.close()
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_with_isolation_level_in_create_engine(self):
         eng = create_engine(
-            testing.db.url,
-            isolation_level=self._non_default_isolation_level()
-            )
+            testing.db.url, isolation_level=self._non_default_isolation_level()
+        )
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
-            self._non_default_isolation_level()
+            self._non_default_isolation_level(),
         )
         conn.close()
 
-class HANAConnectUrlUserHDBUserStoreTest(fixtures.TestBase):
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+class HANAConnectUrlUserHDBUserStoreTest(fixtures.TestBase):
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_parsing_userkey_hdbcli(self):
         import sqlalchemy.engine.url
 
         dialect = testing.db.dialect
 
-        _, result_kwargs = dialect.create_connect_args(sqlalchemy.engine.url.make_url("hana://userkey=myhxe"))
-        assert result_kwargs['userkey'] == "myhxe"
+        _, result_kwargs = dialect.create_connect_args(
+            sqlalchemy.engine.url.make_url("hana://userkey=myhxe")
+        )
+        assert result_kwargs["userkey"] == "myhxe"
 
-
-    @testing.only_on('hana')
-    @testing.only_if('hana+pyhdb')
+    @testing.only_on("hana")
+    @testing.only_if("hana+pyhdb")
     def test_parsing_userkey_pyhdb(self):
         import sqlalchemy.engine.url
 
         dialect = testing.db.dialect
 
-        assert_raises(NotImplementedError, dialect.create_connect_args, sqlalchemy.engine.url.make_url("hana+pyhdb://userkey=myhxe"))
+        assert_raises(
+            NotImplementedError,
+            dialect.create_connect_args,
+            sqlalchemy.engine.url.make_url("hana+pyhdb://userkey=myhxe"),
+        )
 
 
 class HANAConnectUrlParsing(fixtures.TestBase):
-
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_pass_uri_query_as_kwargs(self):
         """Verify sqlalchemy-hana passes all uri query parameters to hdbcli"""
         import sqlalchemy.engine.url
@@ -326,15 +333,12 @@ class HANAConnectUrlParsing(fixtures.TestBase):
 
 
 class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
-
     __dialect__ = testing.db.dialect
 
-    @testing.only_on('hana')
-    @testing.only_if('hana+hdbcli')
+    @testing.only_on("hana")
+    @testing.only_if("hana+hdbcli")
     def test_sql_row_locking(self):
-        table1 = table(
-            "mytable", column("myid"), column("name"), column("description")
-        )
+        table1 = table("mytable", column("myid"), column("name"), column("description"))
 
         self.assert_compile(
             table1.select().with_for_update(),
@@ -362,8 +366,7 @@ class HANACompileTest(fixtures.TestBase, AssertsCompiledSQL):
 
 
 class HANAMiscTest(fixtures.TestBase):
-
-    @testing.only_on('hana')
+    @testing.only_on("hana")
     def test_server_version_parsing(self):
         for string, result in [
             ("2.00.020.00.1500920972", (2, 0, 20, 0, 1500920972)),
@@ -371,19 +374,10 @@ class HANAMiscTest(fixtures.TestBase):
             ("Not a valid version", None),
         ]:
             mock_connection = Mock(
-                execute=Mock(
-                    return_value=Mock(
-                        scalar=Mock(
-                            return_value=string
-                        )
-                    )
-                )
+                execute=Mock(return_value=Mock(scalar=Mock(return_value=string)))
             )
-            eq_(
-                testing.db.dialect._get_server_version_info(mock_connection),
-                result
-            )
+            eq_(testing.db.dialect._get_server_version_info(mock_connection), result)
 
-    @testing.only_on('hana')
+    @testing.only_on("hana")
     def test_get_server_version(self):
         assert isinstance(testing.db.dialect.server_version_info, tuple)

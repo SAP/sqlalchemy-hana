@@ -31,21 +31,19 @@ setup(
     author="Christoph Heer",
     author_email="christoph.heer@sap.com",
     description="SQLAlchemy dialect for SAP HANA",
-    packages=find_packages(exclude=("test", "test.*",)),
+    packages=find_packages(
+        exclude=(
+            "test",
+            "test.*",
+        )
+    ),
     zip_safe=False,
-    install_requires=[
-        "sqlalchemy>=1.0.0"
-    ],
+    install_requires=["sqlalchemy>=1.0.0"],
     extras_require={
-        "test": [
-            "pytest>=2.5.2",
-            "mock>=1.0.1"
-        ],
-        "pyhdb": [
-            "pyhdb>=0.3.1"
-        ]
+        "test": ["pytest>=2.5.2", "mock>=1.0.1"],
+        "pyhdb": ["pyhdb>=0.3.1"],
     },
-    classifiers=[ # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[  # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
@@ -61,11 +59,11 @@ setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    entry_points = {
+    entry_points={
         "sqlalchemy.dialects": [
             "hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
             "hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
-            "hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect"
+            "hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect",
         ]
-     },
+    },
 )

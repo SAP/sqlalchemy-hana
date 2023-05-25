@@ -19,7 +19,6 @@ from sqlalchemy.testing import exclusions, requirements
 
 
 class Requirements(requirements.SuiteRequirements):
-
     @property
     def temporary_tables(self):
         return exclusions.open()
@@ -81,7 +80,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def datetime_microseconds(self):
-        return exclusions.skip_if('hana+pyhdb')
+        return exclusions.skip_if("hana+pyhdb")
 
     @property
     def datetime_historic(self):
@@ -286,7 +285,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def timestamp_microseconds(self):
-        return exclusions.skip_if('hana+pyhdb')
+        return exclusions.skip_if("hana+pyhdb")
 
     @property
     def temp_table_names(self):
@@ -302,7 +301,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def check_constraint_reflection(self):
-        if sqlalchemy.__version__.startswith('1.1.'):
+        if sqlalchemy.__version__.startswith("1.1."):
             # Skip reflection tests in SQLAlchemy~=1.1.0 due missing normalization
             return exclusions.closed()
         return exclusions.open()
