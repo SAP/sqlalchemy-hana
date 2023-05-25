@@ -55,8 +55,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def empty_inserts(self):
-        """Empty value tuple in INSERT statement is not allowed"""
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def precision_numerics_enotation_large(self):
@@ -152,7 +151,11 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def identity(self):
-        return exclusions.closed()
+        return exclusions.open()
+
+    @property
+    def reflectable_autoincrement(self):
+        return exclusions.open()
 
     @property
     def sane_rowcount(self):
@@ -188,7 +191,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def updateable_autoincrement_pks(self):
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def bound_limit_offset(self):
@@ -219,6 +222,10 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def array_type(self):
+        return exclusions.closed()
+
+    @property
+    def json_type(self):
         return exclusions.closed()
 
     @property

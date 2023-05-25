@@ -16,9 +16,12 @@ import os
 from setuptools import setup, find_packages
 
 source_location = os.path.abspath(os.path.dirname(__file__))
+
+
 def get_version():
     with open(os.path.join(source_location, "VERSION")) as version:
         return version.readline().strip()
+
 
 setup(
     name="sqlalchemy-hana",
