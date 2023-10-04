@@ -38,18 +38,6 @@ class HANAConnectUrlWithTenantTest(sqlalchemy.testing.fixtures.TestBase):
         assert result_kwargs["password"] == "secret-password"
         assert result_kwargs['databaseName'] == "TENANT_NAME"
 
-    @sqlalchemy.testing.only_on('hana+pyhdb')
-    def test_pyhdb_rejects_tenant_names(self):
-        """PyHDB doesn't support connecting to database tenants via their name.
-        The user must provide the correct SQL port. A NotImplementedError notifies the user.
-        """
-
-        sqlalchemy.testing.assert_raises(
-            NotImplementedError,
-            sqlalchemy.testing.db.dialect.create_connect_args,
-            make_url("hana://username:secret-password@example.com/TENANT_NAME")
-        )
-
 
 class HANAConnectUrlWithHDBUserStoreTest(sqlalchemy.testing.fixtures.TestBase):
 
@@ -64,17 +52,6 @@ class HANAConnectUrlWithHDBUserStoreTest(sqlalchemy.testing.fixtures.TestBase):
             make_url("hana://userkey=myuserkeyname")
         )
         assert result_kwargs == {"userkey": "myuserkeyname"}
-
-
-    @sqlalchemy.testing.only_on('hana+pyhdb')
-    def test_parsing_userkey_pyhdb(self):
-        """PyHDB doesn't support the HDBUserStore and should raise a NotImplementedError."""
-
-        sqlalchemy.testing.assert_raises(
-            NotImplementedError,
-            sqlalchemy.testing.db.dialect.create_connect_args,
-            make_url("hana://userkey=myuserkeyname")
-        )
 
 
 class HANAConnectUrlParsing(sqlalchemy.testing.fixtures.TestBase):

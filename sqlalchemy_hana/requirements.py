@@ -68,7 +68,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def datetime_microseconds(self):
-        return exclusions.skip_if('hana+pyhdb')
+        return exclusions.open()
 
     @property
     def datetime_historic(self):
@@ -275,7 +275,7 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def timestamp_microseconds(self):
-        return exclusions.skip_if('hana+pyhdb')
+        return exclusions.open()
 
     @property
     def temp_table_names(self):

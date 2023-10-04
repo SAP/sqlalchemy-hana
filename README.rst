@@ -56,12 +56,9 @@ Alternatively, you can use HDB User Store to avoid entering connection-related i
 
 You can create your user key in the user store using the following command:
 
-.. code-block:: 
+.. code-block::
 
 	hdbuserstore SET <KEY> <host:port> <USERNAME> <PASSWORD>
-
-By default the ``hana://`` schema will use hdbcli (from the SAP HANA Client) as underlying database driver.
-To use PyHDB as driver use ``hana+pyhdb://`` as schema in your DBURI.
 
 In case of a tenant database, you may use:
 

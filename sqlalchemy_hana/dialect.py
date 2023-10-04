@@ -258,7 +258,6 @@ class HANABaseDialect(default.DefaultDialect):
 
     _isolation_lookup = {'SERIALIZABLE', 'READ UNCOMMITTED', 'READ COMMITTED', 'REPEATABLE READ'}
 
-    # does not work with pyhdb currently
     def set_isolation_level(self, connection, level):
         if level == "AUTOCOMMIT":
             connection.setautocommit(True)
@@ -657,35 +656,6 @@ class HANABaseDialect(default.DefaultDialect):
         )
 
         return {"text" : result.scalar()}
-
-class HANAPyHDBDialect(HANABaseDialect):
-
-    driver = 'pyhdb'
-    default_paramstyle = 'qmark'
-
-    @classmethod
-    def dbapi(cls):
-        import pyhdb
-        pyhdb.paramstyle = cls.default_paramstyle
-        return pyhdb
-
-    def create_connect_args(self, url):
-        kwargs = url.translate_connect_args(username="user")
-
-        if kwargs.get("database"):
-            raise NotImplementedError("no support for database parameter")
-
-        if url.host and url.host.lower().startswith( 'userkey=' ):
-            raise NotImplementedError("no support for HDB user store")
-
-        kwargs.setdefault("port", 30015)
-        return (), kwargs
-
-    def is_disconnect(self, error, connection, cursor):
-        if connection is None:
-            return True
-        return connection.closed
-
 
 class HANAHDBCLIDialect(HANABaseDialect):
 
