@@ -1,37 +1,108 @@
+from __future__ import annotations
+
+from contextlib import closing
 from functools import wraps
 
-from sqlalchemy import sql, types, util
+from sqlalchemy import exc, sql, types, util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler
 from sqlalchemy.sql.elements import quoted_name
-from sqlalchemy import exc
+
 from sqlalchemy_hana import types as hana_types
-from contextlib import closing
 
 RESERVED_WORDS = {
-    'all', 'alter', 'as', 'before', 'begin', 'both', 'case', 'char',
-    'condition', 'connect', 'cross', 'cube', 'current_connection',
-    'current_date', 'current_schema', 'current_time', 'current_timestamp',
-    'current_transaction_isolation_level', 'current_user', 'current_utcdate',
-    'current_utctime', 'current_utctimestamp', 'currval', 'cursor',
-    'declare', 'distinct', 'else', 'elseif', 'end', 'except', 'exception',
-    'exec', 'false', 'for', 'from', 'full', 'group', 'having', 'if', 'in',
-    'inner', 'inout', 'intersect', 'into', 'is', 'join', 'leading', 'left',
-    'limit', 'loop', 'minus', 'natural', 'nchar', 'nextval', 'null', 'on',
-    'order', 'out', 'prior', 'return', 'returns', 'reverse', 'right',
-    'rollup', 'rowid', 'select', 'session_user', 'set', 'sql', 'start',
-    'sysuuid', 'tablesample', 'top', 'trailing', 'true', 'union', 'unknown',
-    'using', 'utctimestamp', 'values', 'when', 'where', 'while', 'with'
+    "all",
+    "alter",
+    "as",
+    "before",
+    "begin",
+    "both",
+    "case",
+    "char",
+    "condition",
+    "connect",
+    "cross",
+    "cube",
+    "current_connection",
+    "current_date",
+    "current_schema",
+    "current_time",
+    "current_timestamp",
+    "current_transaction_isolation_level",
+    "current_user",
+    "current_utcdate",
+    "current_utctime",
+    "current_utctimestamp",
+    "currval",
+    "cursor",
+    "declare",
+    "distinct",
+    "else",
+    "elseif",
+    "end",
+    "except",
+    "exception",
+    "exec",
+    "false",
+    "for",
+    "from",
+    "full",
+    "group",
+    "having",
+    "if",
+    "in",
+    "inner",
+    "inout",
+    "intersect",
+    "into",
+    "is",
+    "join",
+    "leading",
+    "left",
+    "limit",
+    "loop",
+    "minus",
+    "natural",
+    "nchar",
+    "nextval",
+    "null",
+    "on",
+    "order",
+    "out",
+    "prior",
+    "return",
+    "returns",
+    "reverse",
+    "right",
+    "rollup",
+    "rowid",
+    "select",
+    "session_user",
+    "set",
+    "sql",
+    "start",
+    "sysuuid",
+    "tablesample",
+    "top",
+    "trailing",
+    "true",
+    "union",
+    "unknown",
+    "using",
+    "utctimestamp",
+    "values",
+    "when",
+    "where",
+    "while",
+    "with",
 }
 
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
-
     reserved_words = RESERVED_WORDS
 
 
 class HANAStatementCompiler(compiler.SQLCompiler):
-
     def visit_bindparam(self, bindparam, **kwargs):
         # SAP HANA supports bindparameters within the columns clause of SELECT statements
         # but it will always treat such columns as NVARCHAR(5000).
@@ -40,10 +111,12 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         # and rewriting the bindparam into a normal literal.
 
         if kwargs.get("within_columns_clause") and kwargs.get("within_label_clause"):
-            if bindparam.value and bindparam.callable is None and not getattr(bindparam, "expanding", False):
-                return self.render_literal_bindparam(
-                    bindparam, **kwargs
-                )
+            if (
+                bindparam.value
+                and bindparam.callable is None
+                and not getattr(bindparam, "expanding", False)
+            ):
+                return self.render_literal_bindparam(bindparam, **kwargs)
 
         return super(HANAStatementCompiler, self).visit_bindparam(bindparam, **kwargs)
 
@@ -52,7 +125,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
     def visit_empty_set_expr(self, element_types):
         return "SELECT %s FROM DUMMY WHERE 1 != 1" % (
-            ', '.join(['1' for _ in element_types])
+            ", ".join(["1" for _ in element_types])
         )
 
     def default_from(self):
@@ -79,8 +152,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
             if select._for_update_arg.of:
                 tmp += " OF " + ", ".join(
-                    self.process(elem, **kwargs) for elem
-                    in select._for_update_arg.of
+                    self.process(elem, **kwargs) for elem in select._for_update_arg.of
                 )
 
             if select._for_update_arg.nowait:
@@ -120,8 +192,8 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             left=self.process(binary.left), right=self.process(binary.right)
         )
 
-class HANATypeCompiler(compiler.GenericTypeCompiler):
 
+class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_NUMERIC(self, type_):
         return self.visit_DECIMAL(type_)
 
@@ -150,7 +222,7 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(self, constraint):
         if len(constraint) == 0:
-            return ''
+            return ""
 
         text = ""
         if constraint.name is not None:
@@ -158,8 +230,8 @@ class HANADDLCompiler(compiler.DDLCompiler):
             if formatted_name is not None:
                 text += "CONSTRAINT %s " % formatted_name
         text += "UNIQUE (%s)" % (
-            ', '.join(self.preparer.quote(c.name)
-                      for c in constraint))
+            ", ".join(self.preparer.quote(c.name) for c in constraint)
+        )
         text += self.define_constraint_deferrability(constraint)
         return text
 
@@ -171,7 +243,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         # removed again after the super-class'es visit_create_table call, which consumes the
         # table prefixes.
 
-        table_type = table.kwargs.get('hana_table_type')
+        table_type = table.kwargs.get("hana_table_type")
         appended_index = None
         if table_type:
             # https://github.com/SAP/sqlalchemy-hana/issues/84
@@ -189,21 +261,21 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
 
 class HANAExecutionContext(default.DefaultExecutionContext):
-
     def fire_sequence(self, seq, type_):
         seq = self.dialect.identifier_preparer.format_sequence(seq)
         return self._execute_scalar("SELECT %s.NEXTVAL FROM DUMMY" % seq, type_)
 
 
 class HANAInspector(reflection.Inspector):
-
     def get_table_oid(self, table_name, schema=None):
-        return self.dialect.get_table_oid(self.bind, table_name, schema, info_cache=self.info_cache)
+        return self.dialect.get_table_oid(
+            self.bind, table_name, schema, info_cache=self.info_cache
+        )
 
 
 class HANABaseDialect(default.DefaultDialect):
     name = "hana"
-    default_paramstyle = 'format'
+    default_paramstyle = "format"
 
     statement_compiler = HANAStatementCompiler
     type_compiler = HANATypeCompiler
@@ -233,7 +305,7 @@ class HANABaseDialect(default.DefaultDialect):
         types.DateTime: hana_types.TIMESTAMP,
         types.LargeBinary: hana_types.HanaBinary,
         types.Text: hana_types.HanaText,
-        types.UnicodeText: hana_types.HanaUnicodeText
+        types.UnicodeText: hana_types.HanaUnicodeText,
     }
 
     postfetch_lastrowid = False
@@ -253,13 +325,20 @@ class HANABaseDialect(default.DefaultDialect):
 
     def on_connect(self):
         if self.isolation_level is not None:
+
             def connect(conn):
                 self.set_isolation_level(conn, self.isolation_level)
+
             return connect
         else:
             return None
 
-    _isolation_lookup = {'SERIALIZABLE', 'READ UNCOMMITTED', 'READ COMMITTED', 'REPEATABLE READ'}
+    _isolation_lookup = {
+        "SERIALIZABLE",
+        "READ UNCOMMITTED",
+        "READ COMMITTED",
+        "REPEATABLE READ",
+    }
 
     def set_isolation_level(self, connection, level):
         if level == "AUTOCOMMIT":
@@ -270,8 +349,8 @@ class HANABaseDialect(default.DefaultDialect):
             if level not in self._isolation_lookup:
                 raise exc.ArgumentError(
                     "Invalid value '%s' for isolation_level. "
-                    "Valid isolation levels for %s are %s" %
-                    (level, self.name, ", ".join(self._isolation_lookup))
+                    "Valid isolation levels for %s are %s"
+                    % (level, self.name, ", ".join(self._isolation_lookup))
                 )
             else:
                 with connection.cursor() as cursor:
@@ -304,8 +383,9 @@ class HANABaseDialect(default.DefaultDialect):
         if name is None:
             return None
 
-        if name.upper() == name and not \
-           self.identifier_preparer._requires_quotes(name.lower()):
+        if name.upper() == name and not self.identifier_preparer._requires_quotes(
+            name.lower()
+        ):
             name = name.lower()
         elif name.lower() == name:
             return quoted_name(name, quote=True)
@@ -316,8 +396,9 @@ class HANABaseDialect(default.DefaultDialect):
         if name is None:
             return None
 
-        if name.lower() == name and not \
-           self.identifier_preparer._requires_quotes(name.lower()):
+        if name.lower() == name and not self.identifier_preparer._requires_quotes(
+            name.lower()
+        ):
             name = name.upper()
         return name
 
@@ -330,7 +411,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table",
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
         return bool(result.first())
@@ -343,19 +424,15 @@ class HANABaseDialect(default.DefaultDialect):
                 "WHERE SCHEMA_NAME=:schema AND SEQUENCE_NAME=:sequence",
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                sequence=self.denormalize_name(sequence_name)
+                sequence=self.denormalize_name(sequence_name),
             )
         )
         return bool(result.first())
 
     def get_schema_names(self, connection, **kwargs):
-        result = connection.execute(
-            sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS")
-        )
+        result = connection.execute(sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS"))
 
-        return list([
-            self.normalize_name(name) for name, in result.fetchall()
-        ])
+        return list([self.normalize_name(name) for name, in result.fetchall()])
 
     def get_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
@@ -369,9 +446,7 @@ class HANABaseDialect(default.DefaultDialect):
             )
         )
 
-        tables = list([
-            self.normalize_name(row[0]) for row in result.fetchall()
-        ])
+        tables = list([self.normalize_name(row[0]) for row in result.fetchall()])
         return tables
 
     def get_temp_table_names(self, connection, schema=None, **kwargs):
@@ -386,9 +461,9 @@ class HANABaseDialect(default.DefaultDialect):
             )
         )
 
-        temp_table_names = list([
-            self.normalize_name(row[0]) for row in result.fetchall()
-        ])
+        temp_table_names = list(
+            [self.normalize_name(row[0]) for row in result.fetchall()]
+        )
         return temp_table_names
 
     def get_view_names(self, connection, schema=None, **kwargs):
@@ -402,9 +477,7 @@ class HANABaseDialect(default.DefaultDialect):
             )
         )
 
-        views = list([
-            self.normalize_name(row[0]) for row in result.fetchall()
-        ])
+        views = list([self.normalize_name(row[0]) for row in result.fetchall()])
         return views
 
     def get_view_definition(self, connection, view_name, schema=None, **kwargs):
@@ -431,35 +504,36 @@ class HANABaseDialect(default.DefaultDialect):
                    SYS.VIEW_COLUMNS) AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION"""
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
 
         columns = []
         for row in result.fetchall():
             column = {
-                'name': self.normalize_name(row[0]),
-                'default': row[2],
-                'nullable': row[3] == "TRUE",
-                'comment': row[6]
+                "name": self.normalize_name(row[0]),
+                "default": row[2],
+                "nullable": row[3] == "TRUE",
+                "comment": row[6],
             }
 
             if hasattr(types, row[1]):
-                column['type'] = getattr(types, row[1])
+                column["type"] = getattr(types, row[1])
             elif hasattr(hana_types, row[1]):
-                column['type'] = getattr(hana_types, row[1])
+                column["type"] = getattr(hana_types, row[1])
             else:
-                util.warn("Did not recognize type '%s' of column '%s'" % (
-                    row[1], column['name']
-                ))
-                column['type'] = types.NULLTYPE
+                util.warn(
+                    "Did not recognize type '%s' of column '%s'"
+                    % (row[1], column["name"])
+                )
+                column["type"] = types.NULLTYPE
 
-            if column['type'] == types.DECIMAL:
-                column['type'] = types.DECIMAL(row[4], row[5])
-            elif column['type'] == types.VARCHAR:
-                column['type'] = types.VARCHAR(row[4])
-            elif column['type'] == types.NVARCHAR:
-                column['type'] = types.NVARCHAR(row[4])
+            if column["type"] == types.DECIMAL:
+                column["type"] = types.DECIMAL(row[4], row[5])
+            elif column["type"] == types.VARCHAR:
+                column["type"] = types.VARCHAR(row[4])
+            elif column["type"] == types.NVARCHAR:
+                column["type"] = types.NVARCHAR(row[4])
 
             columns.append(column)
 
@@ -477,7 +551,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
                 schema=self.denormalize_name(lookup_schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
         foreign_keys = {}
@@ -497,10 +571,7 @@ class HANABaseDialect(default.DefaultDialect):
                     "referred_schema": schema,
                     "referred_table": self.normalize_name(row[3]),
                     "referred_columns": [self.normalize_name(row[4])],
-                    "options": {
-                        "onupdate": row[5],
-                        "ondelete": row[6]
-                    }
+                    "options": {"onupdate": row[5], "ondelete": row[6]},
                 }
 
                 if row[2] != self.denormalize_name(self.default_schema_name):
@@ -522,7 +593,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "ORDER BY POSITION"
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
 
@@ -538,7 +609,7 @@ class HANABaseDialect(default.DefaultDialect):
                 indexes[name] = {
                     "name": name,
                     "unique": False,
-                    "column_names": [column]
+                    "column_names": [column],
                 }
 
                 if constraint is not None:
@@ -560,7 +631,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "ORDER BY POSITION"
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
 
@@ -572,7 +643,7 @@ class HANABaseDialect(default.DefaultDialect):
 
         return {
             "name": self.normalize_name(constraint_name),
-            "constrained_columns": constrained_columns
+            "constrained_columns": constrained_columns,
         }
 
     def get_unique_constraints(self, connection, table_name, schema=None, **kwargs):
@@ -586,7 +657,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
 
@@ -597,13 +668,19 @@ class HANABaseDialect(default.DefaultDialect):
                 # Start with new constraint
                 parsing_constraint = constraint_name
 
-                constraint = {'name': None, 'column_names': [], 'duplicates_index': None}
-                if not constraint_name.startswith('_SYS'):
+                constraint = {
+                    "name": None,
+                    "column_names": [],
+                    "duplicates_index": None,
+                }
+                if not constraint_name.startswith("_SYS"):
                     # Constraint has user-defined name
-                    constraint['name'] = self.normalize_name(constraint_name)
-                    constraint['duplicates_index'] = self.normalize_name(constraint_name)
+                    constraint["name"] = self.normalize_name(constraint_name)
+                    constraint["duplicates_index"] = self.normalize_name(
+                        constraint_name
+                    )
                 constraints.append(constraint)
-            constraint['column_names'].append(self.normalize_name(column_name))
+            constraint["column_names"].append(self.normalize_name(column_name))
 
         return constraints
 
@@ -617,7 +694,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "CHECK_CONDITION IS NOT NULL"
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
 
@@ -626,7 +703,7 @@ class HANABaseDialect(default.DefaultDialect):
         for row in result.fetchall():
             check_condition = {
                 "name": self.normalize_name(row[0]),
-                "sqltext": self.normalize_name(row[1])
+                "sqltext": self.normalize_name(row[1]),
             }
             check_conditions.append(check_condition)
 
@@ -641,7 +718,7 @@ class HANABaseDialect(default.DefaultDialect):
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table"
             ).bindparams(
                 schema=self.denormalize_name(schema),
-                table=self.denormalize_name(table_name)
+                table=self.denormalize_name(table_name),
             )
         )
         return result.scalar()
@@ -658,26 +735,29 @@ class HANABaseDialect(default.DefaultDialect):
             )
         )
 
-        return {"text" : result.scalar()}
+        return {"text": result.scalar()}
+
 
 class HANAHDBCLIDialect(HANABaseDialect):
-
-    driver = 'hdbcli'
-    default_paramstyle = 'qmark'
+    driver = "hdbcli"
+    default_paramstyle = "qmark"
 
     @classmethod
     def dbapi(cls):
         import hdbcli.dbapi
+
         hdbcli.dbapi.paramstyle = cls.default_paramstyle
         return hdbcli.dbapi
 
     def create_connect_args(self, url):
-        if url.host and url.host.lower().startswith( 'userkey=' ):
+        if url.host and url.host.lower().startswith("userkey="):
             kwargs = url.translate_connect_args(host="userkey")
-            userkey = url.host[ len('userkey=') : len(url.host)]
+            userkey = url.host[len("userkey=") : len(url.host)]
             kwargs["userkey"] = userkey
         else:
-            kwargs = url.translate_connect_args(host="address", username="user", database="databaseName")
+            kwargs = url.translate_connect_args(
+                host="address", username="user", database="databaseName"
+            )
             kwargs.update(url.query)
             port = 30015
             if kwargs.get("databaseName"):
@@ -714,10 +794,18 @@ def _fix_integrity_error(f):
         try:
             return f(dialect, *args, **kwargs)
         except dialect.dbapi.Error as exc:
-            if exc.errorcode == 301 and not isinstance(exc, dialect.dbapi.IntegrityError):
+            if exc.errorcode == 301 and not isinstance(
+                exc, dialect.dbapi.IntegrityError
+            ):
                 raise dialect.dbapi.IntegrityError(exc)
             raise
+
     return wrapper
 
-for method in ('do_execute', 'do_executemany', 'do_execute_no_params'):
-    setattr(HANAHDBCLIDialect, method, _fix_integrity_error(getattr(HANAHDBCLIDialect, method)))
+
+for method in ("do_execute", "do_executemany", "do_execute_no_params"):
+    setattr(
+        HANAHDBCLIDialect,
+        method,
+        _fix_integrity_error(getattr(HANAHDBCLIDialect, method)),
+    )

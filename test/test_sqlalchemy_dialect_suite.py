@@ -1,28 +1,30 @@
+from __future__ import annotations
+
 import sqlalchemy
+from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflectionTest
+from sqlalchemy.testing.suite import *
 
 # Import dialect test suite provided by SQLAlchemy into SQLAlchemy-HANA test collection.
 # Please don't add other tests in this file. Only adjust or overview SQLAlchemy tests
 # for compatibility with SAP HANA.
 
-from sqlalchemy.testing.suite import *
-from sqlalchemy.testing.suite import ComponentReflectionTest as _ComponentReflectionTest
 
 class ComponentReflectionTest(_ComponentReflectionTest):
-
     # Overwrite function so that temporary tables are correctly created with HANA's specific
     # GLOBAL prefix.
     @classmethod
     def define_temp_tables(cls, metadata):
         kw = {
-            'prefixes': ["GLOBAL TEMPORARY"],
+            "prefixes": ["GLOBAL TEMPORARY"],
         }
 
         Table(
-            "user_tmp", metadata,
+            "user_tmp",
+            metadata,
             Column("id", sqlalchemy.INT, primary_key=True),
-            Column('name', sqlalchemy.VARCHAR(50)),
-            Column('foo', sqlalchemy.INT),
-            sqlalchemy.UniqueConstraint('name', name='user_tmp_uq'),
+            Column("name", sqlalchemy.VARCHAR(50)),
+            Column("foo", sqlalchemy.INT),
+            sqlalchemy.UniqueConstraint("name", name="user_tmp_uq"),
             sqlalchemy.Index("user_tmp_ix", "foo"),
             **kw
         )
