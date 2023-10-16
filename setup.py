@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 source_location = os.path.abspath(os.path.dirname(__file__))
+
+
 def get_version():
     with open(os.path.join(source_location, "VERSION")) as version:
         return version.readline().strip()
+
 
 setup(
     name="sqlalchemy-hana",
@@ -14,18 +20,23 @@ setup(
     author="Christoph Heer",
     author_email="christoph.heer@sap.com",
     description="SQLAlchemy dialect for SAP HANA",
-    packages=find_packages(exclude=("test", "test.*",)),
+    packages=find_packages(
+        exclude=(
+            "test",
+            "test.*",
+        )
+    ),
     zip_safe=False,
-    install_requires=[
-        "sqlalchemy>=1.2.0"
-    ],
+    install_requires=["sqlalchemy>=1.2.0"],
     extras_require={
-        "test": [
-            "pytest>=2.5.2",
-            "mock>=1.0.1"
-        ]
+        "test": ["pytest>=2.5.2", "mock>=1.0.1"],
+        "dev": [
+            "isort==5.12.0",
+            "black==23.9.1",
+            "pre-commit==3.5.0",
+        ],
     },
-    classifiers=[ # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[  # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
@@ -40,10 +51,10 @@ setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    entry_points = {
+    entry_points={
         "sqlalchemy.dialects": [
             "hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
             "hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
         ]
-     },
+    },
 )

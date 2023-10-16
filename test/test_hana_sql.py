@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 import sqlalchemy.testing
-from sqlalchemy.sql.expression import table, column
+from sqlalchemy.sql.expression import column, table
 
 
-class HANACompileTest(sqlalchemy.testing.fixtures.TestBase, sqlalchemy.testing.AssertsCompiledSQL):
-
+class HANACompileTest(
+    sqlalchemy.testing.fixtures.TestBase, sqlalchemy.testing.AssertsCompiledSQL
+):
     __only_on__ = "hana"
 
     def test_sql_with_for_update(self):
-        table1 = table(
-            "mytable", column("myid"), column("name"), column("description")
-        )
+        table1 = table("mytable", column("myid"), column("name"), column("description"))
 
         self.assert_compile(
             table1.select().with_for_update(),
