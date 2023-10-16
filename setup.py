@@ -23,9 +23,6 @@ setup(
         "test": [
             "pytest>=2.5.2",
             "mock>=1.0.1"
-        ],
-        "pyhdb": [
-            "pyhdb>=0.3.1"
         ]
     },
     classifiers=[ # cf. http://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -47,7 +44,6 @@ setup(
         "sqlalchemy.dialects": [
             "hana = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
             "hana.hdbcli = sqlalchemy_hana.dialect:HANAHDBCLIDialect",
-            "hana.pyhdb = sqlalchemy_hana.dialect:HANAPyHDBDialect"
         ]
      },
 )

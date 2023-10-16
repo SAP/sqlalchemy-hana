@@ -8,7 +8,7 @@ PIP_INDEX_URL = os.environ.get('NOX_PIP_INDEX_URL', None)
 
 @nox.session(python=['2.7', '3.6', '3.7'], reuse_venv=True)
 @nox.parametrize('sqlalchemy', ['1.2', '1.3'])
-@nox.parametrize('hana_driver', ['hdbcli', 'pyhdb'])
+@nox.parametrize('hana_driver', ['hdbcli'])
 def test(session, sqlalchemy, hana_driver):
     if 'NOX_SAP_HANA_URI' not in os.environ:
         session.skip(
