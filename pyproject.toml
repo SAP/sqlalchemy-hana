@@ -1,3 +1,57 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqlalchemy-hana"
+version = "0.6.0.dev0"
+description = "SQLAlchemy dialect for SAP HANA"
+keywords = ["sqlalchemy", "sap", "hana"]
+requires-python = "~=3.8"
+readme = "README.rst"
+authors = [{ name = "Christoph Heer", email = "christoph.heer@sap.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: SQL",
+    "Topic :: Database",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli"]
+
+[project.optional-dependencies]
+dev = ["isort==5.12.0", "black==23.9.1", "pre-commit==3.5.0"]
+test = ["pytest==7.4.2"]
+
+[project.entry-points."sqlalchemy.dialects"]
+hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
+"hana.hdbcli" = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
+
+[project.urls]
+Repository = "https://github.com/SAP/sqlalchemy-hana"
+"Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
+Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/master/CHANGES"
+
+[project.license]
+text = "Apache-2.0"
+
+[tool.setuptools.packages.find]
+include = ["sqlalchemy_hana"]
+
+[tool.setuptools.package-data]
+swagger_plugin_for_sphinx = ["py.typed"]
+
 [tool.isort]
 profile = "black"
 add_imports = ["from __future__ import annotations"]
