@@ -145,7 +145,6 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def for_update_clause(self, select, **kwargs):
         if select._for_update_arg.read:
             # The HANA does not allow other parameters for FOR SHARE LOCK
-            # see: https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.03/en-US/20fcf24075191014a89e9dc7b8408b26.html
             tmp = " FOR SHARE LOCK"
         else:
             tmp = " FOR UPDATE"
@@ -183,13 +182,19 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     # possible to rewrite the expression.
     # https://answers.sap.com/questions/642124/hana-and-'is-distinct-from'-operator.html
     def visit_is_distinct_from_binary(self, binary, operator, **kw):
-        return "(({left} <> {right} OR {left} IS NULL OR {right} IS NULL) AND NOT ({left} IS NULL AND {right} IS NULL))".format(
-            left=self.process(binary.left), right=self.process(binary.right)
+        left = self.process(binary.left)
+        right = self.process(binary.right)
+        return (
+            f"(({left} <> {right} OR {left} IS NULL OR {right} IS NULL) "
+            f"AND NOT ({left} IS NULL AND {right} IS NULL))"
         )
 
     def visit_isnot_distinct_from_binary(self, binary, operator, **kw):
-        return "(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR ({left} IS NULL AND {right} IS NULL))".format(
-            left=self.process(binary.left), right=self.process(binary.right)
+        left = self.process(binary.left)
+        right = self.process(binary.right)
+        return (
+            f"(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR "
+            f"({left} IS NULL AND {right} IS NULL))"
         )
 
 
@@ -485,7 +490,8 @@ class HANABaseDialect(default.DefaultDialect):
 
         return connection.execute(
             sql.text(
-                "SELECT DEFINITION FROM SYS.VIEWS WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
+                "SELECT DEFINITION FROM SYS.VIEWS "
+                "WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
             ).bindparams(
                 view_name=self.denormalize_name(view_name),
                 schema=self.denormalize_name(schema),
@@ -497,11 +503,16 @@ class HANABaseDialect(default.DefaultDialect):
 
         result = connection.execute(
             sql.text(
-                """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM (
-                   SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE,
-                   LENGTH, SCALE, COMMENTS FROM SYS.TABLE_COLUMNS UNION ALL SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME,
-                   COLUMN_NAME, POSITION, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS FROM
-                   SYS.VIEW_COLUMNS) AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION"""
+                """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE,
+                    COMMENTS FROM (
+                        SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME,
+                        DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS
+                        FROM SYS.TABLE_COLUMNS UNION ALL
+                        SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME, COLUMN_NAME, POSITION,
+                        DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS
+                        FROM SYS.VIEW_COLUMNS )
+                    AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION
+                """
             ).bindparams(
                 schema=self.denormalize_name(schema),
                 table=self.denormalize_name(table_name),
