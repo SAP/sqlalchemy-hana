@@ -17,4 +17,5 @@ def add_test_seq(column, table):
         column._init_items(Sequence(table.name + "_" + column.name + "_seq"))
 
 
-from sqlalchemy.testing.plugin.pytestplugin import *
+# enable the SQLAlchemy plugin after our setup is done
+import sqlalchemy.testing.plugin.pytestplugin  # noqa: F401,E402

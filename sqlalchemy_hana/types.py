@@ -60,8 +60,6 @@ class _LOBMixin(object):
                 return value
             if isinstance(value, memoryview):
                 return value.obj
-            if compat.py2k and isinstance(value, buffer):
-                return value
             if hasattr(value, "read"):
                 return value.read()
             raise NotImplementedError

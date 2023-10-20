@@ -42,5 +42,5 @@ def test(session, sqlalchemy, hana_driver):
         "--requirements",
         "sqlalchemy_hana.requirements:Requirements",
         "--dropfirst",
-        *session.posargs
+        *session.posargs,
     )
