@@ -528,10 +528,10 @@ class HANABaseDialect(default.DefaultDialect):
                 "comment": row[6],
             }
 
-            if hasattr(types, row[1]):
-                column["type"] = getattr(types, row[1])
-            elif hasattr(hana_types, row[1]):
-                column["type"] = getattr(hana_types, row[1])
+            if hasattr(hana_types, row[1]):
+                column['type'] = getattr(hana_types, row[1])
+            elif hasattr(types, row[1]):
+                column['type'] = getattr(types, row[1])
             else:
                 util.warn(
                     "Did not recognize type '%s' of column '%s'"
