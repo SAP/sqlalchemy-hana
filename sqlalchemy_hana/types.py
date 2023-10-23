@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from sqlalchemy import types as sqltypes
-from sqlalchemy.util import compat
 
 
 class TINYINT(sqltypes.TypeEngine):
@@ -56,7 +55,7 @@ class _LOBMixin(object):
         def process(value):
             if value is None:
                 return None
-            if isinstance(value, compat.string_types):
+            if isinstance(value, str):
                 return value
             if isinstance(value, memoryview):
                 return value.obj
