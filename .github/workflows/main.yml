@@ -1,4 +1,5 @@
 name: CI
+concurrency: ci
 
 on:
   push:
