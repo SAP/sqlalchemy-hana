@@ -46,7 +46,7 @@ def teardown(dburi: str, test_dburi: str) -> None:
 if __name__ == "__main__":
     if sys.argv[1] == "setup":
         print(setup(sys.argv[2]))
-    if sys.argv[1] == "teardown":
+    elif sys.argv[1] == "teardown":
         teardown(sys.argv[2], sys.argv[3])
     else:
         raise ValueError(f"Unknown mode {sys.argv[1]}")
