@@ -1,52 +1,15 @@
 from __future__ import annotations
 
-import sys
-
-import sqlalchemy
 from sqlalchemy.testing import exclusions, requirements
 
 
 class Requirements(requirements.SuiteRequirements):
     @property
-    def temporary_tables(self):
-        return exclusions.open()
-
-    @property
-    def temp_table_reflection(self):
-        return exclusions.open()
-
-    @property
     def views(self):
         return exclusions.open()
 
     @property
-    def deferrable_or_no_constraints(self):
-        """Target database must support derferable constraints."""
-        return exclusions.closed()
-
-    @property
-    def named_constraints(self):
-        return exclusions.open()
-
-    @property
-    def unique_constraint_reflection(self):
-        return exclusions.open()
-
-    @property
     def reflects_pk_names(self):
-        return exclusions.open()
-
-    @property
-    def self_referential_foreign_keys(self):
-        return exclusions.open()
-
-    @property
-    def empty_inserts(self):
-        """Empty value tuple in INSERT statement is not allowed"""
-        return exclusions.closed()
-
-    @property
-    def precision_numerics_enotation_large(self):
         return exclusions.open()
 
     @property
@@ -64,12 +27,8 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def time_microseconds(self):
-        """No support for microseconds in datetime"""
+        # SAP HANA does not support microseconds in TIME
         return exclusions.closed()
-
-    @property
-    def datetime_microseconds(self):
-        return exclusions.open()
 
     @property
     def datetime_historic(self):
@@ -80,106 +39,22 @@ class Requirements(requirements.SuiteRequirements):
         return exclusions.open()
 
     @property
-    def text_type(self):
-        """Currently not supported by PYHDB"""
-        return exclusions.open()
-
-    @property
-    def schemas(self):
-        return exclusions.open()
-
-    @property
     def percent_schema_names(self):
         return exclusions.open()
 
     @property
-    def savepoints(self):
-        """No support for savepoints in transactions"""
-        return exclusions.closed()
-
-    @property
     def selectone(self):
-        """HANA doesn't support 'SELECT 1' without 'FROM DUMMY'"""
-        return exclusions.closed()
-
-    @property
-    def order_by_col_from_union(self):
-        return exclusions.open()
-
-    @property
-    def broken_cx_oracle6_numerics(self):
-        return exclusions.closed()
-
-    @property
-    def mysql_zero_date(self):
-        return exclusions.closed()
-
-    @property
-    def mysql_non_strict(self):
+        # SAP HANA doesn't support 'SELECT 1' without 'FROM DUMMY'
         return exclusions.closed()
 
     @property
     def two_phase_transactions(self):
-        """Not supported by PYHDB"""
-        return exclusions.closed()
-
-    @property
-    def predictable_gc(self):
         return exclusions.open()
 
     @property
-    def cpython(self):
+    def autoincrement_without_sequence(self):
+        # Not supported yet
         return exclusions.closed()
-
-    @property
-    def python3(self):
-        if sys.version_info < (3,):
-            return exclusions.closed()
-        return exclusions.open()
-
-    @property
-    def identity(self):
-        return exclusions.closed()
-
-    @property
-    def sane_rowcount(self):
-        return exclusions.closed()
-
-    @property
-    def sane_multi_rowcount(self):
-        return exclusions.closed()
-
-    @property
-    def check_constraints(self):
-        return exclusions.open()
-
-    @property
-    def update_nowait(self):
-        return exclusions.closed()
-
-    @property
-    def independent_connections(self):
-        return exclusions.open()
-
-    @property
-    def non_broken_pickle(self):
-        return exclusions.closed()
-
-    @property
-    def independent_cursors(self):
-        return exclusions.open()
-
-    @property
-    def cross_schema_fk_reflection(self):
-        return exclusions.closed()
-
-    @property
-    def updateable_autoincrement_pks(self):
-        return exclusions.closed()
-
-    @property
-    def bound_limit_offset(self):
-        return exclusions.open()
 
     @property
     def isolation_level(self):
@@ -195,72 +70,6 @@ class Requirements(requirements.SuiteRequirements):
                 "AUTOCOMMIT",
             ],
         }
-
-    # Disable mysql tests
-    @property
-    def mssql_freetds(self):
-        return exclusions.closed()
-
-    # Disable postgresql tests
-    @property
-    def postgresql_utf8_server_encoding(self):
-        return exclusions.closed()
-
-    @property
-    def range_types(self):
-        return exclusions.closed()
-
-    @property
-    def hstore(self):
-        return exclusions.closed()
-
-    @property
-    def array_type(self):
-        return exclusions.closed()
-
-    @property
-    def psycopg2_compatibility(self):
-        return exclusions.closed()
-
-    @property
-    def postgresql_jsonb(self):
-        return exclusions.closed()
-
-    @property
-    def savepoints_w_release(self):
-        return exclusions.closed()
-
-    @property
-    def non_broken_binary(self):
-        return exclusions.closed()
-
-    @property
-    def oracle5x(self):
-        return exclusions.closed()
-
-    @property
-    def psycopg2_or_pg8000_compatibility(self):
-        return exclusions.closed()
-
-    @property
-    def psycopg2_native_hstore(self):
-        return exclusions.closed()
-
-    @property
-    def psycopg2_native_json(self):
-        return exclusions.closed()
-
-    @property
-    def two_phase_recovery(self):
-        return exclusions.closed()
-
-    @property
-    def enforces_check_constraints(self):
-        return exclusions.closed()
-
-    @property
-    def implicitly_named_constraints(self):
-        return exclusions.open()
 
     @property
     def autocommit(self):
@@ -287,26 +96,121 @@ class Requirements(requirements.SuiteRequirements):
         return exclusions.open()
 
     @property
-    def foreign_key_constraint_option_reflection(self):
-        return exclusions.open()
+    def foreign_key_constraint_option_reflection_ondelete(self):
+        # TODO fix
+        return exclusions.closed()
+
+    @property
+    def foreign_key_constraint_option_reflection_onupdate(self):
+        # TODO fix
+        return exclusions.closed()
 
     @property
     def check_constraint_reflection(self):
-        if sqlalchemy.__version__.startswith("1.1."):
-            # Skip reflection tests in SQLAlchemy~=1.1.0 due missing normalization
-            return exclusions.closed()
-        return exclusions.open()
-
-    @property
-    def implicit_decimal_binds(self):
-        # See SQLAlchemy ticket 4036
+        # TODO fix
         return exclusions.closed()
 
     @property
     def expressions_against_unbounded_text(self):
+        # not supported by SAP HANA
         return exclusions.closed()
 
     @property
-    def temporary_views(self):
-        # SAP HANA doesn't support temporary views only temporary tables.
+    def independent_readonly_connections(self):
+        # TODO check if supported
         return exclusions.closed()
+
+    @property
+    def sql_expression_limit_offset(self):
+        # SAP HANA does not support expressions in LIMIT or OFFSET
+        return exclusions.closed()
+
+    @property
+    def array_type(self):
+        # Not yet supported, #119
+        return exclusions.closed()
+
+    @property
+    def unbounded_varchar(self):
+        # SAP HANA requires a length vor (N)VARCHAR
+        return exclusions.closed()
+
+    @property
+    def unique_index_reflect_as_unique_constraints(self):
+        # SAP HANA reflects unique indexes as unique constraints
+        return exclusions.open()
+
+    @property
+    def unique_constraints_reflect_as_index(self):
+        # SAP HANA reflects unique constraints as indexes
+        return exclusions.open()
+
+    @property
+    def intersect(self):
+        return exclusions.open()
+
+    @property
+    def except_(self):
+        return exclusions.open()
+
+    @property
+    def window_functions(self):
+        return exclusions.open()
+
+    @property
+    def comment_reflection_full_unicode(self):
+        return exclusions.open()
+
+    @property
+    def foreign_key_constraint_name_reflection(self):
+        return exclusions.open()
+
+    @property
+    def cross_schema_fk_reflection(self):
+        return exclusions.open()
+
+    @property
+    def fk_constraint_option_reflection_onupdate_restrict(self):
+        # TODO fix
+        return exclusions.open()
+
+    @property
+    def fk_constraint_option_reflection_ondelete_restrict(self):
+        # TODO fix
+        return exclusions.open()
+
+    @property
+    def schema_create_delete(self):
+        return exclusions.open()
+
+    @property
+    def savepoints(self):
+        return exclusions.open()
+
+    @property
+    def has_temp_table(self):
+        return exclusions.open()
+
+    @property
+    def unicode_ddl(self):
+        return exclusions.open()
+
+    @property
+    def update_from(self):
+        return exclusions.open()
+
+    @property
+    def delete_from(self):
+        return exclusions.open()
+
+    @property
+    def mod_operator_as_percent_sign(self):
+        return exclusions.open()
+
+    @property
+    def order_by_label_with_expression(self):
+        return exclusions.open()
+
+    @property
+    def graceful_disconnects(self):
+        return exclusions.open()

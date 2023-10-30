@@ -20,3 +20,29 @@ jobs:
         run: pip install -e .[dev,test]
       - name: run pre-commit
         run: "pre-commit run --all"
+  ci-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        sqlalchemy-version: ["1.4.*", "2.0.*"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install project
+        run: pip install -e .[test]
+      - name: Install sqlalchemy
+        run: pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
+      - name: run tests (with coverage)
+        run: |
+          PYTEST_DBURI=$(python test/ci_setup setup $TEST_DBURI)
+          export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI --dropfirst"
+          pytest --cov sqlalchemy_hana --cov-report html --cov-report xml test/"
+          python test/ci_setup teardown "$PYTEST_DBURI" "$TEST_DBURI"
+      - name: run diff-cover
+        run: "diff-cover --config-file pyproject.toml coverage.xml"

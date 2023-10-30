@@ -32,7 +32,12 @@ dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli"]
 
 [project.optional-dependencies]
 dev = ["isort==5.12.0", "black==23.9.1", "pre-commit==3.5.0", "flake8==6.1.0"]
-test = ["pytest==7.4.2"]
+test = [
+    "pytest==7.4.2",
+    "pytest-cov==4.1.0",
+    "coverage[toml]==7.3.2",
+    "diff-cover[toml]==8.0.0",
+]
 
 [project.entry-points."sqlalchemy.dialects"]
 hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
@@ -55,3 +60,12 @@ swagger_plugin_for_sphinx = ["py.typed"]
 [tool.isort]
 profile = "black"
 add_imports = ["from __future__ import annotations"]
+
+[tool.pytest.ini_options]
+log_level = "DEBUG"
+xfail_strict = true
+filterwarnings = ["ignore"]
+
+[tool.diff_cover]
+include_untracked = true
+fail_under = 80
