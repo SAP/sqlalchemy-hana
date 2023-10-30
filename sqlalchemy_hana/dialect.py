@@ -257,7 +257,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         # removed again after the super-class'es visit_create_table call, which consumes the
         # table prefixes.
 
-        table_type = table.kw.get("hana_table_type")
+        table_type = table.kwargs.get("hana_table_type")
         appended_index = None
         if table_type:
             # https://github.com/SAP/sqlalchemy-hana/issues/84
@@ -835,20 +835,20 @@ class HANAHDBCLIDialect(HANABaseDialect):
 
     def create_connect_args(self, url):
         if url.host and url.host.lower().startswith("userkey="):
-            kw = url.translate_connect_args(host="userkey")
+            kwargs = url.translate_connect_args(host="userkey")
             userkey = url.host[len("userkey=") : len(url.host)]
-            kw["userkey"] = userkey
+            kwargs["userkey"] = userkey
         else:
-            kw = url.translate_connect_args(
+            kwargs = url.translate_connect_args(
                 host="address", username="user", database="databaseName"
             )
-            kw.update(url.query)
+            kwargs.update(url.query)
             port = 30015
-            if kw.get("databaseName"):
+            if kwargs.get("databaseName"):
                 port = 30013
-            kw.setdefault("port", port)
+            kwargs.setdefault("port", port)
 
-        return (), kw
+        return (), kwargs
 
     def connect(self, *args, **kw):
         connection = super().connect(*args, **kw)
