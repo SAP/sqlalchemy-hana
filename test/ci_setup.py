@@ -46,7 +46,7 @@ def teardown(dburi: str, test_dburi: str) -> None:
     with closing(
         dbapi.connect(url.hostname, url.port, url.username, url.password)
     ) as connection, closing(connection.cursor()) as cursor:
-        cursor.execute(f"DROP USER {test_user} CASCADE ")
+        cursor.execute(f"DROP USER {test_user} CASCADE")
 
 
 if __name__ == "__main__":
