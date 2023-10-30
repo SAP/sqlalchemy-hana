@@ -1,3 +1,6 @@
+# pylint: disable=wildcard-import,unused-wildcard-import
+"""SQLAlchemy dialect test suite."""
+
 from __future__ import annotations
 
 from sqlalchemy.testing.provision import temp_table_keyword_args
