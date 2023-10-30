@@ -3,14 +3,11 @@ from __future__ import annotations
 from unittest.mock import Mock
 
 import sqlalchemy.testing
+from hdbcli.dbapi import Error
 
 
 class HANAHDBCLIConnectionIsDisconnectedTest(sqlalchemy.testing.fixtures.TestBase):
-    __only_on__ = "hana+hdbcli"
-
     def test_detection_by_error_code(self):
-        from hdbcli.dbapi import Error
-
         dialect = sqlalchemy.testing.db.dialect
         assert dialect.is_disconnect(Error(-10709, "Connect failed"), None, None)
 

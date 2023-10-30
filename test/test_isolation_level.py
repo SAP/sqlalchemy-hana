@@ -6,8 +6,6 @@ from sqlalchemy.testing import eq_
 
 
 class IsolationLevelTest(sqlalchemy.testing.fixtures.TestBase):
-    __only_on__ = "hana"
-
     def _default_isolation_level(self):
         return "READ COMMITTED"
 

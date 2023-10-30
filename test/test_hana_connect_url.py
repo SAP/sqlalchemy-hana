@@ -5,7 +5,6 @@ from sqlalchemy.engine.url import make_url
 
 
 class HANAConnectUrlWithTenantTest(sqlalchemy.testing.fixtures.TestBase):
-    @sqlalchemy.testing.only_on("hana+hdbcli")
     def test_hdbcli_tenant_url_default_port(self):
         """If the URL includes a tenant database, the dialect pass the adjusted values to hdbcli.
 
@@ -23,7 +22,6 @@ class HANAConnectUrlWithTenantTest(sqlalchemy.testing.fixtures.TestBase):
         assert result_kwargs["password"] == "secret-password"
         assert result_kwargs["databaseName"] == "TENANT_NAME"
 
-    @sqlalchemy.testing.only_on("hana+hdbcli")
     def test_hdbcli_tenant_url_changed_port(self):
         """If the URL includes a tenant database, the dialect pass the adjusted values to hdbcli.
 
@@ -41,7 +39,6 @@ class HANAConnectUrlWithTenantTest(sqlalchemy.testing.fixtures.TestBase):
 
 
 class HANAConnectUrlWithHDBUserStoreTest(sqlalchemy.testing.fixtures.TestBase):
-    @sqlalchemy.testing.only_on("hana+hdbcli")
     def test_parsing_userkey_hdbcli(self):
         """With HDBCLI, the user may reference to a local HDBUserStore key which holds
         the connection details. SQLAlchemy-HANA should only pass the userkey name to
@@ -55,7 +52,6 @@ class HANAConnectUrlWithHDBUserStoreTest(sqlalchemy.testing.fixtures.TestBase):
 
 
 class HANAConnectUrlParsing(sqlalchemy.testing.fixtures.TestBase):
-    @sqlalchemy.testing.only_on("hana+hdbcli")
     def test_pass_uri_query_as_kwargs(self):
         """SQLAlchemy-HANA should passes all URL parameters to hdbcli."""
 
