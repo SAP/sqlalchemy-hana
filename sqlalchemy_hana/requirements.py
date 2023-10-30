@@ -172,12 +172,12 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def fk_constraint_option_reflection_onupdate_restrict(self):
         # TODO fix
-        return exclusions.open()
+        return exclusions.closed()
 
     @property
     def fk_constraint_option_reflection_ondelete_restrict(self):
         # TODO fix
-        return exclusions.open()
+        return exclusions.closed()
 
     @property
     def schema_create_delete(self):

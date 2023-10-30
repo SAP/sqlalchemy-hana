@@ -47,7 +47,7 @@ jobs:
           PYTEST_DBURI=$(python test/ci_setup.py setup ${{ secrets.TEST_DBURI }})
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI --dropfirst"
-          pytest --cov sqlalchemy_hana --cov-report html --cov-report xml test/
+          pytest -v --cov sqlalchemy_hana --cov-report html --cov-report xml test/
           python test/ci_setup.py teardown "$PYTEST_DBURI" ${{ secrets.TEST_DBURI }}
       - name: run diff-cover
         run: "diff-cover --config-file pyproject.toml coverage.xml"

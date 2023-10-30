@@ -436,6 +436,7 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
+    @reflection.cache
     def has_schema(self, connection, schema_name, **kwargs):
         result = connection.execute(
             sql.text(
@@ -458,7 +459,6 @@ class HANABaseDialect(default.DefaultDialect):
                 index=self.denormalize_name(index_name),
             )
         )
-        return bool(result.first())
         return bool(result.first())
 
     @reflection.cache
@@ -641,11 +641,15 @@ class HANABaseDialect(default.DefaultDialect):
                 foreign_key = {
                     "name": foreign_key_name,
                     "constrained_columns": [self.normalize_name(row[1])],
-                    "referred_schema": self.normalize_name(row[2]),
+                    "referred_schema": None,
                     "referred_table": self.normalize_name(row[3]),
                     "referred_columns": [self.normalize_name(row[4])],
                     "options": {"onupdate": row[5], "ondelete": row[6]},
                 }
+
+                if row[2] != self.denormalize_name(self.default_schema_name):
+                    foreign_key["referred_schema"] = self.normalize_name(row[2])
+
 
                 foreign_keys[foreign_key_name] = foreign_key
                 foreign_keys_list.append(foreign_key)
