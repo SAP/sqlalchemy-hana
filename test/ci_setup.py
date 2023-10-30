@@ -28,7 +28,7 @@ def setup(dburi: str) -> str:
         cursor.execute(
             f'CREATE USER {user} PASSWORD "{password}" NO FORCE_FIRST_PASSWORD_CHANGE'
         )
-        for schema in ["TEST_SCHEMA", "TEST_SCHEMA2"]:
+        for schema in ["TEST_SCHEMA", "TEST_SCHEMA_2"]:
             cursor.execute(f"SELECT 1 FROM SCHEMAS WHERE SCHEMA_NAME='{schema}'")
             if cursor.fetchall():
                 cursor.execute(f"DROP SCHEMA {schema} CASCADE")
