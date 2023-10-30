@@ -82,6 +82,7 @@ RESERVED_WORDS = {
     "sql",
     "start",
     "sysuuid",
+    "table",
     "tablesample",
     "top",
     "trailing",
@@ -121,9 +122,9 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         return super(HANAStatementCompiler, self).visit_bindparam(bindparam, **kwargs)
 
     def visit_sequence(self, seq, **kwargs):
-        return self.dialect.identifier_preparer.format_sequence(seq) + ".NEXTVAL"
+        return self.preparer.format_sequence(seq) + ".NEXTVAL"
 
-    def visit_empty_set_expr(self, element_types):
+    def visit_empty_set_expr(self, element_types, **kwargs):
         return "SELECT %s FROM DUMMY WHERE 1 != 1" % (
             ", ".join(["1" for _ in element_types])
         )
@@ -197,6 +198,12 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             f"({left} IS NULL AND {right} IS NULL))"
         )
 
+    def visit_is_true_unary_operator(self, element, operator, **kw):
+        return "%s = TRUE" % self.process(element.element, **kw)
+
+    def visit_is_false_unary_operator(self, element, operator, **kw):
+        return "%s = FALSE" % self.process(element.element, **kw)
+
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_NUMERIC(self, type_):
@@ -225,7 +232,7 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
-    def visit_unique_constraint(self, constraint):
+    def visit_unique_constraint(self, constraint, **kwargs):
         if len(constraint) == 0:
             return ""
 
@@ -240,7 +247,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         text += self.define_constraint_deferrability(constraint)
         return text
 
-    def visit_create_table(self, create):
+    def visit_create_table(self, create, **kwargs):
         table = create.element
 
         # The table._prefixes list outlives the current compilation, meaning changing the list
@@ -267,13 +274,13 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq, type_):
-        seq = self.dialect.identifier_preparer.format_sequence(seq)
+        seq = self.identifier_preparer.format_sequence(seq)
         return self._execute_scalar("SELECT %s.NEXTVAL FROM DUMMY" % seq, type_)
 
 
 class HANAInspector(reflection.Inspector):
     def get_table_oid(self, table_name, schema=None):
-        return self.dialect.get_table_oid(
+        return self.get_table_oid(
             self.bind, table_name, schema, info_cache=self.info_cache
         )
 
@@ -320,6 +327,10 @@ class HANABaseDialect(default.DefaultDialect):
     supports_default_values = False
     supports_sane_multi_rowcount = False
     isolation_level = None
+    div_is_floordiv = False
+    supports_schemas = True
+    supports_sane_rowcount = False
+    supports_is_distinct_from = False
 
     max_identifier_length = 127
 
@@ -407,13 +418,17 @@ class HANABaseDialect(default.DefaultDialect):
             name = name.upper()
         return name
 
-    def has_table(self, connection, table_name, schema=None):
+    @reflection.cache
+    def has_table(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
         result = connection.execute(
             sql.text(
                 "SELECT 1 FROM SYS.TABLES "
-                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table",
+                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table "
+                "UNION ALL "
+                "SELECT 1 FROM SYS.VIEWS "
+                "WHERE SCHEMA_NAME=:schema AND VIEW_NAME=:table ",
             ).bindparams(
                 schema=self.denormalize_name(schema),
                 table=self.denormalize_name(table_name),
@@ -421,7 +436,33 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
-    def has_sequence(self, connection, sequence_name, schema=None):
+    @reflection.cache
+    def has_schema(self, connection, schema_name, **kwargs):
+        result = connection.execute(
+            sql.text(
+                "SELECT 1 FROM SYS.SCHEMAS WHERE SCHEMA_NAME=:schema",
+            ).bindparams(schema=self.denormalize_name(schema_name))
+        )
+        return bool(result.first())
+
+    @reflection.cache
+    def has_index(self, connection, table_name, index_name, schema=None, **kwargs):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT 1 FROM SYS.INDEXES "
+                "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND INDEX_NAME=:index"
+            ).bindparams(
+                schema=self.denormalize_name(schema),
+                table=self.denormalize_name(table_name),
+                index=self.denormalize_name(index_name),
+            )
+        )
+        return bool(result.first())
+
+    @reflection.cache
+    def has_sequence(self, connection, sequence_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
         result = connection.execute(
             sql.text(
@@ -434,11 +475,13 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
+    @reflection.cache
     def get_schema_names(self, connection, **kwargs):
         result = connection.execute(sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS"))
 
         return list([self.normalize_name(name) for name, in result.fetchall()])
 
+    @reflection.cache
     def get_table_names(self, connection, schema=None, **kwargs):
         schema = schema or self.default_schema_name
 
@@ -487,8 +530,7 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_view_definition(self, connection, view_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
-
-        return connection.execute(
+        result = connection.execute(
             sql.text(
                 "SELECT DEFINITION FROM SYS.VIEWS "
                 "WHERE VIEW_NAME=:view_name AND SCHEMA_NAME=:schema LIMIT 1",
@@ -498,8 +540,14 @@ class HANABaseDialect(default.DefaultDialect):
             )
         ).scalar()
 
+        if result is None:
+            raise exc.NoSuchTableError()
+        return result
+
     def get_columns(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
@@ -550,8 +598,22 @@ class HANABaseDialect(default.DefaultDialect):
 
         return columns
 
+    @reflection.cache
+    def get_sequence_names(self, connection, schema=None, **kwargs):
+        schema = schema or self.default_schema_name
+
+        result = connection.execute(
+            sql.text(
+                "SELECT SEQUENCE_NAME FROM SYS.SEQUENCES "
+                "WHERE SCHEMA_NAME=:schema ORDER BY SEQUENCE_NAME"
+            ).bindparams(schema=self.denormalize_name(schema))
+        )
+        return [self.normalize_name(row[0]) for row in result]
+
     def get_foreign_keys(self, connection, table_name, schema=None, **kwargs):
         lookup_schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, lookup_schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
@@ -579,7 +641,7 @@ class HANABaseDialect(default.DefaultDialect):
                 foreign_key = {
                     "name": foreign_key_name,
                     "constrained_columns": [self.normalize_name(row[1])],
-                    "referred_schema": schema,
+                    "referred_schema": None,
                     "referred_table": self.normalize_name(row[3]),
                     "referred_columns": [self.normalize_name(row[4])],
                     "options": {"onupdate": row[5], "ondelete": row[6]},
@@ -591,10 +653,12 @@ class HANABaseDialect(default.DefaultDialect):
                 foreign_keys[foreign_key_name] = foreign_key
                 foreign_keys_list.append(foreign_key)
 
-        return foreign_keys_list
+        return sorted(foreign_keys_list, key=lambda foreign_key: foreign_key["name"])
 
     def get_indexes(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
@@ -610,10 +674,11 @@ class HANABaseDialect(default.DefaultDialect):
 
         indexes = {}
         for name, column, constraint in result.fetchall():
-            if name.startswith("_SYS"):
+            if constraint == "PRIMARY KEY":
                 continue
 
-            name = self.normalize_name(name)
+            if not name.startswith("_SYS"):
+                name = self.normalize_name(name)
             column = self.normalize_name(column)
 
             if name not in indexes:
@@ -629,10 +694,12 @@ class HANABaseDialect(default.DefaultDialect):
             else:
                 indexes[name]["column_names"].append(column)
 
-        return list(indexes.values())
+        return sorted(list(indexes.values()), key=lambda index: index["name"])
 
     def get_pk_constraint(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
@@ -659,12 +726,14 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_unique_constraints(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
                 "SELECT CONSTRAINT_NAME, COLUMN_NAME FROM SYS.CONSTRAINTS "
                 "WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table AND "
-                "IS_UNIQUE_KEY='TRUE' AND IS_PRIMARY_KEY='FALSE'"
+                "IS_UNIQUE_KEY='TRUE' AND IS_PRIMARY_KEY='FALSE' "
                 "ORDER BY CONSTRAINT_NAME, POSITION"
             ).bindparams(
                 schema=self.denormalize_name(schema),
@@ -693,10 +762,15 @@ class HANABaseDialect(default.DefaultDialect):
                 constraints.append(constraint)
             constraint["column_names"].append(self.normalize_name(column_name))
 
-        return constraints
+        return sorted(
+            constraints,
+            key=lambda constraint: (constraint["name"] is not None, constraint["name"]),
+        )
 
     def get_check_constraints(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
@@ -736,6 +810,8 @@ class HANABaseDialect(default.DefaultDialect):
 
     def get_table_comment(self, connection, table_name, schema=None, **kwargs):
         schema = schema or self.default_schema_name
+        if not self.has_table(connection, table_name, schema, **kwargs):
+            raise exc.NoSuchTableError()
 
         result = connection.execute(
             sql.text(
