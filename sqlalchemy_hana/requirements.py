@@ -1,3 +1,5 @@
+"""SQLAlchemy requirements for testing."""
+
 from __future__ import annotations
 
 from sqlalchemy.testing import exclusions, requirements

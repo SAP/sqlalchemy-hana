@@ -1,3 +1,6 @@
+"""SAP HANA isolation level testing."""
+
+
 from __future__ import annotations
 
 import sqlalchemy
@@ -13,12 +16,12 @@ class IsolationLevelTest(sqlalchemy.testing.fixtures.TestBase):
         return "SERIALIZABLE"
 
     def test_get_isolation_level(self):
-        eng = sqlalchemy.testing.engines.testing_engine(options=dict())
+        eng = sqlalchemy.testing.engines.testing_engine(options={})
         isolation_level = eng.dialect.get_isolation_level(eng.connect().connection)
         eq_(isolation_level, self._default_isolation_level())
 
     def test_set_isolation_level(self):
-        eng = sqlalchemy.testing.engines.testing_engine(options=dict())
+        eng = sqlalchemy.testing.engines.testing_engine(options={})
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
@@ -36,7 +39,7 @@ class IsolationLevelTest(sqlalchemy.testing.fixtures.TestBase):
         conn.close()
 
     def test_reset_level(self):
-        eng = sqlalchemy.testing.engines.testing_engine(options=dict())
+        eng = sqlalchemy.testing.engines.testing_engine(options={})
         conn = eng.connect()
         eq_(
             eng.dialect.get_isolation_level(conn.connection),
@@ -60,7 +63,7 @@ class IsolationLevelTest(sqlalchemy.testing.fixtures.TestBase):
 
     def test_set_level_with_setting(self):
         eng = sqlalchemy.testing.engines.testing_engine(
-            options=dict(isolation_level=self._non_default_isolation_level())
+            options={"isolation_level": self._non_default_isolation_level()}
         )
         conn = eng.connect()
         eq_(
@@ -79,13 +82,13 @@ class IsolationLevelTest(sqlalchemy.testing.fixtures.TestBase):
 
     def test_invalid_level(self):
         eng = sqlalchemy.testing.engines.testing_engine(
-            options=dict(isolation_level="FOO")
+            options={"isolation_level": "FOO"}
         )
+        levels = ", ".join(eng.dialect._isolation_lookup)
         sqlalchemy.testing.assert_raises_message(
             sqlalchemy.exc.ArgumentError,
-            "Invalid value '%s' for isolation_level. "
-            "Valid isolation levels for %s are %s"
-            % ("FOO", eng.dialect.name, ", ".join(eng.dialect._isolation_lookup)),
+            "Invalid value 'FOO' for isolation_level. "
+            f"Valid isolation levels for {eng.dialect.name} are {levels}",
             eng.connect,
         )
 

@@ -31,7 +31,13 @@ classifiers = [
 dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli"]
 
 [project.optional-dependencies]
-dev = ["isort==5.12.0", "black==23.9.1", "pre-commit==3.5.0", "flake8==6.1.0"]
+dev = [
+    "isort==5.12.0",
+    "black==23.9.1",
+    "pre-commit==3.5.0",
+    "flake8==6.1.0",
+    "pylint==3.0.2",
+]
 test = [
     "pytest==7.4.2",
     "pytest-cov==4.1.0",
@@ -69,3 +75,38 @@ filterwarnings = ["ignore"]
 [tool.diff_cover]
 include_untracked = true
 fail_under = 80
+
+[tool.pylint.master]
+max-line-length = 100
+
+[tool.pylint."messages control"]
+enable = ["all"]
+disable = [
+    # ignore fixme comments
+    "fixme",
+    # allow disables
+    "locally-disabled",
+    "suppressed-message",
+    "file-ignored",
+    # allow missing docstrings
+    "missing-class-docstring",
+    "missing-function-docstring",
+    # many false positives
+    "abstract-method",
+    "assignment-from-none",
+    # we need them for the dialect
+    "unused-argument",
+    "protected-access",
+    "not-callable",
+    "no-member",
+    # explicit is better than implicit
+    "use-implicit-booleaness-not-comparison-to-zero",
+    # ignore too-* checks
+    "too-many-ancestors",
+    "too-few-public-methods",
+    "too-many-public-methods",
+    "too-many-function-args",
+]
+
+[tool.pylint.basic]
+good-names = ["visit_TINYINT"]

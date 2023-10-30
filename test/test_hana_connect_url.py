@@ -1,3 +1,5 @@
+"""SAP HANA URL testing."""
+
 from __future__ import annotations
 
 import sqlalchemy.testing

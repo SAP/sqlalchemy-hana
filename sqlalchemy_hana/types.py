@@ -1,3 +1,5 @@
+"""SAP HANA types."""
+
 from __future__ import annotations
 
 from sqlalchemy import types as sqltypes
@@ -21,7 +23,7 @@ class DATE(sqltypes.Date):
         self.bind_processor(dialect)
 
         def process(value):
-            return "to_date('%s')" % value
+            return f"to_date('{value}')"
 
         return process
 
@@ -31,7 +33,7 @@ class TIME(sqltypes.Time):
         self.bind_processor(dialect)
 
         def process(value):
-            return "to_time('%s')" % value
+            return f"to_time('{value}')"
 
         return process
 
@@ -41,12 +43,12 @@ class TIMESTAMP(sqltypes.DateTime):
         self.bind_processor(dialect)
 
         def process(value):
-            return "to_timestamp('%s')" % value
+            return f"to_timestamp('{value}')"
 
         return process
 
 
-class _LOBMixin(object):
+class _LOBMixin:
     def result_processor(self, dialect, coltype):
         if not dialect.auto_convert_lobs:
             # Disable processor and return raw DBAPI LOB type
@@ -84,12 +86,11 @@ class HanaUnicodeText(_LOBMixin, sqltypes.UnicodeText):
 
         if string_processor is None:
             return lob_processor
-        else:
 
-            def process(value):
-                return string_processor(lob_processor(value))
+        def process(value):
+            return string_processor(lob_processor(value))
 
-            return process
+        return process
 
 
 class HanaBinary(_LOBMixin, sqltypes.LargeBinary):

@@ -1,3 +1,6 @@
+# pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+"""Pytest test configuration."""
+
 from __future__ import annotations
 
 import logging

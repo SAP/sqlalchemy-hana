@@ -1,3 +1,5 @@
+"""Script to setup/teardown a test session."""
+
 from __future__ import annotations
 
 import random
