@@ -650,7 +650,6 @@ class HANABaseDialect(default.DefaultDialect):
                 if row[2] != self.denormalize_name(self.default_schema_name):
                     foreign_key["referred_schema"] = self.normalize_name(row[2])
 
-
                 foreign_keys[foreign_key_name] = foreign_key
                 foreign_keys_list.append(foreign_key)
 
