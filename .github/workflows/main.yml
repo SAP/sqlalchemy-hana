@@ -1,4 +1,5 @@
 name: CI
+concurrency: hana-tests
 
 on:
   push:
@@ -21,7 +22,6 @@ jobs:
       - name: run pre-commit
         run: "pre-commit run --all"
   ci-test:
-    concurrency: hana-tests
     if: ${{ github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
