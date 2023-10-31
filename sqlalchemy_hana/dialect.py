@@ -8,42 +8,38 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
 
 import hdbcli.dbapi
-from sqlalchemy import (
-    URL,
+import sqlalchemy
+from sqlalchemy import Integer, Sequence, exc, sql, types, util
+from sqlalchemy.engine import Connection, default, reflection
+from sqlalchemy.sql import Select, compiler
+from sqlalchemy.sql.elements import (
     BinaryExpression,
     BindParameter,
-    Connection,
-    Integer,
-    PoolProxiedConnection,
-    Select,
-    Sequence,
     UnaryExpression,
-    exc,
-    sql,
-    types,
-    util,
+    quoted_name,
 )
-from sqlalchemy.engine import ConnectArgsType, default, reflection
-from sqlalchemy.engine.interfaces import (
-    DBAPIConnection,
-    DBAPICursor,
-    ReflectedCheckConstraint,
-    ReflectedColumn,
-    ReflectedForeignKeyConstraint,
-    ReflectedIndex,
-    ReflectedPrimaryKeyConstraint,
-    ReflectedTableComment,
-    ReflectedUniqueConstraint,
-)
-from sqlalchemy.schema import ColumnCollectionConstraint, CreateTable
-from sqlalchemy.sql import compiler
-from sqlalchemy.sql.elements import quoted_name
-from sqlalchemy.sql.selectable import ForUpdateArg
 
 from sqlalchemy_hana import types as hana_types
 
 if TYPE_CHECKING:
     from typing import ParamSpec, TypeVar
+
+    from sqlalchemy import PoolProxiedConnection
+    from sqlalchemy.engine import ConnectArgsType
+    from sqlalchemy.engine.interfaces import (
+        DBAPIConnection,
+        DBAPICursor,
+        ReflectedCheckConstraint,
+        ReflectedColumn,
+        ReflectedForeignKeyConstraint,
+        ReflectedIndex,
+        ReflectedPrimaryKeyConstraint,
+        ReflectedTableComment,
+        ReflectedUniqueConstraint,
+    )
+    from sqlalchemy.engine.url import URL
+    from sqlalchemy.schema import ColumnCollectionConstraint, CreateTable
+    from sqlalchemy.sql.selectable import ForUpdateArg
 
     RET = TypeVar("RET")
     PARAM = ParamSpec("PARAM")
@@ -136,6 +132,14 @@ RESERVED_WORDS = {
     "with",
 }
 
+if sqlalchemy.__version__ < "2.0":
+    # sqlalchemy 1.4 does not like annotations and caching
+    def cache(func: Callable[PARAM, RET]) -> Callable[PARAM, RET]:
+        return func
+
+else:
+    cache = reflection.cache  # type:ignore[assignment]
+
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
     reserved_words = RESERVED_WORDS
@@ -183,7 +187,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         return text
 
     def for_update_clause(self, select: Select[Any], **kw: Any) -> str:
-        for_update = cast(ForUpdateArg, select._for_update_arg)
+        for_update = cast("ForUpdateArg", select._for_update_arg)
         if for_update.read:
             # The HANA does not allow other parameters for FOR SHARE LOCK
             tmp = " FOR SHARE LOCK"
@@ -493,7 +497,7 @@ class HANABaseDialect(default.DefaultDialect):
             name = name.upper()
         return name
 
-    @reflection.cache
+    @cache
     def has_table(
         self,
         connection: Connection,
@@ -517,7 +521,7 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
-    @reflection.cache
+    @cache
     def has_schema(self, connection: Connection, schema_name: str, **kw: Any) -> bool:
         result = connection.execute(
             sql.text(
@@ -526,7 +530,7 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
-    @reflection.cache
+    @cache
     def has_index(
         self,
         connection: Connection,
@@ -549,7 +553,7 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
-    @reflection.cache
+    @cache
     def has_sequence(
         self,
         connection: Connection,
@@ -569,13 +573,13 @@ class HANABaseDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
-    @reflection.cache
+    @cache
     def get_schema_names(self, connection: Connection, **kw: Any) -> list[str]:
         result = connection.execute(sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS"))
 
         return list(self.normalize_name(name) for name, in result.fetchall())
 
-    @reflection.cache
+    @cache
     def get_table_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -705,11 +709,11 @@ class HANABaseDialect(default.DefaultDialect):
             elif column["type"] == types.NVARCHAR:
                 column["type"] = types.NVARCHAR(row[4])
 
-            columns.append(cast(ReflectedColumn, column))
+            columns.append(cast("ReflectedColumn", column))
 
         return columns
 
-    @reflection.cache
+    @cache
     def get_sequence_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:

@@ -6,8 +6,8 @@ from datetime import date, datetime, time
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
 
-from sqlalchemy import Dialect
 from sqlalchemy import types as sqltypes
+from sqlalchemy.engine import Dialect
 
 if TYPE_CHECKING:
     from sqlalchemy_hana.dialect import HANABaseDialect
@@ -17,7 +17,7 @@ class TINYINT(sqltypes.Integer):
     __visit_name__ = "TINYINT"
 
 
-class DOUBLE(sqltypes.Float[float]):
+class DOUBLE(sqltypes.Float):  # type:ignore[type-arg]
     __visit_name__ = "DOUBLE"
 
 

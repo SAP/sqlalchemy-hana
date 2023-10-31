@@ -218,3 +218,7 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def graceful_disconnects(self) -> compound:
         return exclusions.open()
+
+    @property
+    def uuid_data_type(self) -> compound:
+        return exclusions.closed()
