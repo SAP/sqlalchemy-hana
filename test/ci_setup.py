@@ -22,7 +22,8 @@ def random_string(length: int) -> str:
 def setup(dburi: str) -> str:
     url = urlsplit(dburi)
     user = f"PYTEST_{random_string(10)}"
-    password = random_string(15)
+    # always fulfill the password policy
+    password = random_string(15) + "A1a"
 
     with closing(
         dbapi.connect(url.hostname, url.port, url.username, url.password)

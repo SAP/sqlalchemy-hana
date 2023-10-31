@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import column, table
 class HANACompileTest(
     sqlalchemy.testing.fixtures.TestBase, sqlalchemy.testing.AssertsCompiledSQL
 ):
-    def test_sql_with_for_update(self):
+    def test_sql_with_for_update(self) -> None:
         table1 = table("mytable", column("myid"), column("name"), column("description"))
 
         self.assert_compile(

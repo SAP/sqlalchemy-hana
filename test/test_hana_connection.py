@@ -9,11 +9,11 @@ from hdbcli.dbapi import Error
 
 
 class HANAHDBCLIConnectionIsDisconnectedTest(sqlalchemy.testing.fixtures.TestBase):
-    def test_detection_by_error_code(self):
+    def test_detection_by_error_code(self) -> None:
         dialect = sqlalchemy.testing.db.dialect
         assert dialect.is_disconnect(Error(-10709, "Connect failed"), None, None)
 
-    def test_detection_by_isconnected_function(self):
+    def test_detection_by_isconnected_function(self) -> None:
         dialect = sqlalchemy.testing.db.dialect
 
         mock_connection = Mock(isconnected=Mock(return_value=False))
