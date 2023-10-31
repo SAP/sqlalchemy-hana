@@ -996,6 +996,7 @@ class HANABaseDialect(default.DefaultDialect):
 class HANAHDBCLIDialect(HANABaseDialect):
     driver = "hdbcli"
     default_paramstyle = "qmark"
+    supports_statement_cache = False
 
     @classmethod
     def dbapi(  # type:ignore[override] # pylint:disable=method-hidden
