@@ -37,6 +37,8 @@ dev = [
     "pre-commit==3.5.0",
     "flake8==6.1.0",
     "pylint==3.0.2",
+    "mypy==1.6.1",
+    "types-hdbcli==2.18.0.0",
 ]
 test = [
     "pytest==7.4.2",
@@ -106,7 +108,25 @@ disable = [
     "too-few-public-methods",
     "too-many-public-methods",
     "too-many-function-args",
+    "too-many-lines",
 ]
 
 [tool.pylint.basic]
 good-names = ["visit_TINYINT"]
+
+[tool.mypy]
+# formatting
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+# checks
+strict = true
+strict_optional = true
+warn_no_return = true
+warn_return_any = false
+# allow calls to untyped functions
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+ignore_errors = true
+module = ["test.*"]

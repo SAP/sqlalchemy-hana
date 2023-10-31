@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 
 import pytest
-from sqlalchemy import Column, Sequence, event
+from sqlalchemy import Column, Sequence, Table, event
 from sqlalchemy.dialects import registry
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
@@ -17,7 +17,7 @@ pytest.register_assert_rewrite("sqlalchemy.testing.assertions")
 
 
 @event.listens_for(Column, "after_parent_attach")
-def add_test_seq(column, table):
+def add_test_seq(column: Column, table: Table) -> None:
     if column.info.get("test_needs_autoincrement", False):
         column._init_items(Sequence(table.name + "_" + column.name + "_seq"))
 

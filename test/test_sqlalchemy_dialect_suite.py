@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from sqlalchemy.testing.provision import temp_table_keyword_args
 from sqlalchemy.testing.suite import *  # noqa: F401, F403
 
@@ -12,7 +14,7 @@ from sqlalchemy.testing.suite import *  # noqa: F401, F403
 
 
 @temp_table_keyword_args.for_db("*")
-def _temp_table_keyword_args(*args, **kwargs):
+def _temp_table_keyword_args(*args: Any, **kwargs: Any) -> dict[str, list[str]]:
     return {
         "prefixes": ["GLOBAL TEMPORARY"],
     }
