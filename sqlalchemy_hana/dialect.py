@@ -11,7 +11,7 @@ import hdbcli.dbapi
 import sqlalchemy
 from sqlalchemy import Integer, Sequence, exc, sql, types, util
 from sqlalchemy.engine import Connection, default, reflection
-from sqlalchemy.sql import Select, compiler
+from sqlalchemy.sql import Select, compiler, sqltypes
 from sqlalchemy.sql.elements import (
     BinaryExpression,
     BindParameter,
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     )
     from sqlalchemy.engine.url import URL
     from sqlalchemy.schema import ColumnCollectionConstraint, CreateTable
+    from sqlalchemy.sql.elements import ExpressionClauseList
     from sqlalchemy.sql.selectable import ForUpdateArg
 
     RET = TypeVar("RET")
@@ -259,6 +260,48 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
         return f"{self.process(element.element, **kw)} = FALSE"
+
+    def _regexp_match(
+        self, op: str, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        flags = binary.modifiers["flags"]  # type:ignore[index]
+        left = self.process(binary.left)
+        right = self.process(binary.right)
+
+        statement = f"{left} {op} {right}"
+        if flags:
+            statement += (
+                f" FLAG {self.render_literal_value(flags, sqltypes.STRINGTYPE)}"
+            )
+        return statement
+
+    def visit_regexp_match_op_binary(
+        self, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        return self._regexp_match("LIKE_REGEXPR", binary, operator, **kw)
+
+    def visit_not_regexp_match_op_binary(
+        self, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        return self._regexp_match("NOT LIKE_REGEXPR", binary, operator, **kw)
+
+    def visit_regexp_replace_op_binary(
+        self, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        flags = binary.modifiers["flags"]  # type:ignore[index]
+        clauses = cast("ExpressionClauseList[Any]", binary.right).clauses
+
+        within = self.process(binary.left)
+        pattern = self.process(clauses[0])
+        replacement = self.process(clauses[1])
+
+        statement = f"REPLACE_REGEXPR({pattern}"
+        if flags:
+            statement += (
+                f" FLAG {self.render_literal_value(flags, sqltypes.STRINGTYPE)}"
+            )
+        statement += f" IN {within} WITH {replacement})"
+        return statement
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
