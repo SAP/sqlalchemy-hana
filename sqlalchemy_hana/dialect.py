@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from contextlib import closing
-from functools import wraps
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
 
@@ -1083,34 +1082,3 @@ class HANAHDBCLIDialect(HANABaseDialect):
             if e.errorcode == -10709:
                 return True
         return super().is_disconnect(e, connection, cursor)
-
-
-def _fix_integrity_error(f: Callable[PARAM, RET]) -> Callable[PARAM, RET]:
-    """Ensure raising of IntegrityError on unique constraint violations.
-
-    In earlier versions of hdbcli it doesn't raise the hdbcli.dbapi.IntegrityError
-    exception for unique constraint violations. To support also older versions
-    of hdbcli this decorator inspects the raised exception and will rewrite the
-    exception based on HANA's error code.
-    """
-
-    @wraps(f)
-    def wrapper(*args: PARAM.args, **kw: PARAM.kwargs) -> RET:
-        try:
-            return f(*args, **kw)
-        except hdbcli.dbapi.Error as err:
-            if err.errorcode == 301 and not isinstance(
-                err, hdbcli.dbapi.IntegrityError
-            ):
-                raise hdbcli.dbapi.IntegrityError(err)
-            raise
-
-    return wrapper
-
-
-for method in ("do_execute", "do_executemany", "do_execute_no_params"):
-    setattr(
-        HANAHDBCLIDialect,
-        method,
-        _fix_integrity_error(getattr(HANAHDBCLIDialect, method)),
-    )
