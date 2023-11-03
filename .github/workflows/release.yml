@@ -31,8 +31,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
     - name: Determine version
       run: |
-        tag="${GITHUB_REF#refs/*/}"
-        version="${tag:1}"
+        version="${GITHUB_REF_NAME:1}"
         echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
     - name: Release on GitHub
       uses: softprops/action-gh-release@v1
