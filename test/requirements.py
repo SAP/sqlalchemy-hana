@@ -222,3 +222,11 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def uuid_data_type(self) -> compound:
         return exclusions.closed()
+
+    @property
+    def regexp_match(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def regexp_replace(self) -> compound:
+        return exclusions.open()
