@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli"]
+dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli~=2.10"]
 
 [project.optional-dependencies]
 dev = [
