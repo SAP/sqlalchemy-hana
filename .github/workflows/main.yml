@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install project
-        run: pip install -e .[dev,test]
+        run: pip install -e .[dev,test,alembic]
       - name: run pre-commit
         run: "pre-commit run --all"
   ci-test:

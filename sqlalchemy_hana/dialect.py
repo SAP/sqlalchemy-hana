@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from contextlib import closing
 from functools import wraps
 from types import ModuleType
@@ -9,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 
 import hdbcli.dbapi
 import sqlalchemy
-from sqlalchemy import Integer, Sequence, exc, sql, types, util
+from sqlalchemy import Integer, PrimaryKeyConstraint, Sequence, exc, sql, types, util
 from sqlalchemy.engine import Connection, default, reflection
 from sqlalchemy.sql import Select, compiler
 from sqlalchemy.sql.elements import (
@@ -38,11 +39,21 @@ if TYPE_CHECKING:
         ReflectedUniqueConstraint,
     )
     from sqlalchemy.engine.url import URL
-    from sqlalchemy.schema import ColumnCollectionConstraint, CreateTable
+    from sqlalchemy.schema import (
+        ColumnCollectionConstraint,
+        CreateTable,
+        DropConstraint,
+    )
     from sqlalchemy.sql.selectable import ForUpdateArg
 
     RET = TypeVar("RET")
     PARAM = ParamSpec("PARAM")
+
+with contextlib.suppress(ImportError):
+    # pylint: disable=unused-import
+    import alembic  # noqa: F401
+
+    import sqlalchemy_hana.alembic  # noqa: F401
 
 RESERVED_WORDS = {
     "all",
@@ -328,6 +339,12 @@ class HANADDLCompiler(compiler.DDLCompiler):
             table._prefixes.pop(appended_index)
 
         return result
+
+    def visit_drop_constraint(self, drop: DropConstraint, **kw: Any) -> str:
+        if isinstance(drop.element, PrimaryKeyConstraint):
+            table = self.preparer.format_table(drop.element.table)
+            return f"ALTER TABLE {table} DROP PRIMARY KEY"
+        return super().visit_drop_constraint(drop, **kw)
 
 
 class HANAExecutionContext(default.DefaultExecutionContext):

@@ -58,3 +58,6 @@ sftp-config.json
 ### VisualStudioCode ###
 .vscode/*
 *.code-workspace
+
+### alembic testing ###
+scratch/

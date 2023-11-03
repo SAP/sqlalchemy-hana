@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from sqlalchemy.testing import exclusions, requirements
+from alembic.testing.requirements import SuiteRequirements as TestRequirements
+from sqlalchemy.testing import exclusions
 from sqlalchemy.testing.config import Config
 from sqlalchemy.testing.exclusions import compound
 
 
-class Requirements(requirements.SuiteRequirements):
+class Requirements(TestRequirements):
     @property
     def views(self) -> compound:
         return exclusions.open()
@@ -222,3 +223,32 @@ class Requirements(requirements.SuiteRequirements):
     @property
     def uuid_data_type(self) -> compound:
         return exclusions.closed()
+
+    # alembic
+
+    @property
+    def fk_ondelete_noaction(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def autocommit_isolation(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def unique_constraint_reflection(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def reflects_fk_options(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def fk_ondelete_is_reflected(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def fk_onupdate_is_reflected(self) -> compound:
+        return exclusions.open()
+
+
+# TODO computed_
