@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from alembic.testing.requirements import SuiteRequirements as TestRequirements
+from alembic.testing.requirements import SuiteRequirements as AlembicRequirements
 from sqlalchemy.testing import exclusions
 from sqlalchemy.testing.config import Config
 from sqlalchemy.testing.exclusions import compound
+from sqlalchemy.testing.requirements import SuiteRequirements as SQLAlchemyRequirements
 
 
-class Requirements(TestRequirements):
+class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def views(self) -> compound:
         return exclusions.open()
