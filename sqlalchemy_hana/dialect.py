@@ -328,6 +328,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_unicode_text(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return self.visit_NCLOB(type_, **kw)
 
+    def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        return "SMALLDECIMAL"
+
 
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(
