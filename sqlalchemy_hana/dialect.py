@@ -999,11 +999,12 @@ class HANAHDBCLIDialect(HANABaseDialect):
     supports_statement_cache = False
 
     @classmethod
-    def dbapi(  # type:ignore[override] # pylint:disable=method-hidden
-        cls,
-    ) -> ModuleType:
+    def import_dbapi(cls) -> ModuleType:
         hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
         return hdbcli.dbapi
+
+    if sqlalchemy.__version__ < "2":
+        dbapi = import_dbapi  # type:ignore[assignment]
 
     def create_connect_args(self, url: URL) -> ConnectArgsType:
         if url.host and url.host.lower().startswith("userkey="):
