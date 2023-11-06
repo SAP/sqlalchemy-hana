@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import contextlib
 from contextlib import closing
-from functools import wraps
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
 
@@ -12,7 +11,7 @@ import hdbcli.dbapi
 import sqlalchemy
 from sqlalchemy import Integer, PrimaryKeyConstraint, Sequence, exc, sql, types, util
 from sqlalchemy.engine import Connection, default, reflection
-from sqlalchemy.sql import Select, compiler
+from sqlalchemy.sql import Select, compiler, sqltypes
 from sqlalchemy.sql.elements import (
     BinaryExpression,
     BindParameter,
@@ -44,6 +43,7 @@ if TYPE_CHECKING:
         CreateTable,
         DropConstraint,
     )
+    from sqlalchemy.sql.elements import ExpressionClauseList
     from sqlalchemy.sql.selectable import ForUpdateArg
 
     RET = TypeVar("RET")
@@ -143,7 +143,7 @@ RESERVED_WORDS = {
     "with",
 }
 
-if sqlalchemy.__version__ < "2.0":
+if sqlalchemy.__version__ < "2":  # pragma: no cover
     # sqlalchemy 1.4 does not like annotations and caching
     def cache(func: Callable[PARAM, RET]) -> Callable[PARAM, RET]:
         return func
@@ -271,6 +271,48 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     ) -> str:
         return f"{self.process(element.element, **kw)} = FALSE"
 
+    def _regexp_match(
+        self, op: str, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        flags = binary.modifiers["flags"]  # type:ignore[index]
+        left = self.process(binary.left)
+        right = self.process(binary.right)
+
+        statement = f"{left} {op} {right}"
+        if flags:
+            statement += (
+                f" FLAG {self.render_literal_value(flags, sqltypes.STRINGTYPE)}"
+            )
+        return statement
+
+    def visit_regexp_match_op_binary(
+        self, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        return self._regexp_match("LIKE_REGEXPR", binary, operator, **kw)
+
+    def visit_not_regexp_match_op_binary(
+        self, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        return self._regexp_match("NOT LIKE_REGEXPR", binary, operator, **kw)
+
+    def visit_regexp_replace_op_binary(
+        self, binary: BinaryExpression[Any], operator: Any, **kw: Any
+    ) -> str:
+        flags = binary.modifiers["flags"]  # type:ignore[index]
+        clauses = cast("ExpressionClauseList[Any]", binary.right).clauses
+
+        within = self.process(binary.left)
+        pattern = self.process(clauses[0])
+        replacement = self.process(clauses[1])
+
+        statement = f"REPLACE_REGEXPR({pattern}"
+        if flags:
+            statement += (
+                f" FLAG {self.render_literal_value(flags, sqltypes.STRINGTYPE)}"
+            )
+        statement += f" IN {within} WITH {replacement})"
+        return statement
+
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_NUMERIC(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
@@ -296,6 +338,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_unicode_text(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return self.visit_NCLOB(type_, **kw)
+
+    def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        return "SMALLDECIMAL"
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -354,7 +399,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 
 
 class HANAInspector(reflection.Inspector):
-    dialect: HANABaseDialect
+    dialect: HANAHDBCLIDialect
 
     def get_table_oid(self, table_name: str, schema: str | None = None) -> int:
         return self.dialect.get_table_oid(
@@ -365,9 +410,10 @@ class HANAInspector(reflection.Inspector):
         )
 
 
-class HANABaseDialect(default.DefaultDialect):
+class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
-    default_paramstyle = "format"
+    driver = "hdbcli"
+    default_paramstyle = "qmark"
 
     statement_compiler = HANAStatementCompiler
     type_compiler = HANATypeCompiler
@@ -382,12 +428,12 @@ class HANABaseDialect(default.DefaultDialect):
     convert_unicode = False
     supports_unicode_statements = True
     supports_unicode_binds = True
-    requires_name_normalize = True
-
     supports_sequences = True
     supports_native_decimal = True
-
     supports_comments = True
+    supports_statement_cache = False
+
+    requires_name_normalize = True
 
     colspecs = {
         types.Boolean: hana_types.BOOLEAN,
@@ -425,6 +471,36 @@ class HANABaseDialect(default.DefaultDialect):
         self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
 
+    @classmethod
+    def import_dbapi(cls) -> ModuleType:
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
+        return hdbcli.dbapi
+
+    if sqlalchemy.__version__ < "2":  # pragma: no cover
+        dbapi = import_dbapi  # type:ignore[assignment]
+
+    def create_connect_args(self, url: URL) -> ConnectArgsType:
+        if url.host and url.host.lower().startswith("userkey="):
+            kwargs = url.translate_connect_args(host="userkey")
+            userkey = url.host[len("userkey=") : len(url.host)]
+            kwargs["userkey"] = userkey
+        else:
+            kwargs = url.translate_connect_args(
+                host="address", username="user", database="databaseName"
+            )
+            kwargs.update(url.query)
+            port = 30015
+            if kwargs.get("databaseName"):
+                port = 30013
+            kwargs.setdefault("port", port)
+
+        return (), kwargs
+
+    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
+        connection = super().connect(*args, **kw)
+        connection.setautocommit(False)
+        return connection
+
     def on_connect(self) -> Callable[[DBAPIConnection], None] | None:
         if self.isolation_level is not None:
 
@@ -434,6 +510,20 @@ class HANABaseDialect(default.DefaultDialect):
 
             return connect
         return None
+
+    def is_disconnect(
+        self,
+        e: Exception,
+        connection: PoolProxiedConnection | DBAPIConnection | None,
+        cursor: DBAPICursor | None,
+    ) -> bool:
+        if connection:
+            dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
+            return not dbapi_connection.isconnected()
+        if isinstance(e, hdbcli.dbapi.Error):
+            if e.errorcode == -10709:
+                return True
+        return super().is_disconnect(e, connection, cursor)
 
     _isolation_lookup = {
         "SERIALIZABLE",
@@ -1008,83 +1098,3 @@ class HANABaseDialect(default.DefaultDialect):
         )
 
         return {"text": result.scalar()}
-
-
-class HANAHDBCLIDialect(HANABaseDialect):
-    driver = "hdbcli"
-    default_paramstyle = "qmark"
-    supports_statement_cache = False
-
-    @classmethod
-    def dbapi(  # type:ignore[override] # pylint:disable=method-hidden
-        cls,
-    ) -> ModuleType:
-        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
-        return hdbcli.dbapi
-
-    def create_connect_args(self, url: URL) -> ConnectArgsType:
-        if url.host and url.host.lower().startswith("userkey="):
-            kwargs = url.translate_connect_args(host="userkey")
-            userkey = url.host[len("userkey=") : len(url.host)]
-            kwargs["userkey"] = userkey
-        else:
-            kwargs = url.translate_connect_args(
-                host="address", username="user", database="databaseName"
-            )
-            kwargs.update(url.query)
-            port = 30015
-            if kwargs.get("databaseName"):
-                port = 30013
-            kwargs.setdefault("port", port)
-
-        return (), kwargs
-
-    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
-        connection = super().connect(*args, **kw)
-        connection.setautocommit(False)
-        return connection
-
-    def is_disconnect(
-        self,
-        e: Exception,
-        connection: PoolProxiedConnection | DBAPIConnection | None,
-        cursor: DBAPICursor | None,
-    ) -> bool:
-        if connection:
-            dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
-            return not dbapi_connection.isconnected()
-        if isinstance(e, hdbcli.dbapi.Error):
-            if e.errorcode == -10709:
-                return True
-        return super().is_disconnect(e, connection, cursor)
-
-
-def _fix_integrity_error(f: Callable[PARAM, RET]) -> Callable[PARAM, RET]:
-    """Ensure raising of IntegrityError on unique constraint violations.
-
-    In earlier versions of hdbcli it doesn't raise the hdbcli.dbapi.IntegrityError
-    exception for unique constraint violations. To support also older versions
-    of hdbcli this decorator inspects the raised exception and will rewrite the
-    exception based on HANA's error code.
-    """
-
-    @wraps(f)
-    def wrapper(*args: PARAM.args, **kw: PARAM.kwargs) -> RET:
-        try:
-            return f(*args, **kw)
-        except hdbcli.dbapi.Error as err:
-            if err.errorcode == 301 and not isinstance(
-                err, hdbcli.dbapi.IntegrityError
-            ):
-                raise hdbcli.dbapi.IntegrityError(err)
-            raise
-
-    return wrapper
-
-
-for method in ("do_execute", "do_executemany", "do_execute_no_params"):
-    setattr(
-        HANAHDBCLIDialect,
-        method,
-        _fix_integrity_error(getattr(HANAHDBCLIDialect, method)),
-    )

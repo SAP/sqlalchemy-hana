@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli"]
+dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli~=2.10"]
 
 [project.optional-dependencies]
 dev = [
@@ -73,9 +73,18 @@ add_imports = ["from __future__ import annotations"]
 [tool.pytest.ini_options]
 log_level = "DEBUG"
 xfail_strict = true
-filterwarnings = ["ignore"]
+filterwarnings = [
+    # all warnings are errors
+    "error",
+]
+markers = [
+    # used by sqlalchemy; registered to avoid warnings
+    "backend: used by sqlalchemy",
+    "mypy: used by sqlalchemy",
+]
 
 [tool.diff_cover]
+addopts = "--strict-markers"
 include_untracked = true
 fail_under = 80
 
@@ -113,7 +122,7 @@ disable = [
 ]
 
 [tool.pylint.basic]
-good-names = ["visit_TINYINT"]
+good-names = ["visit_TINYINT", "visit_SMALLDECIMAL"]
 
 [tool.mypy]
 # formatting

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from datetime import date, datetime, time
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, Literal, cast
 
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
 
 if TYPE_CHECKING:
-    from sqlalchemy_hana.dialect import HANABaseDialect
+    from sqlalchemy_hana.dialect import HANAHDBCLIDialect
 
 
 class TINYINT(sqltypes.Integer):
@@ -19,6 +19,23 @@ class TINYINT(sqltypes.Integer):
 
 class DOUBLE(sqltypes.Float):  # type:ignore[type-arg]
     __visit_name__ = "DOUBLE"
+
+
+class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
+    __visit_name__ = "SMALLDECIMAL"
+
+    def __init__(
+        self,
+        decimal_return_scale: int | None = None,
+        asdecimal: Literal[True] | Literal[False] = True,
+    ) -> None:
+        # SMALLDECIMAL does not return scale and precision
+        super().__init__(
+            precision=None,
+            scale=None,
+            decimal_return_scale=decimal_return_scale,
+            asdecimal=asdecimal,
+        )
 
 
 class BOOLEAN(sqltypes.Boolean):
@@ -60,7 +77,7 @@ class _LOBMixin:
     def result_processor(
         self, dialect: Dialect, coltype: object
     ) -> Callable[[Any], Any] | None:
-        dialect = cast("HANABaseDialect", dialect)
+        dialect = cast("HANAHDBCLIDialect", dialect)
         if not dialect.auto_convert_lobs:
             # Disable processor and return raw DBAPI LOB type
             return None

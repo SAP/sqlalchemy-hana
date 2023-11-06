@@ -12,13 +12,13 @@ from sqlalchemy import testing
 from sqlalchemy.testing import fixtures
 
 from sqlalchemy_hana.alembic import HANAImpl
-from sqlalchemy_hana.dialect import HANABaseDialect
+from sqlalchemy_hana.dialect import HANAHDBCLIDialect
 
 
 class AlembicHANATest(fixtures.TestBase):
     def test_configure_hana_migration_context(self):
         context = MigrationContext.configure(url="hana://localhost:30015")
-        assert isinstance(context.dialect, HANABaseDialect)
+        assert isinstance(context.dialect, HANAHDBCLIDialect)
         assert isinstance(context.impl, HANAImpl)
 
 

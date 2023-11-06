@@ -225,6 +225,14 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     def uuid_data_type(self) -> compound:
         return exclusions.closed()
 
+    @property
+    def regexp_match(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def regexp_replace(self) -> compound:
+        return exclusions.open()
+
     # alembic
 
     @property
@@ -250,6 +258,3 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def fk_onupdate_is_reflected(self) -> compound:
         return exclusions.open()
-
-
-# TODO computed_
