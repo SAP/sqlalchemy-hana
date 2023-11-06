@@ -180,6 +180,13 @@ using the following style:
 
     WHERE my_column = ?
 
+Boolean
+~~~~~~~
+By default, sqlalchemy-hana uses native boolean types.
+However, older versions of sqlalchemy-hana used integer columns to represent these values leading
+to a compatibility gap.
+To *disable* native boolean support, add ``use_native_boolean=False`` to the dburi given to SQLAlchemy.
+
 Alembic
 -------
 The sqlalchemy-hana dialect also contains a dialect for ``alembic``.
