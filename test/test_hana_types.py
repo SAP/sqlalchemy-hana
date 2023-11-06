@@ -16,7 +16,7 @@ class HANATypeTest(TestBase):
 
     @testing.provide_metadata
     def test_smalldecimal_insert_select(self):
-        with testing.db.connect() as connection:
+        with testing.db.connect() as connection, connection.begin():
             table = Table(
                 "t", self.metadata, Column("x", SMALLDECIMAL(asdecimal=False))
             )
@@ -32,7 +32,7 @@ class HANATypeTest(TestBase):
 
     @testing.provide_metadata
     def test_smalldecimal_reflection(self):
-        with testing.db.connect() as connection:
+        with testing.db.connect() as connection, connection.begin():
             table = Table("t", self.metadata, Column("x", SMALLDECIMAL))
             table.create(bind=connection)
 
