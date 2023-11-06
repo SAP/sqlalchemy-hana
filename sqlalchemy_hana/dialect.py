@@ -382,7 +382,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 
 
 class HANAInspector(reflection.Inspector):
-    dialect: HANABaseDialect
+    dialect: HANAHDBCLIDialect
 
     def get_table_oid(self, table_name: str, schema: str | None = None) -> int:
         return self.dialect.get_table_oid(
@@ -393,9 +393,10 @@ class HANAInspector(reflection.Inspector):
         )
 
 
-class HANABaseDialect(default.DefaultDialect):
+class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
-    default_paramstyle = "format"
+    driver = "hdbcli"
+    default_paramstyle = "qmark"
 
     statement_compiler = HANAStatementCompiler
     type_compiler = HANATypeCompiler
@@ -410,12 +411,12 @@ class HANABaseDialect(default.DefaultDialect):
     convert_unicode = False
     supports_unicode_statements = True
     supports_unicode_binds = True
-    requires_name_normalize = True
-
     supports_sequences = True
     supports_native_decimal = True
-
     supports_comments = True
+    supports_statement_cache = False
+
+    requires_name_normalize = True
 
     colspecs = {
         types.Boolean: hana_types.BOOLEAN,
@@ -453,6 +454,36 @@ class HANABaseDialect(default.DefaultDialect):
         self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
 
+    @classmethod
+    def import_dbapi(cls) -> ModuleType:
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
+        return hdbcli.dbapi
+
+    if sqlalchemy.__version__ < "2":  # pragma: no cover
+        dbapi = import_dbapi  # type:ignore[assignment]
+
+    def create_connect_args(self, url: URL) -> ConnectArgsType:
+        if url.host and url.host.lower().startswith("userkey="):
+            kwargs = url.translate_connect_args(host="userkey")
+            userkey = url.host[len("userkey=") : len(url.host)]
+            kwargs["userkey"] = userkey
+        else:
+            kwargs = url.translate_connect_args(
+                host="address", username="user", database="databaseName"
+            )
+            kwargs.update(url.query)
+            port = 30015
+            if kwargs.get("databaseName"):
+                port = 30013
+            kwargs.setdefault("port", port)
+
+        return (), kwargs
+
+    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
+        connection = super().connect(*args, **kw)
+        connection.setautocommit(False)
+        return connection
+
     def on_connect(self) -> Callable[[DBAPIConnection], None] | None:
         if self.isolation_level is not None:
 
@@ -462,6 +493,20 @@ class HANABaseDialect(default.DefaultDialect):
 
             return connect
         return None
+
+    def is_disconnect(
+        self,
+        e: Exception,
+        connection: PoolProxiedConnection | DBAPIConnection | None,
+        cursor: DBAPICursor | None,
+    ) -> bool:
+        if connection:
+            dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
+            return not dbapi_connection.isconnected()
+        if isinstance(e, hdbcli.dbapi.Error):
+            if e.errorcode == -10709:
+                return True
+        return super().is_disconnect(e, connection, cursor)
 
     _isolation_lookup = {
         "SERIALIZABLE",
@@ -1036,53 +1081,3 @@ class HANABaseDialect(default.DefaultDialect):
         )
 
         return {"text": result.scalar()}
-
-
-class HANAHDBCLIDialect(HANABaseDialect):
-    driver = "hdbcli"
-    default_paramstyle = "qmark"
-    supports_statement_cache = False
-
-    @classmethod
-    def import_dbapi(cls) -> ModuleType:
-        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
-        return hdbcli.dbapi
-
-    if sqlalchemy.__version__ < "2":  # pragma: no cover
-        dbapi = import_dbapi  # type:ignore[assignment]
-
-    def create_connect_args(self, url: URL) -> ConnectArgsType:
-        if url.host and url.host.lower().startswith("userkey="):
-            kwargs = url.translate_connect_args(host="userkey")
-            userkey = url.host[len("userkey=") : len(url.host)]
-            kwargs["userkey"] = userkey
-        else:
-            kwargs = url.translate_connect_args(
-                host="address", username="user", database="databaseName"
-            )
-            kwargs.update(url.query)
-            port = 30015
-            if kwargs.get("databaseName"):
-                port = 30013
-            kwargs.setdefault("port", port)
-
-        return (), kwargs
-
-    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
-        connection = super().connect(*args, **kw)
-        connection.setautocommit(False)
-        return connection
-
-    def is_disconnect(
-        self,
-        e: Exception,
-        connection: PoolProxiedConnection | DBAPIConnection | None,
-        cursor: DBAPICursor | None,
-    ) -> bool:
-        if connection:
-            dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
-            return not dbapi_connection.isconnected()
-        if isinstance(e, hdbcli.dbapi.Error):
-            if e.errorcode == -10709:
-                return True
-        return super().is_disconnect(e, connection, cursor)
