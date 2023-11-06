@@ -54,7 +54,7 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 [project.urls]
 Repository = "https://github.com/SAP/sqlalchemy-hana"
 "Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
-Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES"
+Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES.rst"
 
 [project.license]
 text = "Apache-2.0"

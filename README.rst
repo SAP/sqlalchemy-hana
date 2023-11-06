@@ -16,20 +16,11 @@ Prerequisites
 
 Install
 -------
-Install from Python Package Index:
+Install from the Python Package Index:
 
 .. code-block:: bash
 
     $ pip install sqlalchemy-hana
-
-You can also install the latest version direct from a cloned git repository.
-
-.. code-block:: bash
-
-    $ git clone https://github.com/SAP/sqlalchemy-hana.git
-    $ cd sqlalchemy-hana
-    $ python setup.py install
-
 
 Getting started
 ---------------
@@ -77,7 +68,6 @@ The default table type depends on your SAP HANA configuration and version.
 .. code-block:: python
 
     t = Table('my_table', metadata, Column('id', Integer), hana_table_type = 'COLUMN')
-    t.create(engine)
 
 Case Sensitivity
 ~~~~~~~~~~~~~~~~
@@ -98,19 +88,110 @@ SQLAlchemy Table objects which include integer primary keys are usually assumed 
 upon INSERT.
 Since SAP HANA has no auto-increment feature, SQLAlchemy relies upon sequences to automatically
 generate primary key values.
+These sequences must be explicitly specified to enable auto-incrementing behavior.
 
-Sequences
-"""""""""
-With the sqlalchemy-hana dialect, a sequence must be explicitly specified to enable
-auto-incrementing behavior.
-This is different than the majority of SQLAlchemy documentation examples which assume the usage of
-an auto-increment-capable database.
-To create sequences, use the sqlalchemy.schema.Sequence object which is passed to a ``Column`` construct.
+To create sequences, use the ``sqlalchemy.schema.Sequence`` object which is passed to a
+``Column`` construct.
 
 .. code-block:: python
 
     t = Table('my_table', metadata, Column('id', Integer, Sequence('id_seq'), primary key=True))
-    t.create(engine)
+
+LIMIT/OFFSET Support
+~~~~~~~~~~~~~~~~~~~~
+SAP HANA supports both ``LIMIT`` and ``OFFSET``, but it only supports ``OFFSET`` in conjunction with
+``LIMIT`` i.e. in the select statement the offset parameter cannot be set without the ``LIMIT``
+clause, hence in sqlalchemy-hana if the user tries to use offset without limit, a limit of
+``2147384648`` would be set, this has been done so that the users can smoothly use ``LIMIT`` or
+``OFFSET`` as in other databases that do not have this limitation.
+``2147384648`` was chosen, because it is the maximum number of records per result set.
+
+RETURNING Support
+~~~~~~~~~~~~~~~~~
+Sqlalchemy-hana does not support ``RETURNING`` in the ``INSERT``, ``UPDATE`` and ``DELETE``
+statements to retrieve result sets of matched rows from ``INSERT``, ``UPDATE`` and ``DELETE``
+statements because newly generated primary key values are neither fetched nor returned automatically
+in SAP HANA and SAP HANA does not support the syntax ``INSERT... RETURNING...``.
+
+Reflection
+~~~~~~~~~~
+The sqlalchemy-hana dialect supports all reflection capabilities of SQLAlchemy.
+The Inspector used for the SAP HANA database is an instance of ``HANAInspector`` and offers an
+additional method which returns the OID (object id) for the given table name.
+
+.. code-block:: python
+
+    from sqlalchemy import create_engine, inspect
+
+    engine = create_engine("hana://username:password@example.de:30015")
+    insp = inspect(engine)  # will be a HANAInspector
+    print(insp.get_table_oid('my_table'))
+
+Foreign Key Constraints
+~~~~~~~~~~~~~~~~~~~~~~~
+In SAP HANA the following ``UPDATE`` and ``DELETE`` foreign key referential actions are available:
+
+* RESTRICT
+* CASCADE
+* SET NULL
+* SET DEFAULT
+
+The foreign key referential option ``NO ACTION`` does not exist in SAP HANA.
+The default is ``RESTRICT``.
+
+UNIQUE Constraints
+~~~~~~~~~~~~~~~~~~
+For each unique constraint an index is created in SAP HANA, this may lead to unexpected behavior
+in programs using reflection.
+
+Data types
+~~~~~~~~~~
+As with all SQLAlchemy dialects, all UPPERCASE types that are known to be valid with SAP HANA are
+importable from the top level dialect, whether they originate from sqlalchemy types or from the
+local dialect.
+
+DateTime Compatibility
+""""""""""""""""""""""
+SAP HANA has no data type known as ``DATETIME``, it instead has the datatype ``TIMESTAMP``, which can
+actually store the date and time value.
+For this reason, the sqlalchemy-hana dialect provides a ``TIMESTAMP`` type which is a ```datetime``.
+
+NUMERIC Compatibility
+"""""""""""""""""""""
+SAP HANA does not have a data type known as ``NUMERIC``, hence if a user has a column with data type
+numeric while using sqlalchemy-hana, it is stored as ``DECIMAL`` data type instead.
+
+TEXT datatype
+"""""""""""""
+SAP HANA only supports the datatype ``TEXT`` for column tables.
+It is not a valid data type for row tables. Hence, one must mention ``hana_table_type="COLUMN"``
+
+Regex
+~~~~~
+sqlalchemy-hana supports the ``regexp_match`` and ``regexp_replace``
+functions provided by SQLAlchemy.
+
+Bound Parameter Styles
+~~~~~~~~~~~~~~~~~~~~~~
+The default parameter style for the sqlalchemy-hana dialect is ``qmark``, where SQL is rendered
+using the following style:
+
+.. code-block:: sql
+
+    WHERE my_column = ?
+
+Alembic
+-------
+The sqlalchemy-hana dialect also contains a dialect for ``alembic``.
+This dialect is active as soon as ``alembic`` is installed.
+To ensure version compatibility, install sqlalchemy-hana as followed:
+
+.. code-block:: bash
+
+    $ pip install sqlalchemy-hana[alembic]
+
+Cookbook
+--------
 
 IDENTITY Feature
 """"""""""""""""
@@ -135,129 +216,31 @@ the IDENTITY feature.
 
     t.create(engine)
 
-LIMIT/OFFSET Support
-~~~~~~~~~~~~~~~~~~~~
-SAP HANA supports both ``LIMIT`` and ``OFFSET``, but it only supports ``OFFSET`` in conjunction with ``LIMIT``
-i.e. in the select statement the offset parameter cannot be set without the ``LIMIT`` clause,
-hence in sqlalchemy-hana if the user tries to use offset without limit, a limit of 2147384648 would
-be set, this has been done so that the users can smoothly use ``LIMIT`` or ``OFFSET`` as in other
-databases that do not have this limitation.
-2147384648 was chosen, because it is the maximum number of records per result set.
+Development Setup
+-----------------
+We recommend the usage of ``pyenv`` to install a proper 3.11 python version for development.
 
-RETURNING Support
-~~~~~~~~~~~~~~~~~
-Sqlalchemy-hana does not support ``RETURNING`` in the ``INSERT``, ``UPDATE`` and ``DELETE``
-statements to retrieve result sets of matched rows from ``INSERT``, ``UPDATE`` and ``DELETE``
-statements because newly generated primary key values are neither fetched nor returned automatically
-in SAP HANA and SAP HANA does not support the syntax ``INSERT... RETURNING...``.
+* ``pyenv install 3.11``
+* ``python311 -m venv venv``
+* ``source venv/bin/activate``
+* ``pip install -U pip``
+* ``pip install -e .[dev,test,alembic]``
 
-Constraint Reflection
-~~~~~~~~~~~~~~~~~~~~
-The sqlalchemy-hana dialect can return information about foreign keys, unique constraints and
-check constraints, as well as table indexes.
+To execute the tests, use ``pyenv``.
+The linters and formatters can be executed using ``pre-commit``: ``pre-commit run -a``.
 
-Raw information regarding these constraints can be acquired using:
+Testing
+-------
+**Pre-Submit**: Linters, formatters and reduced test matrix
+**Post-Submit**: Linters and formatters
+**Nightly**: Full test matrix
 
-* Inspector.get_foreign_keys()
-* Inspector.get_unique_constraints()
-* Inspector.get_check_constraints()
-* Inspector.get_indexes()
-
-When using refection at the table level, the table will also include these constraints.
-
-Foreign key Options
-"""""""""""""""""""
-In SAP HANA the following ``UPDATE`` and ``DELETE`` foreign key referential actions are available:
-
-* RESTRICT
-* CASCADE
-* SET NULL
-* SET DEFAULT
-
-The foreign key referential option ``NO ACTION`` does not exist in SAP HANA.
-The default is ``RESTRICT``.
-
-CHECK Constraints
-"""""""""""""""""
-Table level check constraints can be created as well as reflected in the sqlalchemy-hana dialect.
-Column level check constraints are not available in SAP HANA.
-
-.. code-block:: python
-
-    t = Table('my_table', metadata, Column('id', Integer), Column(...), ..., CheckConstraint('id >5', name='my_check_const'))
-
-UNIQUE Constraints
-""""""""""""""""""
-For each unique constraint an index is created in SAP HANA, this may lead to unexpected behavior
-in programs using reflection.
-
-Special Reflection Option
-~~~~~~~~~~~~~~~~~~~~~~~~
-The Inspector used for the SAP HANA database is an instance of ``HANAInspector`` and offers an
-additional method.
-
-get_table_oid(table name, schema=None)
-""""""""""""""""""""""""""""""""""""""
-Return the OID (object id) for the given table name.
-
-.. code-block:: python
-
-    from sqlalchemy import create_engine, inspect
-
-    engine = create_engine("hana://username:password@example.de:30015")
-    insp = inspect(engine)
-    # will be a HANAInspector
-    print(insp.get_table_oid('my_table'))
-
-Data types
-~~~~~~~~~~
-
-As with all SQLAlchemy dialects, all UPPERCASE types that are known to be valid with SAP HANA are
-importable from the top level dialect, whether they originate from sqlalchemy types or from the
-local dialect.
-The allowed data types for sqlalchemy-hana are as follows:
-
-* BOOLEAN
-* NUMERIC
-* NVARCHAR
-* CLOB
-* BLOB
-* DATE
-* TIME
-* TIMESTAMP
-* CHAR
-* VARCHAR
-* VARBINARY
-* BIGINT
-* SMALLINT
-* INTEGER
-* FLOAT
-* TEXT
-
-DateTime Compatibility
-""""""""""""""""""""""
-SAP HANA has no data type known as ``DATETIME``, it instead has the datatype ``TIMESTAMP``, which can
-actually store the date and time value.
-For this reason, the sqlalchemy-hana dialect provides a ``TIMESTAMP`` type which is a ```datetime``.
-
-NUMERIC Compatibility
-"""""""""""""""""""""
-SAP HANA does not have a data type known as ``NUMERIC``, hence if a user has a column with data type
-numeric while using sqlalchemy-hana, it is stored as ``DECIMAL`` data type instead.
-
-TEXT datatype
-"""""""""""""
-SAP HANA only supports the datatype ``TEXT`` for column tables.
-It is not a valid data type for row tables. Hence, one must mention ``hana_table_type="COLUMN"``
-
-Bound Parameter Styles
-~~~~~~~~~~~~~~~~~~~~~~
-The default parameter style for the sqlalchemy-hana dialect is ``qmark``, where SQL is rendered
-using the following style:
-
-.. code-block:: sql
-
-    WHERE my_column = ?
+Release Actions
+---------------
+* Verify that the latest nighty run is after the latest commit; else trigger a run
+* Update the version in the pyproject.toml
+* Add an entry in the changelog
+* Push a new tag like vX.X.X to trigger the release
 
 Contribute
 ----------
