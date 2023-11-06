@@ -12,7 +12,6 @@ from sqlalchemy.dialects import registry
 logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
 
 registry.register("hana", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
-registry.register("hana.hdbcli", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
 pytest.register_assert_rewrite("sqlalchemy.testing.assertions")
 
 
