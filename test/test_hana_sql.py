@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlalchemy.testing
+from sqlalchemy import select, true
 from sqlalchemy.sql.expression import column, table
 
 
@@ -34,4 +35,9 @@ class HANACompileTest(
             table1.select().with_for_update(skip_locked=True),
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
+        )
+
+    def test_sql_unary_boolean(self) -> None:
+        self.assert_compile(
+            select().where(true()), "SELECT FROM DUMMY WHERE true = TRUE"
         )

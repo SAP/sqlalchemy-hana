@@ -218,26 +218,6 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
         return tmp
 
-    def visit_true(self, expr: None, **kw: Any) -> str:
-        return "TRUE"
-
-    def visit_false(self, expr: None, **kw: Any) -> str:
-        return "FALSE"
-
-    # SAP HANA supports native boolean types but it doesn't support a reduced
-    # where clause like:
-    #   SELECT 1 FROM DUMMY WHERE TRUE
-    #   SELECT 1 FROM DUMMY WHERE FALSE
-    def visit_istrue_unary_operator(
-        self, element: UnaryExpression[Any], operator: Any, **kw: Any
-    ) -> str:
-        return f"{self.process(element.element, **kw)} = TRUE"
-
-    def visit_isfalse_unary_operator(
-        self, element: UnaryExpression[Any], operator: Any, **kw: Any
-    ) -> str:
-        return f"{self.process(element.element, **kw)} = FALSE"
-
     # SAP HANA doesn't support the "IS DISTINCT FROM" operator but it is
     # possible to rewrite the expression.
     # https://answers.sap.com/questions/642124/hana-and-'is-distinct-from'-operator.html
@@ -260,6 +240,11 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             f"(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR "
             f"({left} IS NULL AND {right} IS NULL))"
         )
+
+    # SAP HANA supports native boolean types but it doesn't support a reduced
+    # where clause like:
+    #   SELECT 1 FROM DUMMY WHERE TRUE
+    #   SELECT 1 FROM DUMMY WHERE FALSE
 
     def visit_is_true_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
@@ -341,6 +326,11 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return "SMALLDECIMAL"
+
+    def visit_boolean(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        if self.dialect.supports_native_boolean:
+            return self.visit_BOOLEAN(type_)
+        return self.visit_TINYINT(type_)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -465,11 +455,13 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self,
         isolation_level: str | None = None,
         auto_convert_lobs: bool = True,
+        supports_native_boolean: bool = True,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
+        self.supports_native_boolean = supports_native_boolean
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:

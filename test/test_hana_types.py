@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Any
 from unittest import mock
 
-from sqlalchemy import inspect, testing
+import pytest
+from sqlalchemy import Boolean, inspect, testing
 from sqlalchemy.testing.fixtures import TestBase
 from sqlalchemy.testing.schema import Column, Table
 
-from sqlalchemy_hana.types import SMALLDECIMAL
+from sqlalchemy_hana.types import SMALLDECIMAL, TINYINT
 
 
 class HANATypeTest(TestBase):
@@ -47,3 +49,35 @@ class HANATypeTest(TestBase):
                 }
             ]
             assert isinstance(result[0]["type"], SMALLDECIMAL)
+
+    @testing.provide_metadata
+    @pytest.mark.parametrize(
+        "supports_native_boolean,type_", [(True, Boolean), (False, TINYINT)]
+    )
+    def test_native_boolean(self, supports_native_boolean: bool, type_: Any) -> None:
+        with mock.patch.object(
+            testing.db.engine.dialect,
+            "supports_native_boolean",
+            supports_native_boolean,
+        ), testing.db.connect() as connection, connection.begin():
+            table = Table("t", self.metadata, Column("x", Boolean))
+            table.create(bind=connection)
+
+            insert = table.insert().values(x=False)
+            connection.execute(insert)
+
+            row = connection.execute(table.select()).scalar()
+            assert isinstance(row, bool)
+            assert not row
+
+            result = inspect(connection).get_columns("t")
+            assert result == [
+                {
+                    "name": "x",
+                    "default": None,
+                    "nullable": True,
+                    "comment": None,
+                    "type": mock.ANY,
+                }
+            ]
+            assert isinstance(result[0]["type"], type_)
