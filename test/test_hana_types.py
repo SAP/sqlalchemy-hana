@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
 from unittest import mock
 
 import pytest
@@ -54,7 +53,7 @@ class HANATypeTest(TestBase):
     @pytest.mark.parametrize(
         "supports_native_boolean,type_", [(True, Boolean), (False, TINYINT)]
     )
-    def test_native_boolean(self, supports_native_boolean: bool, type_: Any) -> None:
+    def test_native_boolean(self, supports_native_boolean, type_):
         with mock.patch.object(
             testing.db.engine.dialect,
             "supports_native_boolean",

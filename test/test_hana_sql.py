@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sqlalchemy.testing
-from sqlalchemy import select, true
+from sqlalchemy import literal, select, true
 from sqlalchemy.sql.expression import column, table
 
 
@@ -39,5 +39,6 @@ class HANACompileTest(
 
     def test_sql_unary_boolean(self) -> None:
         self.assert_compile(
-            select().where(true()), "SELECT FROM DUMMY WHERE true = TRUE"
+            select(literal(1)).where(true()),
+            "SELECT 1 AS anon_1 FROM DUMMY WHERE true = TRUE",
         )
