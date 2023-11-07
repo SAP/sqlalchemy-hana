@@ -78,9 +78,6 @@ class _LOBMixin:
         self, dialect: Dialect, coltype: object
     ) -> Callable[[Any], Any] | None:
         dialect = cast("HANAHDBCLIDialect", dialect)
-        if not dialect.auto_convert_lobs:
-            # Disable processor and return raw DBAPI LOB type
-            return None
 
         def process(value: Any) -> Any | None:
             if value is None:

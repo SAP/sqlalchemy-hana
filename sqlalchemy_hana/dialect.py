@@ -461,15 +461,9 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     default_schema_name: str  # this is always set for us
 
-    def __init__(
-        self,
-        isolation_level: str | None = None,
-        auto_convert_lobs: bool = True,
-        **kw: Any,
-    ) -> None:
+    def __init__(self, isolation_level: str | None = None, **kw: Any) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
-        self.auto_convert_lobs = auto_convert_lobs
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:
