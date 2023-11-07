@@ -73,8 +73,8 @@ class HANACreateEngineTest(sqlalchemy.testing.fixtures.TestBase):
         "kwargs,supports_native_boolean",
         [
             ({}, True),
-            ({"supports_native_boolean": True}, True),
-            ({"supports_native_boolean": False}, False),
+            ({"use_native_boolean": True}, True),
+            ({"use_native_boolean": False}, False),
         ],
     )
     def test_supports_native_boolean(
