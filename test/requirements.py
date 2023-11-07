@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from sqlalchemy.testing import exclusions, requirements
+from alembic.testing.requirements import SuiteRequirements as AlembicRequirements
+from sqlalchemy.testing import exclusions
 from sqlalchemy.testing.config import Config
 from sqlalchemy.testing.exclusions import compound
+from sqlalchemy.testing.requirements import SuiteRequirements as SQLAlchemyRequirements
 
 
-class Requirements(requirements.SuiteRequirements):
+class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def views(self) -> compound:
         return exclusions.open()
@@ -229,4 +231,30 @@ class Requirements(requirements.SuiteRequirements):
 
     @property
     def regexp_replace(self) -> compound:
+        return exclusions.open()
+
+    # alembic
+
+    @property
+    def fk_ondelete_noaction(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def autocommit_isolation(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def unique_constraint_reflection(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def reflects_fk_options(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def fk_ondelete_is_reflected(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def fk_onupdate_is_reflected(self) -> compound:
         return exclusions.open()

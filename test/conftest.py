@@ -13,6 +13,7 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
 
 registry.register("hana", "sqlalchemy_hana.dialect", "HANAHDBCLIDialect")
 pytest.register_assert_rewrite("sqlalchemy.testing.assertions")
+pytest.register_assert_rewrite("alembic.testing.assertions")
 
 
 @event.listens_for(Column, "after_parent_attach")
