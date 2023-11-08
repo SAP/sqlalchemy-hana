@@ -31,6 +31,12 @@ class HANACompileTest(
         )
 
         self.assert_compile(
+            table1.select().with_for_update(read=True, skip_locked=True),
+            "SELECT mytable.myid, mytable.name, mytable.description "
+            "FROM mytable FOR SHARE LOCK IGNORE LOCKED",
+        )
+
+        self.assert_compile(
             table1.select().with_for_update(skip_locked=True),
             "SELECT mytable.myid, mytable.name, mytable.description "
             "FROM mytable FOR UPDATE IGNORE LOCKED",
