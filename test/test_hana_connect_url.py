@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
 import sqlalchemy.testing
+from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 
 
-class HANAConnectUrlWithTenantTest(sqlalchemy.testing.fixtures.TestBase):
+class HANAConnectUrlTest(sqlalchemy.testing.fixtures.TestBase):
     def test_hdbcli_tenant_url_default_port(self) -> None:
         """If the URL includes a tenant database, the dialect pass the adjusted values to hdbcli.
 
@@ -39,8 +41,6 @@ class HANAConnectUrlWithTenantTest(sqlalchemy.testing.fixtures.TestBase):
         assert result_kwargs["password"] == "secret-password"
         assert result_kwargs["databaseName"] == "TENANT_NAME"
 
-
-class HANAConnectUrlWithHDBUserStoreTest(sqlalchemy.testing.fixtures.TestBase):
     def test_parsing_userkey_hdbcli(self) -> None:
         """With HDBCLI, the user may reference to a local HDBUserStore key which holds
         the connection details. SQLAlchemy-HANA should only pass the userkey name to
@@ -52,8 +52,6 @@ class HANAConnectUrlWithHDBUserStoreTest(sqlalchemy.testing.fixtures.TestBase):
         )
         assert result_kwargs == {"userkey": "myuserkeyname"}
 
-
-class HANAConnectUrlParsing(sqlalchemy.testing.fixtures.TestBase):
     def test_pass_uri_query_as_kwargs(self) -> None:
         """SQLAlchemy-HANA should passes all URL parameters to hdbcli."""
 
@@ -68,3 +66,19 @@ class HANAConnectUrlParsing(sqlalchemy.testing.fixtures.TestBase):
             )
             assert result_kwargs["encrypt"] == "true"
             assert result_kwargs["compress"] == "true"
+
+
+class HANACreateEngineTest(sqlalchemy.testing.fixtures.TestBase):
+    @pytest.mark.parametrize(
+        "kwargs,supports_native_boolean",
+        [
+            ({}, True),
+            ({"use_native_boolean": True}, True),
+            ({"use_native_boolean": False}, False),
+        ],
+    )
+    def test_supports_native_boolean(
+        self, kwargs: dict, supports_native_boolean: bool
+    ) -> None:
+        engine = create_engine("hana://username:secret-password@example.com", **kwargs)
+        assert engine.dialect.supports_native_boolean == supports_native_boolean
