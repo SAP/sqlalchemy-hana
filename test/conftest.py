@@ -43,7 +43,7 @@ def _get_main_config() -> Config:
 
 def _random_string(length: int) -> str:
     """Create a random string with the given length."""
-    return "".join(random.choices(string.ascii_uppercase, k=length))
+    return "".join(random.choices(string.ascii_lowercase, k=length))
 
 
 @post
