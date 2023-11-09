@@ -199,22 +199,16 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
     def for_update_clause(self, select: Select[Any], **kw: Any) -> str:
         for_update = cast("ForUpdateArg", select._for_update_arg)
-        if for_update.read:
-            # The HANA does not allow other parameters for FOR SHARE LOCK
-            tmp = " FOR SHARE LOCK"
-        else:
-            tmp = " FOR UPDATE"
+        tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
 
-            if for_update.of:
-                tmp += " OF " + ", ".join(
-                    self.process(elem, **kw) for elem in for_update.of
-                )
-
-            if for_update.nowait:
-                tmp += " NOWAIT"
-
-            if for_update.skip_locked:
-                tmp += " IGNORE LOCKED"
+        if for_update.of:
+            tmp += " OF " + ", ".join(
+                self.process(elem, **kw) for elem in for_update.of
+            )
+        if for_update.nowait:
+            tmp += " NOWAIT"
+        if for_update.skip_locked:
+            tmp += " IGNORE LOCKED"
 
         return tmp
 
