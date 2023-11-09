@@ -7,7 +7,7 @@ Changelog
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 - By default native booleans are used. If integer based columns should be used, specify
-  ``use_native_boolean=False`` in the dburi
+  ``use_native_boolean=False`` in ``create_engine``
 - Columns of SQLAlchemy type String are now created with the HANA SQL type NVARCHAR.
   The previously used HANA SQL type VARCHAR has been only designed for 7-bit ASCII character data.
   Storing other non-ASCII characters in a different encoding like UTF-8 was sometimes possible but
