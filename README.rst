@@ -222,7 +222,7 @@ Cookbook
 --------
 
 IDENTITY Feature
-""""""""""""""""
+~~~~~~~~~~~~~~~~
 SAP HANA also comes with an option to have an ``IDENTITY`` column which can also be used to create
 new primary key values for integer-based primary key columns.
 Built-in support for rendering of ``IDENTITY`` is not available yet, however the following compilation
