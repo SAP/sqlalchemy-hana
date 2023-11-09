@@ -199,44 +199,18 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
     def for_update_clause(self, select: Select[Any], **kw: Any) -> str:
         for_update = cast("ForUpdateArg", select._for_update_arg)
-        if for_update.read:
-            # The HANA does not allow other parameters for FOR SHARE LOCK
-            tmp = " FOR SHARE LOCK"
-        else:
-            tmp = " FOR UPDATE"
+        tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
 
-            if for_update.of:
-                tmp += " OF " + ", ".join(
-                    self.process(elem, **kw) for elem in for_update.of
-                )
-
-            if for_update.nowait:
-                tmp += " NOWAIT"
-
-            if for_update.skip_locked:
-                tmp += " IGNORE LOCKED"
+        if for_update.of:
+            tmp += " OF " + ", ".join(
+                self.process(elem, **kw) for elem in for_update.of
+            )
+        if for_update.nowait:
+            tmp += " NOWAIT"
+        if for_update.skip_locked:
+            tmp += " IGNORE LOCKED"
 
         return tmp
-
-    def visit_true(self, expr: None, **kw: Any) -> str:
-        return "TRUE"
-
-    def visit_false(self, expr: None, **kw: Any) -> str:
-        return "FALSE"
-
-    # SAP HANA supports native boolean types but it doesn't support a reduced
-    # where clause like:
-    #   SELECT 1 FROM DUMMY WHERE TRUE
-    #   SELECT 1 FROM DUMMY WHERE FALSE
-    def visit_istrue_unary_operator(
-        self, element: UnaryExpression[Any], operator: Any, **kw: Any
-    ) -> str:
-        return f"{self.process(element.element, **kw)} = TRUE"
-
-    def visit_isfalse_unary_operator(
-        self, element: UnaryExpression[Any], operator: Any, **kw: Any
-    ) -> str:
-        return f"{self.process(element.element, **kw)} = FALSE"
 
     # SAP HANA doesn't support the "IS DISTINCT FROM" operator but it is
     # possible to rewrite the expression.
@@ -260,6 +234,11 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             f"(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR "
             f"({left} IS NULL AND {right} IS NULL))"
         )
+
+    # SAP HANA supports native boolean types but it doesn't support a reduced
+    # where clause like:
+    #   SELECT 1 FROM DUMMY WHERE TRUE
+    #   SELECT 1 FROM DUMMY WHERE FALSE
 
     def visit_is_true_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
@@ -341,6 +320,11 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return "SMALLDECIMAL"
+
+    def visit_boolean(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        if self.dialect.supports_native_boolean:
+            return self.visit_BOOLEAN(type_)
+        return self.visit_TINYINT(type_)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -461,9 +445,15 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     default_schema_name: str  # this is always set for us
 
-    def __init__(self, isolation_level: str | None = None, **kw: Any) -> None:
+    def __init__(
+        self,
+        isolation_level: str | None = None,
+        use_native_boolean: bool = True,
+        **kw: Any,
+    ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
+        self.supports_native_boolean = use_native_boolean
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:

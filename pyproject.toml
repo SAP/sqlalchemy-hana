@@ -64,7 +64,7 @@ text = "Apache-2.0"
 include = ["sqlalchemy_hana"]
 
 [tool.setuptools.package-data]
-swagger_plugin_for_sphinx = ["py.typed"]
+sqlalchemy_hana = ["py.typed"]
 
 [tool.isort]
 profile = "black"
