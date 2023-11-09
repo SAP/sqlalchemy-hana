@@ -2,7 +2,11 @@ SQLAlchemy dialect for SAP HANA
 ===============================
 
 .. image:: https://api.reuse.software/badge/github.com/SAP/sqlalchemy-hana
-   :target: https://api.reuse.software/info/github.com/SAP/sqlalchemy-hana
+    :target: https://api.reuse.software/info/github.com/SAP/sqlalchemy-hana
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+.. image:: https://github.com/SAP/sqlalchemy-hana/actions/workflows/nightly.yml/badge.svg?branch=main&event=schedule
+    :target: https://github.com/SAP/sqlalchemy-hana/actions/workflows/nightly.yml
 
 This dialect allows you to use the SAP HANA database with SQLAlchemy.
 It uses ``hdbcli`` to connect to SAP HANA.
