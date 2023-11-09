@@ -8,20 +8,21 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 - By default native booleans are used. If integer based columns should be used, specify
   ``use_native_boolean=False`` in ``create_engine``
-- Columns of SQLAlchemy type String are now created with the HANA SQL type NVARCHAR.
-  The previously used HANA SQL type VARCHAR has been only designed for 7-bit ASCII character data.
+- Columns of SQLAlchemy type String are now created with the SAP HANA SQL type NVARCHAR.
+  The previously used SAP HANA SQL type VARCHAR has been only designed for 7-bit ASCII character data.
   Storing other non-ASCII characters in a different encoding like UTF-8 was sometimes possible but
   never intended or recommended
   It may cause unexpected behavior for certain database-side operations like sorting or failures
   with string functions
   With the introduction of SAP HANA Cloud, the SQL type VARCHAR is also only an alias for NVARCHAR.
-- Columns of SQLAlchemy type Text are now created with the HANA SQL type NCLOB instead of CLOB.
-  Like the HANA SQL type VARCHAR, CLOB was designed for 7-bit ASCII character data.
+- Columns of SQLAlchemy type Text are now created with the SAP HANA SQL type NCLOB instead of CLOB.
+  Like the SAP HANA SQL type VARCHAR, CLOB was designed for 7-bit ASCII character data.
   This change also ensures consistency and compatibility with SAP HANA Cloud, where CLOB is just an
   alias for NCLOB
 - Removed ``pyhdb`` support because  ``pyhdb`` is out of maintenance and the GitHub repository was
-  archived. Please migrate to ``hdbcli``
-- Removed support for python versions below version 3.8
+  archived.
+  Please migrate to ``hdbcli`` as it also supports connections towards SAP HANA Cloud databases.
+- Removed support for Python versions below version 3.8
 - Removed support for SQLAlchemy below version 1.4
 - Removed support for hdbcli below version 2.10
 - Removed the hidden and outdated feature ``auto_convert_lobs``
@@ -30,17 +31,21 @@ Features
 ~~~~~~~~
 - Official support for SQLAlchemy 1.4 and 2.0
 - Official support for Python 3.11 and 3.12
-- Added CI with linters and testing utilizing the SQLAchemy and alembic test suite
 - Support the SAP HANA datatype ``SMALLDECIMAL``
 - Support native booleans (this is the new default)
-- sqlalchemy-hana is fully typed and exports its types
-- The alembic dialect left the preview stage and is now included by default
-- Specified the caching support explicitly (the value might change in the future)
-- Support ``regexp_match`` and ``regexp_replace``
-- Allow usage of "is_distinct_from" operator through a SAP HANA compatible expression
+- The ``sqlalchemy_hana`` package is fully typed and exports its types
+- The Alembic dialect left the preview stage and is now included by default.
+  Please install sqlalchemy-hana with the alembic requirement like ``pip install sqlchemy-hana[alembic]``.
+  Supported is Alembic 1.12 onwards.
+- Specified the SQLAlchemy statement caching support explicitly to false.
+  Support might be added later (see #126)
+- Support `regexp_match <https://docs.sqlalchemy.org/en/20/core/operators.html#string-matching>`_
+  and `regexp_replace <https://docs.sqlalchemy.org/en/20/core/operators.html#string-alteration>`_
+- Allow usage of ``is_distinct_from`` operator through a SAP HANA compatible expression
 - Prefer dialect types in ``get_columns``
-- Allow usage of additional options (e.g. ``nowwait``) in ``with_for_update`` when using
+- Allow usage of additional options (e.g. ``nowait``) in ``with_for_update`` when using
   ``read=True``
+- Added CI with linters and testing utilizing the SQLAlchemy and Alembic test suite
 
 Bugfixes
 ~~~~~~~~
