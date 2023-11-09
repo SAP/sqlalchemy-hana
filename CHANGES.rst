@@ -24,6 +24,7 @@ Breaking Changes
 - Removed support for python versions below version 3.8
 - Removed support for SQLAlchemy below version 1.4
 - Removed support for hdbcli below version 2.10
+- Removed the hidden and outdated feature ``auto_convert_lobs``
 
 Features
 ~~~~~~~~
@@ -38,6 +39,8 @@ Features
 - Support ``regexp_match`` and ``regexp_replace``
 - Allow usage of "is_distinct_from" operator through a SAP HANA compatible expression
 - Prefer dialect types in ``get_columns``
+- Allow usage of additional options (e.g. ``nowwait``) in ``with_for_update`` when using
+  ``read=True``
 
 Bugfixes
 ~~~~~~~~

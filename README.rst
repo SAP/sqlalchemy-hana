@@ -187,6 +187,21 @@ However, older versions of sqlalchemy-hana used integer columns to represent the
 to a compatibility gap.
 To *disable* native boolean support, add ``use_native_boolean=False`` to ``create_engine``.
 
+Users are encouraged to switch to native booleans.
+This can be e.g. done by using ``alembic``:
+
+.. code-block:: python
+
+    from sqlalchemy import false
+
+    # assuming a table TAB with a tinyint column named valid
+    def upgrade() -> None:
+        op.add_column(Column("TAB", Column('valid_tmp', Boolean, server_default=false())))
+        op.get_bind().execute("UPDATE TAB SET valid_tmp = TRUE WHERE valid = 1")
+        op.drop_column("TAB", "valid")
+        op.get_bind().execute("RENAME COLUMN TAB.valid_tmp to valid")
+        # optionally, remove also the server default by using alter column
+
 Alembic
 -------
 The sqlalchemy-hana dialect also contains a dialect for ``alembic``.
