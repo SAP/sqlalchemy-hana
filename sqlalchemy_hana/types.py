@@ -10,7 +10,7 @@ from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
 
 if TYPE_CHECKING:
-    from sqlalchemy_hana.dialect import HANABaseDialect
+    from sqlalchemy_hana.dialect import HANAHDBCLIDialect
 
 
 class TINYINT(sqltypes.Integer):
@@ -77,7 +77,7 @@ class _LOBMixin:
     def result_processor(
         self, dialect: Dialect, coltype: object
     ) -> Callable[[Any], Any] | None:
-        dialect = cast("HANABaseDialect", dialect)
+        dialect = cast("HANAHDBCLIDialect", dialect)
         if not dialect.auto_convert_lobs:
             # Disable processor and return raw DBAPI LOB type
             return None

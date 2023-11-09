@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import contextlib
 from contextlib import closing
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
 
 import hdbcli.dbapi
 import sqlalchemy
-from sqlalchemy import Integer, Sequence, exc, sql, types, util
+from sqlalchemy import Integer, PrimaryKeyConstraint, Sequence, exc, sql, types, util
 from sqlalchemy.engine import Connection, default, reflection
 from sqlalchemy.sql import Select, compiler, sqltypes
 from sqlalchemy.sql.elements import (
@@ -37,12 +38,22 @@ if TYPE_CHECKING:
         ReflectedUniqueConstraint,
     )
     from sqlalchemy.engine.url import URL
-    from sqlalchemy.schema import ColumnCollectionConstraint, CreateTable
+    from sqlalchemy.schema import (
+        ColumnCollectionConstraint,
+        CreateTable,
+        DropConstraint,
+    )
     from sqlalchemy.sql.elements import ExpressionClauseList
     from sqlalchemy.sql.selectable import ForUpdateArg
 
     RET = TypeVar("RET")
     PARAM = ParamSpec("PARAM")
+
+with contextlib.suppress(ImportError):
+    # pylint: disable=unused-import
+    import alembic  # noqa: F401
+
+    import sqlalchemy_hana.alembic  # noqa: F401
 
 RESERVED_WORDS = {
     "all",
@@ -188,44 +199,18 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
     def for_update_clause(self, select: Select[Any], **kw: Any) -> str:
         for_update = cast("ForUpdateArg", select._for_update_arg)
-        if for_update.read:
-            # The HANA does not allow other parameters for FOR SHARE LOCK
-            tmp = " FOR SHARE LOCK"
-        else:
-            tmp = " FOR UPDATE"
+        tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
 
-            if for_update.of:
-                tmp += " OF " + ", ".join(
-                    self.process(elem, **kw) for elem in for_update.of
-                )
-
-            if for_update.nowait:
-                tmp += " NOWAIT"
-
-            if for_update.skip_locked:
-                tmp += " IGNORE LOCKED"
+        if for_update.of:
+            tmp += " OF " + ", ".join(
+                self.process(elem, **kw) for elem in for_update.of
+            )
+        if for_update.nowait:
+            tmp += " NOWAIT"
+        if for_update.skip_locked:
+            tmp += " IGNORE LOCKED"
 
         return tmp
-
-    def visit_true(self, expr: None, **kw: Any) -> str:
-        return "TRUE"
-
-    def visit_false(self, expr: None, **kw: Any) -> str:
-        return "FALSE"
-
-    # SAP HANA supports native boolean types but it doesn't support a reduced
-    # where clause like:
-    #   SELECT 1 FROM DUMMY WHERE TRUE
-    #   SELECT 1 FROM DUMMY WHERE FALSE
-    def visit_istrue_unary_operator(
-        self, element: UnaryExpression[Any], operator: Any, **kw: Any
-    ) -> str:
-        return f"{self.process(element.element, **kw)} = TRUE"
-
-    def visit_isfalse_unary_operator(
-        self, element: UnaryExpression[Any], operator: Any, **kw: Any
-    ) -> str:
-        return f"{self.process(element.element, **kw)} = FALSE"
 
     # SAP HANA doesn't support the "IS DISTINCT FROM" operator but it is
     # possible to rewrite the expression.
@@ -249,6 +234,11 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             f"(NOT ({left} <> {right} OR {left} IS NULL OR {right} IS NULL) OR "
             f"({left} IS NULL AND {right} IS NULL))"
         )
+
+    # SAP HANA supports native boolean types but it doesn't support a reduced
+    # where clause like:
+    #   SELECT 1 FROM DUMMY WHERE TRUE
+    #   SELECT 1 FROM DUMMY WHERE FALSE
 
     def visit_is_true_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
@@ -331,6 +321,11 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return "SMALLDECIMAL"
 
+    def visit_boolean(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        if self.dialect.supports_native_boolean:
+            return self.visit_BOOLEAN(type_)
+        return self.visit_TINYINT(type_)
+
 
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(
@@ -374,6 +369,12 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
         return result
 
+    def visit_drop_constraint(self, drop: DropConstraint, **kw: Any) -> str:
+        if isinstance(drop.element, PrimaryKeyConstraint):
+            table = self.preparer.format_table(drop.element.table)
+            return f"ALTER TABLE {table} DROP PRIMARY KEY"
+        return super().visit_drop_constraint(drop, **kw)
+
 
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq: Sequence, type_: Integer) -> int:
@@ -382,7 +383,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
 
 
 class HANAInspector(reflection.Inspector):
-    dialect: HANABaseDialect
+    dialect: HANAHDBCLIDialect
 
     def get_table_oid(self, table_name: str, schema: str | None = None) -> int:
         return self.dialect.get_table_oid(
@@ -393,9 +394,10 @@ class HANAInspector(reflection.Inspector):
         )
 
 
-class HANABaseDialect(default.DefaultDialect):
+class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
-    default_paramstyle = "format"
+    driver = "hdbcli"
+    default_paramstyle = "qmark"
 
     statement_compiler = HANAStatementCompiler
     type_compiler = HANATypeCompiler
@@ -410,12 +412,12 @@ class HANABaseDialect(default.DefaultDialect):
     convert_unicode = False
     supports_unicode_statements = True
     supports_unicode_binds = True
-    requires_name_normalize = True
-
     supports_sequences = True
     supports_native_decimal = True
-
     supports_comments = True
+    supports_statement_cache = False
+
+    requires_name_normalize = True
 
     colspecs = {
         types.Boolean: hana_types.BOOLEAN,
@@ -447,11 +449,43 @@ class HANABaseDialect(default.DefaultDialect):
         self,
         isolation_level: str | None = None,
         auto_convert_lobs: bool = True,
+        use_native_boolean: bool = True,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
+        self.supports_native_boolean = use_native_boolean
+
+    @classmethod
+    def import_dbapi(cls) -> ModuleType:
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
+        return hdbcli.dbapi
+
+    if sqlalchemy.__version__ < "2":  # pragma: no cover
+        dbapi = import_dbapi  # type:ignore[assignment]
+
+    def create_connect_args(self, url: URL) -> ConnectArgsType:
+        if url.host and url.host.lower().startswith("userkey="):
+            kwargs = url.translate_connect_args(host="userkey")
+            userkey = url.host[len("userkey=") : len(url.host)]
+            kwargs["userkey"] = userkey
+        else:
+            kwargs = url.translate_connect_args(
+                host="address", username="user", database="databaseName"
+            )
+            kwargs.update(url.query)
+            port = 30015
+            if kwargs.get("databaseName"):
+                port = 30013
+            kwargs.setdefault("port", port)
+
+        return (), kwargs
+
+    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
+        connection = super().connect(*args, **kw)
+        connection.setautocommit(False)
+        return connection
 
     def on_connect(self) -> Callable[[DBAPIConnection], None] | None:
         if self.isolation_level is not None:
@@ -462,6 +496,20 @@ class HANABaseDialect(default.DefaultDialect):
 
             return connect
         return None
+
+    def is_disconnect(
+        self,
+        e: Exception,
+        connection: PoolProxiedConnection | DBAPIConnection | None,
+        cursor: DBAPICursor | None,
+    ) -> bool:
+        if connection:
+            dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
+            return not dbapi_connection.isconnected()
+        if isinstance(e, hdbcli.dbapi.Error):
+            if e.errorcode == -10709:
+                return True
+        return super().is_disconnect(e, connection, cursor)
 
     _isolation_lookup = {
         "SERIALIZABLE",
@@ -1036,53 +1084,3 @@ class HANABaseDialect(default.DefaultDialect):
         )
 
         return {"text": result.scalar()}
-
-
-class HANAHDBCLIDialect(HANABaseDialect):
-    driver = "hdbcli"
-    default_paramstyle = "qmark"
-    supports_statement_cache = False
-
-    @classmethod
-    def import_dbapi(cls) -> ModuleType:
-        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
-        return hdbcli.dbapi
-
-    if sqlalchemy.__version__ < "2":  # pragma: no cover
-        dbapi = import_dbapi  # type:ignore[assignment]
-
-    def create_connect_args(self, url: URL) -> ConnectArgsType:
-        if url.host and url.host.lower().startswith("userkey="):
-            kwargs = url.translate_connect_args(host="userkey")
-            userkey = url.host[len("userkey=") : len(url.host)]
-            kwargs["userkey"] = userkey
-        else:
-            kwargs = url.translate_connect_args(
-                host="address", username="user", database="databaseName"
-            )
-            kwargs.update(url.query)
-            port = 30015
-            if kwargs.get("databaseName"):
-                port = 30013
-            kwargs.setdefault("port", port)
-
-        return (), kwargs
-
-    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
-        connection = super().connect(*args, **kw)
-        connection.setautocommit(False)
-        return connection
-
-    def is_disconnect(
-        self,
-        e: Exception,
-        connection: PoolProxiedConnection | DBAPIConnection | None,
-        cursor: DBAPICursor | None,
-    ) -> bool:
-        if connection:
-            dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
-            return not dbapi_connection.isconnected()
-        if isinstance(e, hdbcli.dbapi.Error):
-            if e.errorcode == -10709:
-                return True
-        return super().is_disconnect(e, connection, cursor)

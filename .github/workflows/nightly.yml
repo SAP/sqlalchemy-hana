@@ -1,33 +1,18 @@
-name: CI
+name: Full Test Matrix
 concurrency: hana-tests
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
-  ci-pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-      - name: Install project
-        run: pip install -e .[dev,test,alembic]
-      - name: run pre-commit
-        run: "pre-commit run --all"
   ci-test:
-    if: ${{ github.event_name == 'pull_request' }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       max-parallel: 1
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         sqlalchemy-version: ["1.4.*", "2.0.*"]
     runs-on: ubuntu-latest
     steps:
@@ -48,5 +33,3 @@ jobs:
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI --dropfirst"
           pytest -v --cov sqlalchemy_hana --cov-report html --cov-report xml test/
           python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
-      - name: run diff-cover
-        run: "diff-cover --config-file pyproject.toml coverage.xml"

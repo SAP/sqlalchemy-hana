@@ -46,6 +46,7 @@ test = [
     "coverage[toml]==7.3.2",
     "diff-cover[toml]==8.0.0",
 ]
+alembic = ["alembic~=1.12"]
 
 [project.entry-points."sqlalchemy.dialects"]
 hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
@@ -63,7 +64,7 @@ text = "Apache-2.0"
 include = ["sqlalchemy_hana"]
 
 [tool.setuptools.package-data]
-swagger_plugin_for_sphinx = ["py.typed"]
+sqlalchemy_hana = ["py.typed"]
 
 [tool.isort]
 profile = "black"
@@ -135,6 +136,7 @@ warn_no_return = true
 warn_return_any = false
 # allow calls to untyped functions
 disallow_untyped_calls = false
+disallow_untyped_decorators = false
 
 [[tool.mypy.overrides]]
 ignore_errors = true
