@@ -4,7 +4,7 @@ concurrency: hana-tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+  -   cron: 0 0 * * *
 
 jobs:
   ci-test:
@@ -12,21 +12,21 @@ jobs:
       fail-fast: true
       max-parallel: 1
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        sqlalchemy-version: ["1.4.*", "2.0.*"]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        sqlalchemy-version: [1.4.*, 2.0.*]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+    -   uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+    -   uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install project
+    -   name: Install project
         run: pip install -e .[test,alembic]
-      - name: Install sqlalchemy
+    -   name: Install sqlalchemy
         run: pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
-      - name: run tests (with coverage)
+    -   name: run tests (with coverage)
         run: |
           PYTEST_DBURI=$(python test/ci_setup.py setup ${{ secrets.TEST_DBURI }})
           echo "::add-mask::$PYTEST_DBURI"

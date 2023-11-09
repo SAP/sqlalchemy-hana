@@ -3,50 +3,50 @@ concurrency: hana-tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   ci-pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+    -   uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+    -   uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
-      - name: Install project
+          python-version: '3.12'
+    -   name: Install project
         run: pip install -e .[dev,test,alembic]
-      - name: run pre-commit
-        run: "pre-commit run --all"
+    -   name: run pre-commit
+        run: pre-commit run --all
   ci-test:
     if: ${{ github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        python-version: ["3.11"]
-        sqlalchemy-version: ["1.4.*", "2.0.*"]
+        python-version: ['3.11']
+        sqlalchemy-version: [1.4.*, 2.0.*]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+    -   uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+    -   uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install project
+    -   name: Install project
         run: pip install -e .[test,alembic]
-      - name: Install sqlalchemy
+    -   name: Install sqlalchemy
         run: pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
-      - name: run tests (with coverage)
+    -   name: run tests (with coverage)
         run: |
           PYTEST_DBURI=$(python test/ci_setup.py setup ${{ secrets.TEST_DBURI }})
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI --dropfirst"
           pytest -v --cov sqlalchemy_hana --cov-report html --cov-report xml test/
           python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
-      - name: run diff-cover
-        run: "diff-cover --config-file pyproject.toml coverage.xml"
+    -   name: run diff-cover
+        run: diff-cover --config-file pyproject.toml coverage.xml

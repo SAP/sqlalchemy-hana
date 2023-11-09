@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     tags:
-      - v*
+    -   v*
 
 jobs:
   release:
@@ -15,26 +15,26 @@ jobs:
     permissions:
       id-token: write
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    - name: Setup python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-    - name: Install project
-      run: pip install -e .
-    - name: Install libraries
-      run: pip install -U build
-    - name: Create wheel
-      run: python -m build -o dist/ .
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-    - name: Determine version
-      run: |
-        version="${GITHUB_REF_NAME:1}"
-        echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
-    - name: Release on GitHub
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*
-        name: Version ${{ env.RELEASE_VERSION }}
+    -   name: Checkout repository
+        uses: actions/checkout@v3
+    -   name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+    -   name: Install project
+        run: pip install -e .
+    -   name: Install libraries
+        run: pip install -U build
+    -   name: Create wheel
+        run: python -m build -o dist/ .
+    -   name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+    -   name: Determine version
+        run: |
+          version="${GITHUB_REF_NAME:1}"
+          echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
+    -   name: Release on GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          name: Version ${{ env.RELEASE_VERSION }}
