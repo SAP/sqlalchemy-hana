@@ -448,13 +448,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     def __init__(
         self,
         isolation_level: str | None = None,
-        auto_convert_lobs: bool = True,
         use_native_boolean: bool = True,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
-        self.auto_convert_lobs = auto_convert_lobs
         self.supports_native_boolean = use_native_boolean
 
     @classmethod
