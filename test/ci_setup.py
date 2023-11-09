@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+import random
+import string
 import sys
 from contextlib import closing
-from test.util import random_string
 from urllib.parse import urlsplit
 
 from hdbcli import dbapi
+
+
+def random_string(length: int) -> str:
+    """Create a random string with the given length."""
+    return "".join(
+        random.choices(
+            string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length
+        )
+    )
 
 
 def setup(dburi: str) -> str:

@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 import logging
-from test.util import random_string
+import random
+import string
 from typing import Any
 
 import pytest
@@ -40,14 +41,19 @@ def _get_main_config() -> Config:
     return list(Config.all_configs())[0]
 
 
+def _random_string(length: int) -> str:
+    """Create a random string with the given length."""
+    return "".join(random.choices(string.ascii_uppercase, k=length))
+
+
 @post
 def randomize_test_schemas(*args: Any, **kwargs: Any) -> None:
     """Set random schema names for the testing schemas."""
     config = _get_main_config()
-    config.test_schema = random_string(10)
-    config.test_schema_2 = random_string(10)
+    config.test_schema = _random_string(10)
+    config.test_schema_2 = _random_string(10)
     Config.set_as_current(config, testing)
-    testing.config.ident = random_string(5)
+    testing.config.ident = _random_string(5)
 
     with config.db.connect() as connection, connection.begin():
         for schema in [config.test_schema, config.test_schema_2]:
