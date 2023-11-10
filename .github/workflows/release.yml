@@ -25,8 +25,8 @@ jobs:
       run: pip install -U build
     - name: Create wheel
       run: python -m build -o dist/ .
-    #- name: Publish package distributions to PyPI
-    #  uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
     - name: Determine version
       run: |
         version="${GITHUB_REF_NAME:1}"
