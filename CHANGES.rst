@@ -1,6 +1,17 @@
 Changelog
 =========
 
+1.0.1
+-----
+
+Bugfixes
+~~~~~~~~
+- Version 1.0.0 states that ``is_distinct_from`` is supported, but the dialect specified
+  ``supports_is_distinct_from=False``. The value was changed to ``True``
+- Fixed an issue causing ``is_not_distinct_from`` to fail with an SQL syntax error
+- Make sure that ``Text`` types are really rendered as ``UnicodeText``
+- Removed misleading ``get_dbapi_type`` from ``Boolean``
+
 1.0.0
 -----
 

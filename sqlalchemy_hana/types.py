@@ -38,11 +38,6 @@ class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
         )
 
 
-class BOOLEAN(sqltypes.Boolean):
-    def get_dbapi_type(self, dbapi: ModuleType) -> Any | None:
-        return dbapi.NUMBER
-
-
 class DATE(sqltypes.Date):
     def literal_processor(self, dialect: Dialect) -> Callable[[Any], str]:
         self.bind_processor(dialect)
@@ -93,11 +88,6 @@ class _LOBMixin:
         return process
 
 
-class HanaText(_LOBMixin, sqltypes.Text):
-    def get_dbapi_type(self, dbapi: ModuleType) -> Any | None:
-        return dbapi.CLOB
-
-
 class HanaUnicodeText(_LOBMixin, sqltypes.UnicodeText):
     def get_dbapi_type(self, dbapi: ModuleType) -> Any | None:
         return dbapi.NCLOB
@@ -125,7 +115,3 @@ class HanaBinary(_LOBMixin, sqltypes.LargeBinary):
 
     def bind_processor(self, dialect: Dialect) -> None:
         return None
-
-
-class NCLOB(sqltypes.Text):
-    __visit_name__ = "NCLOB"
