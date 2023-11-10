@@ -1,5 +1,4 @@
 name: Full Test Matrix
-concurrency: hana-tests
 
 on:
   workflow_dispatch:
