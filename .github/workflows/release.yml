@@ -1,17 +1,15 @@
-name: Release
+name: Release_Test
 
 permissions:
   contents: write
 
 on:
-  push:
-    tags:
-      - v*
+  workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    environment: release
+    #environment: release
     permissions:
       id-token: write
     steps:
@@ -27,11 +25,9 @@ jobs:
       run: pip install -U build
     - name: Create wheel
       run: python -m build -o dist/ .
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
     - name: Determine version
       run: |
-        version="${GITHUB_REF_NAME:1}"
+        version="Test KM"
         echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
     - name: Release on GitHub
       uses: softprops/action-gh-release@v1
