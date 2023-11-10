@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlalchemy-hana"
-version = "1.0.0rc1"
+version = "1.0.1"
 description = "SQLAlchemy dialect for SAP HANA"
 keywords = ["sqlalchemy", "sap", "hana"]
 requires-python = "~=3.8"
@@ -55,7 +55,7 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 [project.urls]
 Repository = "https://github.com/SAP/sqlalchemy-hana"
 "Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
-Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES"
+Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES.rst"
 
 [project.license]
 text = "Apache-2.0"

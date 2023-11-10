@@ -1,7 +1,4 @@
-name: Release
-
-permissions:
-  contents: write
+name: Release  
 
 on:
   push:
@@ -14,6 +11,7 @@ jobs:
     environment: release
     permissions:
       id-token: write
+      contents: write
     steps:
     -   name: Checkout repository
         uses: actions/checkout@v3

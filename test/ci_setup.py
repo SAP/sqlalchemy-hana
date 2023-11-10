@@ -12,6 +12,7 @@ from hdbcli import dbapi
 
 
 def random_string(length: int) -> str:
+    """Create a random string with the given length."""
     return "".join(
         random.choices(
             string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length
@@ -31,12 +32,6 @@ def setup(dburi: str) -> str:
         cursor.execute(
             f'CREATE USER {user} PASSWORD "{password}" NO FORCE_FIRST_PASSWORD_CHANGE'
         )
-        for schema in ["TEST_SCHEMA", "TEST_SCHEMA_2"]:
-            cursor.execute(f"SELECT 1 FROM SCHEMAS WHERE SCHEMA_NAME='{schema}'")
-            if cursor.fetchall():
-                cursor.execute(f"DROP SCHEMA {schema} CASCADE")
-            cursor.execute(f"CREATE SCHEMA {schema}")
-            cursor.execute(f"GRANT ALL PRIVILEGES ON SCHEMA {schema} TO {user}")
         cursor.execute(f"GRANT CREATE SCHEMA TO {user}")
 
     return f"hana://{user}:{password}@{url.hostname}:{url.port}"

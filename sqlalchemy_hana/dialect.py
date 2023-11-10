@@ -225,7 +225,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             f"AND NOT ({left} IS NULL AND {right} IS NULL))"
         )
 
-    def visit_isnot_distinct_from_binary(
+    def visit_is_not_distinct_from_binary(
         self, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
         left = self.process(binary.left)
@@ -420,12 +420,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     requires_name_normalize = True
 
     colspecs = {
-        types.Boolean: hana_types.BOOLEAN,
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
         types.LargeBinary: hana_types.HanaBinary,
-        types.Text: hana_types.HanaText,
+        types.Text: hana_types.HanaUnicodeText,
         types.UnicodeText: hana_types.HanaUnicodeText,
     }
 
@@ -439,7 +438,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     div_is_floordiv = False
     supports_schemas = True
     supports_sane_rowcount = False
-    supports_is_distinct_from = False
+    supports_is_distinct_from = True
 
     max_identifier_length = 127
 
