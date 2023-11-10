@@ -420,12 +420,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     requires_name_normalize = True
 
     colspecs = {
-        types.Boolean: hana_types.BOOLEAN,
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
         types.LargeBinary: hana_types.HanaBinary,
-        types.Text: hana_types.HanaText,
+        types.Text: hana_types.HanaUnicodeText,
         types.UnicodeText: hana_types.HanaUnicodeText,
     }
 
