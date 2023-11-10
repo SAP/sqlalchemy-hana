@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.0.1
+-----
+
+Bugfixes
+~~~~~~~~
+- Version 1.0.0 states that ``is_distinct_from`` is supported, but the dialect specified
+  ``supports_is_distinct_from=False``. The value was changed to ``True``
+- Fixed an issue causing ``is_not_distinct_from`` to fail with an SQL syntax error
+
 1.0.0
 -----
 
