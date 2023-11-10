@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest import mock
 
 import pytest
-from sqlalchemy import Boolean, inspect, testing
+from sqlalchemy import VARBINARY, Boolean, inspect, testing
 from sqlalchemy.testing.fixtures import TestBase
 from sqlalchemy.testing.schema import Column, Table
 
@@ -48,6 +48,25 @@ class HANATypeTest(TestBase):
                 }
             ]
             assert isinstance(result[0]["type"], SMALLDECIMAL)
+
+    @testing.provide_metadata
+    def test_varbinary_reflection(self):
+        with testing.db.connect() as connection, connection.begin():
+            table = Table("t", self.metadata, Column("x", VARBINARY(100)))
+            table.create(bind=connection)
+
+            result = inspect(connection).get_columns("t")
+            assert result == [
+                {
+                    "name": "x",
+                    "default": None,
+                    "nullable": True,
+                    "comment": None,
+                    "type": mock.ANY,
+                }
+            ]
+            assert isinstance(result[0]["type"], VARBINARY)
+            assert result[0]["type"].length == 100
 
     @testing.provide_metadata
     @pytest.mark.parametrize(

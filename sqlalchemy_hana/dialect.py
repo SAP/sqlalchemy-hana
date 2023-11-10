@@ -798,6 +798,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                 column["type"] = types.VARCHAR(row[4])
             elif column["type"] == types.NVARCHAR:
                 column["type"] = types.NVARCHAR(row[4])
+            elif column["type"] == types.VARBINARY:
+                column["type"] = types.VARBINARY(row[4])
 
             columns.append(cast("ReflectedColumn", column))
 
