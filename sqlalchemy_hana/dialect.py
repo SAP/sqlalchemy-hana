@@ -545,8 +545,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         assert result, "no current transaction isolation level found"
         return cast(str, result[0])  # type:ignore[index]
 
-    def _get_server_version_info(self, connection: Connection) -> None:
-        pass
+    def _get_server_version_info(self, connection: Connection) -> tuple[int, ...]:
+        result: str = connection.execute(  # type:ignore[assignment]
+            sql.text("SELECT VERSION FROM SYS.M_DATABASE")
+        ).scalar()
+        return tuple(int(i) for i in result.split("."))
 
     def _get_default_schema_name(self, connection: Connection) -> str:
         # In this case, the SQLAlchemy Connection object is not yet "ready".

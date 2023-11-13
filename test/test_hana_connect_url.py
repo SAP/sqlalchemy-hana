@@ -82,3 +82,9 @@ class HANACreateEngineTest(sqlalchemy.testing.fixtures.TestBase):
     ) -> None:
         engine = create_engine("hana://username:secret-password@example.com", **kwargs)
         assert engine.dialect.supports_native_boolean == supports_native_boolean
+
+
+class HANADialectTest(sqlalchemy.testing.fixtures.TestBase):
+    def test_server_version_info(self) -> None:
+        # Test that the attribute is defined
+        assert sqlalchemy.testing.db.dialect.server_version_info
