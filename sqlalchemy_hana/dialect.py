@@ -9,7 +9,16 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 
 import hdbcli.dbapi
 import sqlalchemy
-from sqlalchemy import Integer, PrimaryKeyConstraint, Sequence, exc, sql, types, util
+from sqlalchemy import (
+    Computed,
+    Integer,
+    PrimaryKeyConstraint,
+    Sequence,
+    exc,
+    sql,
+    types,
+    util,
+)
 from sqlalchemy.engine import Connection, default, reflection
 from sqlalchemy.sql import Select, compiler, sqltypes
 from sqlalchemy.sql.elements import (
@@ -375,6 +384,17 @@ class HANADDLCompiler(compiler.DDLCompiler):
             return f"ALTER TABLE {table} DROP PRIMARY KEY"
         return super().visit_drop_constraint(drop, **kw)
 
+    def visit_computed_column(self, generated: Computed, **kw: Any) -> str:
+        clause = (
+            "GENERATED ALWAYS AS"
+            if generated.persisted is None or generated.persisted is True
+            else "AS"
+        )
+        expression = self.sql_compiler.process(
+            generated.sqltext, include_table=False, literal_binds=True
+        )
+        return f"{clause} ({expression})"
+
 
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq: Sequence, type_: Integer) -> int:
@@ -398,6 +418,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
     driver = "hdbcli"
     default_paramstyle = "qmark"
+    max_identifier_length = 127
 
     statement_compiler = HANAStatementCompiler
     type_compiler = HANATypeCompiler
@@ -410,14 +431,28 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     # for encoding and decoding Python unicode objects. SQLAlchemy
     # will rely on their capabilities.
     convert_unicode = False
-    supports_unicode_statements = True
-    supports_unicode_binds = True
-    supports_sequences = True
-    supports_native_decimal = True
-    supports_comments = True
-    supports_statement_cache = False
 
+    div_is_floordiv = False
+    implicit_returning = False
+    postfetch_lastrowid = False
     requires_name_normalize = True
+    returns_native_bytes = False
+    supports_comments = True
+    supports_default_values = False
+    supports_empty_insert = False
+    supports_for_update_of = True
+    supports_identity_columns = False
+    supports_is_distinct_from = True
+    supports_native_boolean = True
+    supports_native_decimal = True
+    supports_sane_multi_rowcount = False
+    supports_sane_rowcount = False
+    supports_schemas = True
+    supports_sequences = True
+    supports_statement_cache = False
+    supports_unicode_binds = True
+    supports_unicode_statements = True
+    support_views = True
 
     colspecs = {
         types.Date: hana_types.DATE,
@@ -428,20 +463,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         types.UnicodeText: hana_types.HanaUnicodeText,
     }
 
-    postfetch_lastrowid = False
-    implicit_returning = False
-    supports_empty_insert = False
-    supports_native_boolean = True
-    supports_default_values = False
-    supports_sane_multi_rowcount = False
     isolation_level = None
-    div_is_floordiv = False
-    supports_schemas = True
-    supports_sane_rowcount = False
-    supports_is_distinct_from = True
-
-    max_identifier_length = 127
-
     default_schema_name: str  # this is always set for us
 
     def __init__(
@@ -761,12 +783,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         result = connection.execute(
             sql.text(
                 """SELECT COLUMN_NAME, DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE,
-                    COMMENTS FROM (
+                    COMMENTS, GENERATED_ALWAYS_AS, GENERATION_TYPE FROM (
                         SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, POSITION, DATA_TYPE_NAME,
-                        DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS
+                        DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS,
+                        GENERATED_ALWAYS_AS, GENERATION_TYPE
                         FROM SYS.TABLE_COLUMNS UNION ALL
                         SELECT SCHEMA_NAME, VIEW_NAME AS TABLE_NAME, COLUMN_NAME, POSITION,
-                        DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE, COMMENTS
+                        DATA_TYPE_NAME, DEFAULT_VALUE, IS_NULLABLE, LENGTH, SCALE,
+                        COMMENTS, GENERATED_ALWAYS_AS, GENERATION_TYPE
                         FROM SYS.VIEW_COLUMNS )
                     AS COLUMS WHERE SCHEMA_NAME=:schema AND TABLE_NAME=:table ORDER BY POSITION
                 """
@@ -784,6 +808,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                 "nullable": row[3] == "TRUE",
                 "comment": row[6],
             }
+
+            if row[8] == "ALWAYS CALCULATED AS":  # COL AS EXPR
+                column["computed"] = {"sqltext": row[7], "persisted": False}
+            elif row[8] == "ALWAYS AS":  # COL GENERATED ALWAYS AS EXPR
+                column["computed"] = {"sqltext": row[7], "persisted": True}
 
             if hasattr(hana_types, row[1]):
                 column["type"] = getattr(hana_types, row[1])
@@ -1043,7 +1072,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             }
             check_conditions.append(check_condition)
 
-        return check_conditions
+        return sorted(
+            check_conditions,
+            # technical constraints comes first
+            key=lambda constraint: (
+                not constraint["name"].startswith("_SYS_"),  # type:ignore[union-attr]
+                constraint["name"],
+            ),
+        )
 
     def get_table_oid(
         self,
