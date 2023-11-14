@@ -19,14 +19,6 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
         return exclusions.open()
 
     @property
-    def precision_numerics_many_significant_digits(self) -> compound:
-        return exclusions.open()
-
-    @property
-    def precision_numerics_retains_significant_digits(self) -> compound:
-        return exclusions.closed()
-
-    @property
     def datetime_literals(self) -> compound:
         """HANA has the function to_date, to_time, to_timestamp"""
         return exclusions.open()
@@ -103,18 +95,15 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def foreign_key_constraint_option_reflection_ondelete(self) -> compound:
-        # TODO fix
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def foreign_key_constraint_option_reflection_onupdate(self) -> compound:
-        # TODO fix
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def check_constraint_reflection(self) -> compound:
-        # TODO fix
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def expressions_against_unbounded_text(self) -> compound:
@@ -123,7 +112,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def independent_readonly_connections(self) -> compound:
-        # TODO check if supported
+        # Not supported by sqlalchemy-hana
         return exclusions.closed()
 
     @property
@@ -177,13 +166,11 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def fk_constraint_option_reflection_onupdate_restrict(self) -> compound:
-        # TODO fix
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def fk_constraint_option_reflection_ondelete_restrict(self) -> compound:
-        # TODO fix
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def schema_create_delete(self) -> compound:
@@ -233,7 +220,29 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     def regexp_replace(self) -> compound:
         return exclusions.open()
 
-    # alembic
+    @property
+    def precision_numerics_general(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def precision_numerics_enotation_small(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def precision_numerics_many_significant_digits(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def boolean_col_expressions(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def ctes(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def ctes_with_update_delete(self) -> compound:
+        return exclusions.closed()
 
     @property
     def fk_ondelete_noaction(self) -> compound:
@@ -258,3 +267,47 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def fk_onupdate_is_reflected(self) -> compound:
         return exclusions.open()
+
+    @property
+    def computed_reflects_as_server_default(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def computed_doesnt_reflect_as_server_default(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def computed_columns(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def computed_columns_stored(self) -> compound:
+        # not supported by SAP HANA
+        return exclusions.open()
+
+    @property
+    def computed_columns_virtual(self) -> compound:
+        # not supported by SAP HANA
+        return exclusions.open()
+
+    @property
+    def computed_columns_default_persisted(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def computed_columns_reflect_persisted(self) -> compound:
+        return exclusions.open()
+
+    # identity columns are not supported yet
+
+    @property
+    def identity_columns(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def identity_columns_alter(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def autoincrement_insert(self) -> compound:
+        return exclusions.closed()
