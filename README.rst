@@ -7,9 +7,6 @@ SQLAlchemy dialect for SAP HANA
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
-.. image:: https://github.com/SAP/sqlalchemy-hana/actions/workflows/nightly.yml/badge.svg?branch=main&event=schedule
-    :target: https://github.com/SAP/sqlalchemy-hana/actions/workflows/nightly.yml
-
 This dialect allows you to use the SAP HANA database with SQLAlchemy.
 It uses ``hdbcli`` to connect to SAP HANA.
 Please notice that sqlalchemy-hana isn't an official SAP product and isn't covered by SAP support.
@@ -270,13 +267,11 @@ The linters and formatters can be executed using ``pre-commit``: ``pre-commit ru
 
 Testing
 -------
-**Pre-Submit**: Linters, formatters and reduced test matrix
+**Pre-Submit**: Linters, formatters and test matrix
 **Post-Submit**: Linters and formatters
-**Nightly**: Full test matrix
 
 Release Actions
 ---------------
-* Verify that the latest nighty run is after the latest commit; else trigger a run
 * Update the version in the pyproject.toml
 * Add an entry in the changelog
 * Push a new tag like vX.X.X to trigger the release
