@@ -172,16 +172,15 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         # SAP HANA supports bindparameters within the columns clause of SELECT statements
         # but it will always treat such columns as NVARCHAR(5000).
         # With the effect that "select([literal(1)])" will return the string '1' instead of
-        # an interger. Therefore the following special logic for detecting such requests
-        # and rewriting the bindparam into a normal literal.
-
+        # an integer.
+        # The following logic detects such requests and rewriting the bindparam into a literal
         if kw.get("within_columns_clause") and kw.get("within_label_clause"):
             if (
                 bindparam.value
                 and bindparam.callable is None
                 and not getattr(bindparam, "expanding", False)
             ):
-                return self.render_literal_bindparam(bindparam, **kw)
+                kw["literal_execute"] = True
 
         return super().visit_bindparam(bindparam, **kw)
 
@@ -198,11 +197,12 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def limit_clause(self, select: Select[Any], **kw: Any) -> str:
         text = ""
         if select._limit_clause is not None:
-            text += "\nLIMIT " + self.process(select._limit_clause, **kw)
+            text += "\n LIMIT " + self.process(select._limit_clause, **kw)
         if select._offset_clause is not None:
             if select._limit_clause is None:
                 # 2147384648 is the max. no. of records per result set
-                text += "\nLIMIT 2147384648"
+                # we can hardcode the value, because using a limit would lead to another cache key
+                text += "\n LIMIT 2147384648"
             text += " OFFSET " + self.process(select._offset_clause, **kw)
         return text
 
@@ -449,7 +449,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     supports_sane_rowcount = False
     supports_schemas = True
     supports_sequences = True
-    supports_statement_cache = False
+    supports_statement_cache = True
     supports_unicode_binds = True
     supports_unicode_statements = True
     support_views = True

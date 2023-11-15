@@ -46,5 +46,11 @@ class HANACompileTest(
     def test_sql_unary_boolean(self) -> None:
         self.assert_compile(
             select(literal(1)).where(true()),
-            "SELECT 1 AS anon_1 FROM DUMMY WHERE true = TRUE",
+            "SELECT __[POSTCOMPILE_param_1] AS anon_1 FROM DUMMY WHERE true = TRUE",
+        )
+
+    def test_sql_offset_without_limit(self) -> None:
+        self.assert_compile(
+            select(literal(1)).offset(100),
+            "SELECT __[POSTCOMPILE_param_1] AS anon_1 FROM DUMMY LIMIT 2147384648 OFFSET ?",
         )
