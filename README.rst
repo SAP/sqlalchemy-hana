@@ -208,6 +208,17 @@ This can be e.g. done by using ``alembic``:
         op.get_bind().execute("RENAME COLUMN TAB.valid_tmp to valid")
         # optionally, remove also the server default by using alter column
 
+Computed columns
+~~~~~~~~~~~~~~~~
+SAP HANA supports two computed/calculated columns:
+
+* <col> AS <expr>: the column is fully virtual and the expression is evaluated with each SELECT
+* <col> GENERATED ALWAYS AS <expr>: the expression is evaluated during insertion and the value
+    is stored in the table
+
+By default, sqlalchemy-hana creates a ``GENERATED ALWAYS AS`` if a ``Computed`` column is used.
+If ``Computed(persisted=False)`` is used, a fully virtual column using ``AS`` is created.
+
 Alembic
 -------
 The sqlalchemy-hana dialect also contains a dialect for ``alembic``.
