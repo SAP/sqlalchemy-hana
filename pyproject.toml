@@ -122,7 +122,7 @@ disable = [
 ]
 
 [tool.pylint.basic]
-good-names = ["visit_TINYINT", "visit_SMALLDECIMAL"]
+good-names = ["visit_TINYINT", "visit_SMALLDECIMAL", "visit_SECONDDATE"]
 
 [tool.mypy]
 # formatting

@@ -3,22 +3,67 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time
-from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Literal, cast
+from typing import Callable, Literal
 
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
 
-if TYPE_CHECKING:
-    from sqlalchemy_hana.dialect import HANAHDBCLIDialect
+
+class DATE(sqltypes.DATE):
+    def literal_processor(self, dialect: Dialect) -> Callable[[date], str]:
+        def process(value: date) -> str:
+            return f"TO_DATE('{value}')"
+
+        return process
+
+
+class TIME(sqltypes.TIME):
+    def literal_processor(self, dialect: Dialect) -> Callable[[time], str]:
+        def process(value: time) -> str:
+            return f"TO_TIME('{value}')"
+
+        return process
+
+
+class SECONDDATE(sqltypes.DateTime):
+    __visit_name__ = "SECONDDATE"
+
+    def literal_processor(self, dialect: Dialect) -> Callable[[datetime], str]:
+        def process(value: datetime) -> str:
+            return f"TO_SECONDDATE('{value}')"
+
+        return process
+
+
+class TIMESTAMP(sqltypes.TIMESTAMP):
+    def literal_processor(self, dialect: Dialect) -> Callable[[datetime], str]:
+        def process(value: datetime) -> str:
+            return f"TO_TIMESTAMP('{value}')"
+
+        return process
+
+
+LONGDATE = TIMESTAMP
 
 
 class TINYINT(sqltypes.Integer):
     __visit_name__ = "TINYINT"
 
 
-class DOUBLE(sqltypes.Float):  # type:ignore[type-arg]
-    __visit_name__ = "DOUBLE"
+class SMALLINT(sqltypes.Integer):
+    __visit_name__ = "SMALLINT"
+
+
+class INTEGER(sqltypes.INTEGER):
+    pass
+
+
+class BIGINT(sqltypes.BIGINT):
+    pass
+
+
+class DECIMAL(sqltypes.DECIMAL):  # type:ignore[type-arg]
+    pass
 
 
 class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
@@ -38,80 +83,58 @@ class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
         )
 
 
-class DATE(sqltypes.Date):
-    def literal_processor(self, dialect: Dialect) -> Callable[[Any], str]:
-        self.bind_processor(dialect)
-
-        def process(value: date) -> str:
-            return f"to_date('{value}')"
-
-        return process
+class REAL(sqltypes.REAL):  # type:ignore[type-arg]
+    pass
 
 
-class TIME(sqltypes.Time):
-    def literal_processor(self, dialect: Dialect) -> Callable[[Any], str]:
-        self.bind_processor(dialect)
-
-        def process(value: time) -> str:
-            return f"to_time('{value}')"
-
-        return process
+class DOUBLE(sqltypes.DOUBLE):  # type:ignore[type-arg]
+    pass
 
 
-class TIMESTAMP(sqltypes.DateTime):
-    def literal_processor(self, dialect: Dialect) -> Callable[[Any], str]:
-        self.bind_processor(dialect)
-
-        def process(value: datetime) -> str:
-            return f"to_timestamp('{value}')"
-
-        return process
+class FLOAT(sqltypes.FLOAT):  # type:ignore[type-arg]
+    pass
 
 
-class _LOBMixin:
-    def result_processor(
-        self, dialect: Dialect, coltype: object
-    ) -> Callable[[Any], Any] | None:
-        dialect = cast("HANAHDBCLIDialect", dialect)
-
-        def process(value: Any) -> Any | None:
-            if value is None:
-                return None
-            if isinstance(value, str):
-                return value
-            if isinstance(value, memoryview):
-                return value.obj
-            if hasattr(value, "read"):
-                return value.read()
-            raise NotImplementedError
-
-        return process
+class BOOLEAN(sqltypes.BOOLEAN):
+    pass
 
 
-class HanaUnicodeText(_LOBMixin, sqltypes.UnicodeText):
-    def get_dbapi_type(self, dbapi: ModuleType) -> Any | None:
-        return dbapi.NCLOB
-
-    def result_processor(
-        self, dialect: Dialect, coltype: object
-    ) -> Callable[[Any], str] | None:
-        lob_processor = _LOBMixin.result_processor(self, dialect, coltype)
-        if lob_processor is None:
-            return None
-
-        string_processor = sqltypes.UnicodeText.result_processor(self, dialect, coltype)
-        if string_processor is None:
-            return lob_processor
-
-        def process(value: Any) -> str:
-            return string_processor(lob_processor(value))
-
-        return process
+class VARCHAR(sqltypes.VARCHAR):
+    pass
 
 
-class HanaBinary(_LOBMixin, sqltypes.LargeBinary):
-    def get_dbapi_type(self, dbapi: ModuleType) -> Any | None:
-        return dbapi.BLOB
+class NVARCHAR(sqltypes.NVARCHAR):
+    pass
 
-    def bind_processor(self, dialect: Dialect) -> None:
-        return None
+
+class ALPHANUM(sqltypes.String):
+    __visit_name__ = "ALPHANUM"
+
+    def __init__(self, length: int | None = None, collation: str | None = None) -> None:
+        if length is not None and length > 127:
+            raise ValueError("Alphanum does only support a length up to 127 characters")
+        super().__init__(length, collation)
+
+
+class CHAR(sqltypes.CHAR):
+    pass
+
+
+class NCHAR(sqltypes.NCHAR):
+    pass
+
+
+class VARBINARY(sqltypes.VARBINARY):
+    pass
+
+
+class BLOB(sqltypes.BLOB):
+    pass
+
+
+class CLOB(sqltypes.CLOB):
+    pass
+
+
+class NCLOB(sqltypes.UnicodeText):
+    __visit_name__ = "NCLOB"
