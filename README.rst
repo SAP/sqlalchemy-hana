@@ -152,22 +152,43 @@ Data types
 As with all SQLAlchemy dialects, all UPPERCASE types that are known to be valid with SAP HANA are
 importable from the top level dialect, whether they originate from sqlalchemy types or from the
 local dialect.
+Therefore all supported types are part of the ``sqlalchemy_hana.types`` module and can be used from
+there.
 
-DateTime Compatibility
-""""""""""""""""""""""
-SAP HANA has no data type known as ``DATETIME``, it instead has the datatype ``TIMESTAMP``, which can
-actually store the date and time value.
-For this reason, the sqlalchemy-hana dialect provides a ``TIMESTAMP`` type which is a ```datetime``.
+sqlalchemy-hana aims to support as many SQLAlchemy types as possible and to fallback to a similar
+type of the requested type is not supported in SAP HANA.
+The following table shows the mapping:
 
-NUMERIC Compatibility
-"""""""""""""""""""""
-SAP HANA does not have a data type known as ``NUMERIC``, hence if a user has a column with data type
-numeric while using sqlalchemy-hana, it is stored as ``DECIMAL`` data type instead.
+.. list-table::
+    :header-rows: 1
 
-TEXT datatype
-"""""""""""""
-SAP HANA only supports the datatype ``TEXT`` for column tables.
-It is not a valid data type for row tables. Hence, one must mention ``hana_table_type="COLUMN"``
+    * - SQLAlchemy type
+      - HANA type
+    * - DATETIME
+      - TIMESTAMP
+    * - NUMERIC
+      - DECIMAL
+    * - String
+      - NVARCHAR
+    * - Unicode
+      - NVARCHAR
+    * - TEXT
+      - NCLOB
+    * - BINARY
+      - VARBINARY
+    * - DOUBLE_PRECISION
+      - DOUBLE
+    * - Uuid
+      - NVARCHAR(32)
+    * - LargeBinary
+      - BLOB
+    * - UnicodeText
+      - NCLOB
+
+Please note, that some types might not support a length, precision or scale, even if the SQLAlchemy
+type class accepts them.
+The type compiler will then just ignore these arguments are render a type which will not lead to a
+SQL error.
 
 Regex
 ~~~~~

@@ -304,36 +304,50 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_NUMERIC(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA has no NUMERIC type, therefore delegate to DECIMAL
         return self.visit_DECIMAL(type_)
 
     def visit_TINYINT(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA special type
         return "TINYINT"
 
-    def visit_DOUBLE(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        return "DOUBLE"
+    def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA special type
+        return "SMALLDECIMAL"
+
+    def visit_SECONDDATE(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA special type
+        return "SECONDDATE"
 
     def visit_string(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # Normally string renders as VARCHAR, but we want NVARCHAR
         return self.visit_NVARCHAR(type_, **kw)
 
     def visit_unicode(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # Normally unicode renders as VARCHAR, but we want NVARCHAR
         return self.visit_NVARCHAR(type_, **kw)
 
-    def visit_text(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_TEXT(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # Normally unicode renders as TEXT, but we want NCLOB
         return self.visit_NCLOB(type_, **kw)
-
-    def visit_large_binary(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        return self.visit_BLOB(type_, **kw)
-
-    def visit_unicode_text(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        return self.visit_NCLOB(type_, **kw)
-
-    def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        return "SMALLDECIMAL"
 
     def visit_boolean(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # Check if we want native or non-native booleans
         if self.dialect.supports_native_boolean:
             return self.visit_BOOLEAN(type_)
         return self.visit_TINYINT(type_)
+
+    def visit_BINARY(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA has no BINARY type, therefore delegate to VARBINARY
+        return super().visit_VARBINARY(type_, **kw)
+
+    def visit_DOUBLE_PRECISION(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA has no DOUBLE_PRECISION type, therefore delegate to DOUBLE
+        return super().visit_DOUBLE(type_, **kw)
+
+    def visit_uuid(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
+        return self._render_string_type(type_, "NVARCHAR", length_override=32)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -458,10 +472,18 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
-        types.LargeBinary: hana_types.HanaBinary,
-        types.Text: hana_types.HanaUnicodeText,
-        types.UnicodeText: hana_types.HanaUnicodeText,
+        # these classes extend a mapped class (left side of this map); without listing them here,
+        # the wrong class will be used
+        hana_types.SECONDDATE: hana_types.SECONDDATE,
     }
+    types_with_length = [
+        hana_types.VARCHAR,
+        hana_types.NVARCHAR,
+        hana_types.VARBINARY,
+        hana_types.CHAR,
+        hana_types.NCHAR,
+        hana_types.ALPHANUM,
+    ]
 
     isolation_level = None
     default_schema_name: str  # this is always set for us
@@ -824,14 +846,12 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                 )
                 column["type"] = types.NULLTYPE
 
-            if column["type"] == types.DECIMAL:
-                column["type"] = types.DECIMAL(row[4], row[5])
-            elif column["type"] == types.VARCHAR:
-                column["type"] = types.VARCHAR(row[4])
-            elif column["type"] == types.NVARCHAR:
-                column["type"] = types.NVARCHAR(row[4])
-            elif column["type"] == types.VARBINARY:
-                column["type"] = types.VARBINARY(row[4])
+            if column["type"] == hana_types.DECIMAL:
+                column["type"] = hana_types.DECIMAL(row[4], row[5])
+            elif column["type"] == hana_types.FLOAT:
+                column["type"] = hana_types.FLOAT(row[4])
+            elif column["type"] in self.types_with_length:
+                column["type"] = column["type"](row[4])
 
             columns.append(cast("ReflectedColumn", column))
 
