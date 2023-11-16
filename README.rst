@@ -159,7 +159,7 @@ sqlalchemy-hana aims to support as many SQLAlchemy types as possible and to fall
 type of the requested type is not supported in SAP HANA.
 The following table shows the mapping:
 
-.. list-table:: Title
+.. list-table::
     :header-rows: 1
 
     * - SQLAlchemy type
