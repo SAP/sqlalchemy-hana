@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from typing import Callable, Literal
 
+import sqlalchemy
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
 
@@ -87,7 +88,10 @@ class REAL(sqltypes.REAL):  # type:ignore[type-arg]
     pass
 
 
-class DOUBLE(sqltypes.DOUBLE):  # type:ignore[type-arg]
+_BaseDouble = sqltypes.FLOAT if sqlalchemy.__version__ < "2" else sqltypes.DOUBLE
+
+
+class DOUBLE(_BaseDouble):  # type:ignore[valid-type,misc]
     pass
 
 
