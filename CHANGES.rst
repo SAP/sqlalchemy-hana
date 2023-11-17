@@ -1,6 +1,24 @@
 Changelog
 =========
 
+1.1.0
+-----
+
+Features
+~~~~~~~~
+- The statement caching capabilities of SQLAlchemy are now supported
+- Calculated/Computed columns are now officially supported
+- The following SAP HANA types are now supported: ``SECONDDATE``, ``LONGDATE`` and ``ALPHANUM``
+- The module ``sqlalchemy_hana.types`` defines now all SAP HANA native types
+- All *camelcase* types of SQLAlchemy are now supported. If SAP HANA does not support it, a
+  similar type is used automatically
+- sqlalchemy-hana will now expose the version information of the connected SAP HANA instance,
+  filling the dialect field ``server_version_info``
+
+Bugfixes
+~~~~~~~~
+- During column reflection all types will expose their respective length, scale and precision
+
 1.0.1
 -----
 
