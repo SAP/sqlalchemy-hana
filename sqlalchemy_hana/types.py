@@ -142,3 +142,31 @@ class CLOB(sqltypes.CLOB):
 
 class NCLOB(sqltypes.UnicodeText):
     __visit_name__ = "NCLOB"
+
+
+__all__ = (
+    "ALPHANUM",
+    "BIGINT",
+    "BLOB",
+    "BOOLEAN",
+    "CHAR",
+    "CLOB",
+    "DATE",
+    "DECIMAL",
+    "DOUBLE",
+    "FLOAT",
+    "INTEGER",
+    "LONGDATE",
+    "NCHAR",
+    "NCLOB",
+    "NVARCHAR",
+    "REAL",
+    "SECONDDATE",
+    "SMALLDECIMAL",
+    "SMALLINT",
+    "TIME",
+    "TIMESTAMP",
+    "TINYINT",
+    "VARBINARY",
+    "VARCHAR",
+)
