@@ -25,6 +25,16 @@ Install from the Python Package Index:
 
     $ pip install sqlalchemy-hana
 
+Versioning
+----------
+sqlalchemy-hana follows the semantic versioning standard, meaning that breaking changes will
+only be added in major releases.
+Please note, that only the following modules are considered to be part of the public API
+
+- ``sqlalchemy_hana.types``
+
+For these, only exported members (part of ``__all__`` ) are guaranteed to be stable.
+
 Getting started
 ---------------
 If you do not have access to a SAP HANA server, you can also use the
