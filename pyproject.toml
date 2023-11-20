@@ -42,7 +42,7 @@ dev = [
     "flake8==6.1.0",
     "pylint==3.0.2",
     "mypy==1.7.0",
-    "types-hdbcli==2.18.0.0",
+    "types-hdbcli==2.18.0.1",
 ]
 test = [
     "pytest==7.4.2",
