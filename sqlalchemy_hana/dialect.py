@@ -581,13 +581,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self, dbapi_connection: hdbcli.dbapi.Connection
     ) -> str:
         with closing(dbapi_connection.cursor()) as cursor:
-            cursor.execute(  # type:ignore[call-arg]
-                "SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY"
-            )
+            cursor.execute("SELECT CURRENT_TRANSACTION_ISOLATION_LEVEL FROM DUMMY")
             result = cursor.fetchone()
 
         assert result, "no current transaction isolation level found"
-        return cast(str, result[0])  # type:ignore[index]
+        return cast(str, result[0])
 
     def _get_server_version_info(self, connection: Connection) -> tuple[int, ...]:
         result: str = connection.execute(  # type:ignore[assignment]
