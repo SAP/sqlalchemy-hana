@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import sqlalchemy.testing
 from sqlalchemy import literal, select, true
 from sqlalchemy.sql.expression import column, table
+from sqlalchemy.testing.assertions import AssertsCompiledSQL
+from sqlalchemy.testing.fixtures import TestBase
 
 
-class HANACompileTest(
-    sqlalchemy.testing.fixtures.TestBase, sqlalchemy.testing.AssertsCompiledSQL
-):
+class SQLCompileTest(TestBase, AssertsCompiledSQL):
     def test_sql_with_for_update(self) -> None:
         table1 = table("mytable", column("myid"), column("name"), column("description"))
 
