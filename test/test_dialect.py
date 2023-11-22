@@ -104,7 +104,7 @@ class DialectTest(TestBase):
     def test_get_isolation_level(self) -> None:
         eng = testing_engine(options={})
         isolation_level = eng.dialect.get_isolation_level(eng.connect().connection)
-        eq_(isolation_level, self._default_isolation_level())
+        eq_(isolation_level, DEFAULT_ISOLATION_LEVEL)
 
     def test_set_isolation_level(self) -> None:
         eng = testing_engine(options={})
@@ -142,9 +142,7 @@ class DialectTest(TestBase):
             NON_DEFAULT_ISOLATION_LEVEL,
         )
 
-        eng.dialect.set_isolation_level(
-            conn.connection, self._default_isolation_level()
-        )
+        eng.dialect.set_isolation_level(conn.connection, DEFAULT_ISOLATION_LEVEL)
         eq_(eng.dialect.get_isolation_level(conn.connection), DEFAULT_ISOLATION_LEVEL)
         conn.close()
 
