@@ -103,6 +103,11 @@ class AlembicHANAOperationTest(TestBase):
             """RENAME COLUMN "strange Table nAme"."colume A 1" TO column_a"""
         )
 
+    def test_rename_table(self):
+        context = op_fixture("hana")
+        op.rename_table("old_table", "new_table")
+        context.assert_("RENAME TABLE old_table TO new_table")
+
     def test_create_check_constraint(self):
         context = op_fixture("hana")
         op.create_check_constraint(
