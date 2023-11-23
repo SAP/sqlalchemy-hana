@@ -11,6 +11,7 @@ from alembic.ddl.base import (
     ColumnNullable,
     ColumnType,
     DropColumn,
+    RenameTable,
     alter_table,
     format_column_name,
     format_server_default,
@@ -111,3 +112,11 @@ def visit_column_default(element: ColumnDefault, compiler: HANADDLCompiler) -> s
         else "NULL"
     )
     return f"{table} ALTER ({column} {type_} DEFAULT {default})"
+
+
+@compiles(RenameTable, "hana")
+def visit_rename_table(element: RenameTable, compiler: HANADDLCompiler) -> str:
+    """Generate SQL to rename a table."""
+    old_table = format_table_name(compiler, element.table_name, element.schema)
+    new_table = format_table_name(compiler, element.new_table_name, element.schema)
+    return f"RENAME TABLE {old_table} TO {new_table}"
