@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 
 import sqlalchemy
 from sqlalchemy import types as sqltypes
@@ -144,8 +144,28 @@ class NCLOB(sqltypes.UnicodeText):
     __visit_name__ = "NCLOB"
 
 
+class ARRAY(sqltypes.ARRAY):
+    def __init__(self, item_type: Any, as_tuple: bool = False):
+        super().__init__(item_type, as_tuple, dimensions=1, zero_indexes=False)
+
+    def literal_processor(self, dialect: Dialect) -> Callable[[ARRAY], str]:
+        item_processor = self.item_type.dialect_impl(dialect).literal_processor(dialect)
+        if item_processor is None:
+            return None
+
+        def process(value: ARRAY) -> str:
+            elements = [item_processor(x) for x in value]
+            return f"ARRAY({', '.join(elements)})"
+
+        return process
+
+    def result_processor(self, dialect: Dialect, coltype: object) -> Any | None:
+        raise NotImplementedError("ARRAY columns in result set is not supported")
+
+
 __all__ = (
     "ALPHANUM",
+    "ARRAY",
     "BIGINT",
     "BLOB",
     "BOOLEAN",

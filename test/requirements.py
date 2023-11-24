@@ -122,7 +122,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def array_type(self) -> compound:
-        # Not yet supported, #119
+        # No E2E test possible, since hdbcli does not support ARRAY in result sets
         return exclusions.closed()
 
     @property

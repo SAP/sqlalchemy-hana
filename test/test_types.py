@@ -11,7 +11,7 @@ from unittest import mock
 import pytest
 import sqlalchemy
 import sqlalchemy.testing.suite.test_types
-from sqlalchemy import inspect, testing, types
+from sqlalchemy import Integer, inspect, testing, types
 from sqlalchemy.testing.fixtures import TablesTest
 from sqlalchemy.testing.schema import Column, Table
 from sqlalchemy.testing.suite.test_types import _DateFixture
@@ -207,4 +207,8 @@ class CLOBTest(_TypeBaseTest):
 
 class NCLOBTest(_TypeBaseTest):
     column_type = hana_types.NCLOB()
+    data = "some test text"
+
+class ARRAYTest(_TypeBaseTest):
+    column_type = hana_types.ARRAY(hana_types.INTEGER())
     data = "some test text"

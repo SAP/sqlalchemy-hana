@@ -349,6 +349,10 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
         return self._render_string_type(type_, "NVARCHAR", length_override=32)
 
+    def visit_ARRAY(self, type_: types.ARRAY, **kw: Any) -> str:
+        inner = self.process(type_.item_type, **kw)
+        return f"{inner} ARRAY"
+
 
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(
@@ -472,6 +476,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
+        types.ARRAY: hana_types.ARRAY,
         # these classes extend a mapped class (left side of this map); without listing them here,
         # the wrong class will be used
         hana_types.SECONDDATE: hana_types.SECONDDATE,
