@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.1.1
+-----
+
+Bugfixes
+~~~~~~~~
+- Fixed an issue causing the alembic dialect to render a ``RENAME`` table statement wrongly
+
 1.1.0
 -----
 
