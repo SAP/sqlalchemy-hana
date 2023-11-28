@@ -15,6 +15,10 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
         return exclusions.open()
 
     @property
+    def view_reflection(self) -> compound:
+        return exclusions.open()
+
+    @property
     def reflects_pk_names(self) -> compound:
         return exclusions.open()
 
