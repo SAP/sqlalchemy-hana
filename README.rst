@@ -247,6 +247,51 @@ SAP HANA supports two computed/calculated columns:
 By default, sqlalchemy-hana creates a ``GENERATED ALWAYS AS`` if a ``Computed`` column is used.
 If ``Computed(persisted=False)`` is used, a fully virtual column using ``AS`` is created.
 
+Views
+~~~~~
+sqlalchemy-hana supports the creation and usage of SQL views.
+
+The views are not bound to the metadata object, therefore each needs to be created/dropped manually
+using ``CreateView`` and ``DropView``.
+By using the helper function ``view``, a ``TableClause`` object is generated which can be used in
+select statements.
+The returned object has the same primary keys as the underlying selectable.
+
+Views can also be used in ORM and e.g. assigned to the ``__table__`` attribute of declarative base
+classes.
+
+For general information about views, please refer to
+`this page <https://github.com/sqlalchemy/sqlalchemy/wiki/Views>`_.
+
+.. code-block:: python
+
+    from sqlalchemy import Column, Integer, MetaData, String, Table, select
+    from sqlalchemy_hana.elements import CreateView, DropView, view
+
+    engine = None  # a engine bound to a SAP HANA instance
+    metadata = MetaData()
+    stuff = sa.Table(
+        "stuff",
+        metadata,
+        Column("id", Integer, primary_key=True),
+        Column("data", String(50)),
+    )
+
+    selectable = select(stuff.c.id, stuff.c.data).where(stuff.c.data == "something")
+
+    with engine.begin() as conn:
+        # create a view
+        ddl = CreateView("stuff_view", selectable)
+        conn.execute(ddl)
+
+        # usage of a view
+        stuff_view = view("stuff_view", selectable)
+        select(stuff_view.c.id, stuff_view.c.data).all()
+
+        # drop a view
+        ddl = DropView("stuff_view")
+        conn.execute(ddl)
+
 Alembic
 -------
 The sqlalchemy-hana dialect also contains a dialect for ``alembic``.

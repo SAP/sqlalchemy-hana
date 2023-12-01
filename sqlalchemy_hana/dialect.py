@@ -21,6 +21,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.engine import Connection, default, reflection
 from sqlalchemy.sql import Select, compiler, sqltypes
+from sqlalchemy.sql.ddl import _DropView as BaseDropView
 from sqlalchemy.sql.elements import (
     BinaryExpression,
     BindParameter,
@@ -29,6 +30,7 @@ from sqlalchemy.sql.elements import (
 )
 
 from sqlalchemy_hana import types as hana_types
+from sqlalchemy_hana.elements import CreateView, DropView
 
 if TYPE_CHECKING:
     from typing import ParamSpec, TypeVar
@@ -408,6 +410,15 @@ class HANADDLCompiler(compiler.DDLCompiler):
             generated.sqltext, include_table=False, literal_binds=True
         )
         return f"{clause} ({expression})"
+
+    def visit_create_view(self, create: CreateView, **kw: Any) -> str:
+        selectable = self.sql_compiler.process(create.selectable, literal_binds=True)
+        return f"CREATE VIEW {create.name} AS {selectable}"
+
+    def visit_drop_view(self, drop: DropView | BaseDropView, **kw: Any) -> str:
+        if isinstance(drop, BaseDropView):
+            return f"DROP VIEW {self.preparer.format_table(drop.element)}"
+        return f"DROP VIEW {drop.name}"
 
 
 class HANAExecutionContext(default.DefaultExecutionContext):
