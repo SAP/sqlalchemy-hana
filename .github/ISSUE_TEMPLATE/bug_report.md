@@ -24,6 +24,7 @@ A clear and concise description of what you expected to happen.
 - `sqlalchemy`
 - `sqlalchemy-hana`
 - `python`
+- `SAP HANA version and edition (cloud/on-prem)`
 
 **Additional context**
 Add any other context about the problem here.
