@@ -268,7 +268,6 @@ For general information about views, please refer to
     from sqlalchemy import Column, Integer, MetaData, String, Table, select
     from sqlalchemy_hana.elements import CreateView, DropView, view
 
-    # we assume that a stuff
     engine = None  # a engine bound to a SAP HANA instance
     metadata = MetaData()
     stuff = sa.Table(
