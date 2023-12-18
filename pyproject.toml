@@ -36,7 +36,7 @@ dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli~=2.10"]
 
 [project.optional-dependencies]
 dev = [
-    "isort==5.13.1",
+    "isort==5.13.2",
     "black==23.11.0",
     "pre-commit==3.6.0",
     "flake8==6.1.0",
