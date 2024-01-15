@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Insert
 from sqlalchemy import table as table_clause
 from sqlalchemy.sql.ddl import DDLElement
-from sqlalchemy.sql.dml import DMLWhereBase
+from sqlalchemy.sql.dml import DMLWhereBase, Insert
 from sqlalchemy.sql.selectable import Select, TableClause
 
 if TYPE_CHECKING:
