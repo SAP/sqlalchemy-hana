@@ -200,6 +200,8 @@ type class accepts them.
 The type compiler will then just ignore these arguments are render a type which will not lead to a
 SQL error.
 
+The ``ARRAY`` datatype is not supported because ``hdbcli`` does not yet provide support for it.
+
 Regex
 ~~~~~
 sqlalchemy-hana supports the ``regexp_match`` and ``regexp_replace``
