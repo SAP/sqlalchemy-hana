@@ -328,6 +328,27 @@ To ensure version compatibility, install sqlalchemy-hana as followed:
 
     $ pip install sqlalchemy-hana[alembic]
 
+Error handling for humans
+-------------------------
+sqlalchemy-hana provides the ``sqlalchemy_hana.errors`` module which contains a set of
+special exceptions and wrapper methods.
+SQLAlchemy and hdbcli only provide generic exceptions which are sometimes not very helpful and
+manual effort is needed to extract the relevant information.
+To make this easier, the module provides two wrapper functions which take a SQLAlchemy or hdbcli
+error and raise a more specific exception if possible.
+
+.. code-block:: python
+
+    from sqlalchemy_hana.errors import wrap_dbapi_error
+    from sqlalchemy.exc import DBAPIError
+
+    try:
+        # some sqlalchemy code which might raise a DBAPIError
+    except DBAPIError as err:
+        wrap_dbapi_error(err)
+        # if you reach this line, either the wrapped error of DBAPIError was not a hdbcli error
+        # of no more specific exception was found
+
 Cookbook
 --------
 
