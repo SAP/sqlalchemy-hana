@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import table
+from sqlalchemy import table as table_clause
 from sqlalchemy.sql.ddl import DDLElement
+from sqlalchemy.sql.dml import DMLWhereBase, Insert
 from sqlalchemy.sql.selectable import Select, TableClause
 
 if TYPE_CHECKING:
@@ -33,11 +34,26 @@ class DropView(DDLElement):
 
 def view(name: str, selectable: AnySelect) -> TableClause:
     """Helper function to create a view clause element."""
-    clause = table(name)
+    clause = table_clause(name)
     clause._columns._populate_separate_keys(
         col._make_proxy(clause) for col in selectable.selected_columns
     )
     return clause
 
 
-__all__ = ("CreateView", "DropView", "view")
+class Upsert(Insert, DMLWhereBase):  # type: ignore[misc]
+    __visit_name__ = "upsert"
+    # until https://github.com/sqlalchemy/sqlalchemy/issues/8321 is implemented we don't cache
+    inherit_cache = False
+
+    @property
+    def _effective_plugin_target(self) -> str:
+        # somewhere in the internal logic of sqlalchemy an error occurs if this is not set
+        return "insert"
+
+
+def upsert(table: Any) -> Upsert:
+    return Upsert(table)
+
+
+__all__ = ("CreateView", "DropView", "Upsert", "upsert", "view")

@@ -30,7 +30,7 @@ from sqlalchemy.sql.elements import (
 )
 
 from sqlalchemy_hana import types as hana_types
-from sqlalchemy_hana.elements import CreateView, DropView
+from sqlalchemy_hana.elements import CreateView, DropView, Upsert
 
 if TYPE_CHECKING:
     from typing import ParamSpec, TypeVar
@@ -301,6 +301,18 @@ class HANAStatementCompiler(compiler.SQLCompiler):
                 f" FLAG {self.render_literal_value(flags, sqltypes.STRINGTYPE)}"
             )
         statement += f" IN {within} WITH {replacement})"
+        return statement
+
+    def visit_upsert(self, upsert: Upsert, **kw: Any) -> str:
+        statement: str = super().visit_insert(upsert, **kw)
+        assert statement.startswith("INSERT INTO")
+        statement = statement.replace("INSERT INTO", "UPSERT")
+
+        if upsert._where_criteria:
+            where = self._generate_delimited_and_list(upsert._where_criteria, **kw)
+            if where:
+                statement += f" WHERE {where}"
+
         return statement
 
 

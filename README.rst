@@ -294,6 +294,30 @@ For general information about views, please refer to
         ddl = DropView("stuff_view")
         conn.execute(ddl)
 
+Upsert
+~~~~~~
+UPSERT statements are supported with some limitations by sqlalchemy-hana.
+Caching is disabled due to implementation details and will not be added until a unified
+insert/upsert/merge implementation is available in SQLAlchemy (see https://github.com/sqlalchemy/sqlalchemy/issues/8321).
+
+.. code-block:: python
+
+    from sqlalchemy import Column, Integer, MetaData, String, Table
+    from sqlalchemy_hana.elements import upsert
+
+    engine = None  # a engine bound to a SAP HANA instance
+    metadata = MetaData()
+    stuff = sa.Table(
+        "stuff",
+        metadata,
+        Column("id", Integer, primary_key=True),
+        Column("data", String(50)),
+    )
+
+    with engine.begin() as conn:
+        statement upsert(stuff).values(id=1, data="some").filter_by(id=1)
+        conn.execute(statement)
+
 Alembic
 -------
 The sqlalchemy-hana dialect also contains a dialect for ``alembic``.

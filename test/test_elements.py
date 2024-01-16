@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.testing.config import fixture
 from sqlalchemy.testing.fixtures import TablesTest
 
-from sqlalchemy_hana.elements import CreateView, DropView, view
+from sqlalchemy_hana.elements import CreateView, DropView, upsert, view
 
 
 class TestViews(TablesTest):
@@ -72,3 +72,48 @@ class TestViews(TablesTest):
         result = Session(connection).query(MyModel).all()
         assert result[0].id == 1
         assert result[1].id == 3
+
+
+class TestUpsert(TablesTest):
+    @classmethod
+    def define_tables(cls, metadata):
+        Table(
+            "test_table",
+            metadata,
+            Column("id", Integer, primary_key=True),
+            Column("value", String(10)),
+        )
+
+    @classmethod
+    def insert_data(cls, connection):
+        connection.execute(
+            cls.tables.test_table.insert(),
+            [
+                {"id": 1, "value": "data1"},
+                {"id": 2, "value": "data2"},
+                {"id": 3, "value": "data3"},
+            ],
+        )
+
+    def test_upsert_as_insert(self, connection):
+        table = self.tables.test_table
+        connection.execute(upsert(table).values(id=4, value="data4").filter_by(id=4))
+
+        select_stmt = select(table.c.id, table.c.value).order_by(table.c.id)
+        assert connection.execute(select_stmt).all() == [
+            (1, "data1"),
+            (2, "data2"),
+            (3, "data3"),
+            (4, "data4"),
+        ]
+
+    def test_upsert_as_update(self, connection):
+        table = self.tables.test_table
+        connection.execute(upsert(table).values(id=2, value="dataX").filter_by(id=2))
+
+        select_stmt = select(table.c.id, table.c.value).order_by(table.c.id)
+        assert connection.execute(select_stmt).all() == [
+            (1, "data1"),
+            (2, "dataX"),
+            (3, "data3"),
+        ]
