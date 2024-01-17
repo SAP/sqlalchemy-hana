@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.2.0
+-----
+
+Features
+~~~~~~~~
+- Support CREATE and DROP of views
+- Add limited UPSERT support
+- Add support for exception wrapping by replacing hdbcli errors with more detailed ones if possible
+
 1.1.1
 -----
 
