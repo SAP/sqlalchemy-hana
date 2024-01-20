@@ -13,9 +13,10 @@
 # language governing permissions and limitations under the License.
 
 from functools import wraps
+from typing import List, Dict
 
 from sqlalchemy import sql, types, util
-from sqlalchemy.engine import default, reflection
+from sqlalchemy.engine import default, reflection, ResultProxy
 from sqlalchemy.sql import compiler
 from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy import exc
@@ -209,11 +210,13 @@ class HANABaseDialect(default.DefaultDialect):
     supports_default_values = False
     supports_sane_multi_rowcount = False
     isolation_level = None
+    normalize_column_name = True
 
-    def __init__(self, isolation_level=None, auto_convert_lobs=True, **kwargs):
+    def __init__(self, isolation_level=None, auto_convert_lobs=True, normalize_column_name=True, **kwargs):
         super(HANABaseDialect, self).__init__(**kwargs)
         self.isolation_level = isolation_level
         self.auto_convert_lobs = auto_convert_lobs
+        self.normalize_column_name = normalize_column_name
 
     def on_connect(self):
         if self.isolation_level is not None:
@@ -402,7 +405,7 @@ class HANABaseDialect(default.DefaultDialect):
         columns = []
         for row in result.fetchall():
             column = {
-                'name': self.normalize_name(row[0]),
+                'name': self.normalize_name(row[0]) if self.normalize_column_name else row[0],
                 'default': row[2],
                 'nullable': row[3] == "TRUE",
                 'comment': row[6]
