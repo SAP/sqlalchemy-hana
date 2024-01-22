@@ -210,7 +210,6 @@ class HANABaseDialect(default.DefaultDialect):
     supports_default_values = False
     supports_sane_multi_rowcount = False
     isolation_level = None
-    normalize_column_name = True
 
     def __init__(self, isolation_level=None, auto_convert_lobs=True, normalize_column_name=True, **kwargs):
         super(HANABaseDialect, self).__init__(**kwargs)
