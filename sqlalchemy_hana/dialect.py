@@ -515,11 +515,13 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self,
         isolation_level: str | None = None,
         use_native_boolean: bool = True,
+        normalize_column_name=True,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
         self.supports_native_boolean = use_native_boolean
+        self.normalize_column_name = normalize_column_name
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:
@@ -846,7 +848,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         columns: list[ReflectedColumn] = []
         for row in result.fetchall():
             column = {
-                "name": self.normalize_name(row[0]),
+                "name": self.normalize_name(row[0]) if self.normalize_column_name else row[0],
                 "default": row[2],
                 "nullable": row[3] == "TRUE",
                 "comment": row[6],
