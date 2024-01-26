@@ -58,6 +58,10 @@ class TransactionCancelledError(HANAError):
     """Error raised when a transaction is cancelled."""
 
 
+class InvalidObjectNameError(HANAError):
+    """Error when an invalid object name is referenced."""
+
+
 def wrap_dbapi_error(error: DBAPIError) -> None:
     """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and raises a more specific exception if possible.
 
@@ -74,6 +78,19 @@ def wrap_dbapi_error(error: DBAPIError) -> None:
     """
     if isinstance(error.orig, HdbcliError):
         wrap_hdbcli_error(error.orig)
+
+
+def convert_dbapi_error(error: DBAPIError) -> DBAPIError | HANAError:
+    """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and converts it to a more specific exception.
+
+    Similar to :py:func:`~wrap_dbapi_error`, but instead of throwing the error, it returns it as
+    an object.
+    """
+    try:
+        wrap_dbapi_error(error)
+    except HANAError as thrown:
+        return thrown
+    return error
 
 
 def wrap_hdbcli_error(error: HdbcliError) -> None:
@@ -150,6 +167,8 @@ def wrap_hdbcli_error(error: HdbcliError) -> None:
         and "An error occurred while opening the channel" in error.errortext
     ):
         raise StatementExecutionError from error
+    if error.errorcode == 397:
+        raise InvalidObjectNameError from error
 
 
 __all__ = (
@@ -165,4 +184,6 @@ __all__ = (
     "DeadlockError",
     "DatabaseOverloadedError",
     "StatementExecutionError",
+    "InvalidObjectNameError",
+    "convert_dbapi_error",
 )
