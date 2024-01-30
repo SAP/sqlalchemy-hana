@@ -4,6 +4,7 @@ This module contains improved error handling for hdbcli errors.
 Basically it takes a py:exc:`hdbcli.dbapi.Error` or :py:exc:`sqlalchemy.exc.DBAPIError` instance
 and raises a more specific exception if possible.
 """
+
 from __future__ import annotations
 
 from hdbcli.dbapi import Error as HdbcliError
