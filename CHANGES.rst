@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.3.0
+-----
+
+Features
+~~~~~~~~
+- Support ``InvalidObjectNameError`` in ``sqlalchemy_hana.errors``
+- Add ``convert_dbapi_error`` to ``sqlalchemy_hana.errors``
+
 1.2.0
 -----
 

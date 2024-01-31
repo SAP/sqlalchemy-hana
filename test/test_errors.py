@@ -15,12 +15,14 @@ from sqlalchemy_hana.errors import (
     DatabaseOutOfMemoryError,
     DatabaseOverloadedError,
     DeadlockError,
+    InvalidObjectNameError,
     LockAcquisitionError,
     LockWaitTimeoutError,
     SequenceCacheTimeoutError,
     StatementExecutionError,
     StatementTimeoutError,
     TransactionCancelledError,
+    convert_dbapi_error,
     wrap_dbapi_error,
     wrap_hdbcli_error,
 )
@@ -96,6 +98,7 @@ class TestWrapHdbcliError(TestBase):
                 TransactionCancelledError,
             ),
             (613, "", StatementTimeoutError),
+            (397, "", InvalidObjectNameError),
         ],
     )
     def test_wrap_hdbcli_error(
@@ -120,3 +123,26 @@ class TestWrapHdbcliError(TestBase):
     def test_wrap_hdbcli_error_no_wrap(self, errorcode: int, errortext: str) -> None:
         error = HdbcliError(errorcode, errortext)
         wrap_hdbcli_error(error)
+
+
+class TestConvertDbapiError(TestBase):
+    def test_calls_wrap_dbapi_error_throw(self) -> None:
+        error = DBAPIError("", None, orig=HdbcliError())
+
+        with mock.patch(
+            "sqlalchemy_hana.errors.wrap_dbapi_error", side_effect=StatementTimeoutError
+        ) as mocked:
+            new_error = convert_dbapi_error(error)
+            assert isinstance(new_error, StatementTimeoutError)
+
+        mocked.assert_called_once_with(error)
+
+    def test_calls_not_wrap_hdbcli_error_no_throw(self) -> None:
+        error = DBAPIError("", None, orig=ValueError())
+
+        with mock.patch(
+            "sqlalchemy_hana.errors.wrap_dbapi_error", return_value=None
+        ) as mocked:
+            assert convert_dbapi_error(error) == error
+
+        mocked.assert_called_once_with(error)
