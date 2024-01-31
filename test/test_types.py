@@ -12,7 +12,8 @@ import pytest
 import sqlalchemy
 import sqlalchemy.testing.suite.test_types
 from sqlalchemy import inspect, testing, types
-from sqlalchemy.testing.fixtures import TablesTest
+from sqlalchemy.schema import CreateTable
+from sqlalchemy.testing.fixtures import TablesTest, TestBase
 from sqlalchemy.testing.schema import Column, Table
 from sqlalchemy.testing.suite.test_types import _DateFixture
 
@@ -210,5 +211,12 @@ class NCLOBTest(_TypeBaseTest):
     data = "some test text"
 
 
-# The following types cannot be tested because they are not support in SAP HANA Cloud:
-# - ALPHANUM
+class AlphanumTest(TestBase):
+    # no real test possible because ALPHANUM is not supported in SAP HANA Cloud
+
+    def test_compile(self, connection, metadata) -> None:
+        mytab = Table("mytab", metadata, Column("mycol", hana_types.ALPHANUM(10)))
+        assert (
+            str(CreateTable(mytab).compile(connection))
+            == "\nCREATE TABLE mytab (\n\tmycol ALPHANUM(10)\n)\n\n"
+        )
