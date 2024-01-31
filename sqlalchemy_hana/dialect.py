@@ -333,6 +333,10 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         # SAP HANA special type
         return "SECONDDATE"
 
+    def visit_ALPHANUM(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        # SAP HANA special type
+        return "ALPHANUM"
+
     def visit_string(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         # Normally string renders as VARCHAR, but we want NVARCHAR
         return self.visit_NVARCHAR(type_, **kw)

@@ -208,3 +208,7 @@ class CLOBTest(_TypeBaseTest):
 class NCLOBTest(_TypeBaseTest):
     column_type = hana_types.NCLOB()
     data = "some test text"
+
+
+# The following types cannot be tested because they are not support in SAP HANA Cloud:
+# - ALPHANUM

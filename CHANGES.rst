@@ -9,6 +9,10 @@ Features
 - Support ``InvalidObjectNameError`` in ``sqlalchemy_hana.errors``
 - Add ``convert_dbapi_error`` to ``sqlalchemy_hana.errors``
 
+Bugfixes
+~~~~~~~~
+- Fixed an issue causing the usage of ALPHANUM to result in an AttributeError
+
 1.2.0
 -----
 
