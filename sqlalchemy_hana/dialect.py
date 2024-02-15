@@ -1,7 +1,6 @@
 """Dialect for SAP HANA."""
 
 import json
-import re
 from __future__ import annotations
 
 import contextlib
