@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import operator
 from contextlib import closing
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
@@ -168,6 +169,23 @@ class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
 
 class HANAStatementCompiler(compiler.SQLCompiler):
+    def visit_binary(
+        self,
+        *args,
+        **kw,
+    ):
+        binary = args[0]
+        res = super().visit_binary(*args, **kw)
+        if binary.operator == operator.sub and (
+            isinstance(binary.left.type, types.DateTime)
+            or isinstance(binary.right.type, types.DateTime)
+        ):
+            # Interval type compares to epoch start + difference
+            # Hence we add the second diff to epochs and query on that
+            parts = res.replace(" - ", ",")
+            return f"add_seconds('1970-01-01 00:00:00', seconds_between({parts}))"
+        return res
+
     def visit_bindparam(  # type:ignore[override] # pylint: disable=arguments-differ
         self, bindparam: BindParameter[Any], **kw: Any
     ) -> Any:
