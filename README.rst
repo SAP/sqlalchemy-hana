@@ -321,6 +321,7 @@ insert/upsert/merge implementation is available in SQLAlchemy (see https://githu
 Identity
 ~~~~~~~~
 Identity columns are fully supported but not reflection of those.
+Therefore, alembic support for identity columns is reduced to creation of those.
 
 Auto-increment
 ~~~~~~~~~~~~~~
