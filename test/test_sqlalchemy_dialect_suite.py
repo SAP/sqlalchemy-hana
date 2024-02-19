@@ -15,7 +15,8 @@ from sqlalchemy import (
     inspect,
     testing,
 )
-from sqlalchemy.testing.assertions import eq_
+from sqlalchemy.exc import DBAPIError
+from sqlalchemy.testing.assertions import assert_raises, eq_
 from sqlalchemy.testing.provision import temp_table_keyword_args
 from sqlalchemy.testing.schema import Column, Table
 from sqlalchemy.testing.suite import *  # noqa: F401, F403
@@ -25,6 +26,12 @@ from sqlalchemy.testing.suite.test_reflection import (
 )
 from sqlalchemy.testing.suite.test_reflection import (
     ComponentReflectionTestExtra as _ComponentReflectionTestExtra,
+)
+from sqlalchemy.testing.suite.test_reflection import (
+    IdentityReflectionTest as _IdentityReflectionTest,
+)
+from sqlalchemy.testing.suite.test_select import (
+    IdentityColumnTest as _IdentityColumnTest,
 )
 
 # Import dialect test suite provided by SQLAlchemy into SQLAlchemy-HANA test collection.
@@ -134,3 +141,22 @@ class CTETest(_CTETest):
 
     def test_insert_from_select_round_trip(self, connection):
         pytest.skip("Insert CTEs are not supported by SAP HANA")
+
+
+class IdentityReflectionTest(_IdentityReflectionTest):
+    def test_reflect_identity(self, connection):
+        pytest.skip("Identity column reflection is not supported")
+
+    def test_reflect_identity_schema(self, connection):
+        pytest.skip("Identity column reflection is not supported")
+
+
+class IdentityColumnTest(_IdentityColumnTest):
+    def test_insert_always_error(self, connection):
+        def fn():
+            connection.execute(
+                self.tables.tbl_a.insert(),
+                [{"id": 200, "desc": "a"}],
+            )
+
+        assert_raises((DBAPIError,), fn)
