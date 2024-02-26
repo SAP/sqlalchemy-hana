@@ -47,7 +47,7 @@ dev = [
 test = [
     "pytest==8.0.1",
     "pytest-cov==4.1.0",
-    "coverage[toml]==7.4.1",
+    "coverage[toml]==7.4.3",
     "diff-cover[toml]==8.0.3",
 ]
 alembic = ["alembic~=1.12"]
