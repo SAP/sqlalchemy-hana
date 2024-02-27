@@ -94,22 +94,6 @@ data received from SAP HANA.
 Unless identifier names have been truly created as case sensitive (i.e. using quoted names),
 all lowercase names should be used on the SQLAlchemy side.
 
-Auto Increment Behavior
-~~~~~~~~~~~~~~~~~~~~~~~
-SQLAlchemy Table objects which include integer primary keys are usually assumed to have
-“auto incrementing” behavior, which means that primary key values can be automatically generated
-upon INSERT.
-Since SAP HANA has no auto-increment feature, SQLAlchemy relies upon sequences to automatically
-generate primary key values.
-These sequences must be explicitly specified to enable auto-incrementing behavior.
-
-To create sequences, use the ``sqlalchemy.schema.Sequence`` object which is passed to a
-``Column`` construct.
-
-.. code-block:: python
-
-    t = Table('my_table', metadata, Column('id', Integer, Sequence('id_seq'), primary key=True))
-
 LIMIT/OFFSET Support
 ~~~~~~~~~~~~~~~~~~~~
 SAP HANA supports both ``LIMIT`` and ``OFFSET``, but it only supports ``OFFSET`` in conjunction with
@@ -334,6 +318,16 @@ if needed. This means that the  the following constructs are equivalent:
 
 Note, that for ``autoincrement=True`` a post-execute statement execution is needed to fetch the
 inserted identity value which might affect performance.
+
+As an SQLAlchemy specific alternative, a ``sqlalchemy.schema.Sequence`` can be used to simulate
+an auto-increment behavior, as followed:
+
+.. code-block:: python
+
+    t = Table('my_table', metadata, Column('id', Integer, Sequence('id_seq'), primary key=True))
+
+Note, that on SAP HANA side, the column and the sequence are not linked, meaning that the sequence
+can be e.g. be incremented w/o an actual insert into the table.
 
 Alembic
 -------
