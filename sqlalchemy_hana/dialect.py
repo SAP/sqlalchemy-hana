@@ -452,7 +452,7 @@ class HANAExecutionContext(default.DefaultExecutionContext):
         return self._execute_scalar(f"SELECT {seq}.NEXTVAL FROM DUMMY", type_)
 
     def get_lastrowid(self) -> int:
-        self.cursor.execute("SELECT CURRENT_IDENTITY_VALUE () FROM DUMMY")
+        self.cursor.execute("SELECT CURRENT_IDENTITY_VALUE() FROM DUMMY")
         res = self.cursor.fetchone()
         assert res, "No lastrowid available"
         return res[0]
