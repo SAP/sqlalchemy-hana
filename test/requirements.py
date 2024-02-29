@@ -55,8 +55,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def autoincrement_without_sequence(self) -> compound:
-        # Not supported yet
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def isolation_level(self) -> compound:
@@ -302,16 +301,20 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     def computed_columns_reflect_persisted(self) -> compound:
         return exclusions.open()
 
-    # identity columns are not supported yet
-
     @property
     def identity_columns(self) -> compound:
-        return exclusions.closed()
+        return exclusions.open()
 
     @property
     def identity_columns_alter(self) -> compound:
+        # SAP HANA does not return the semantics of an identity column
+        # Therefore, no diff can be calculated
         return exclusions.closed()
 
     @property
+    def identity_columns_standard(self) -> compound:
+        return exclusions.open()
+
+    @property
     def autoincrement_insert(self) -> compound:
-        return exclusions.closed()
+        return exclusions.open()

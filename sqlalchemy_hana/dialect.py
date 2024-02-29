@@ -11,6 +11,7 @@ import hdbcli.dbapi
 import sqlalchemy
 from sqlalchemy import (
     Computed,
+    Identity,
     Integer,
     PrimaryKeyConstraint,
     Sequence,
@@ -20,6 +21,7 @@ from sqlalchemy import (
     util,
 )
 from sqlalchemy.engine import Connection, default, reflection
+from sqlalchemy.schema import CreateColumn
 from sqlalchemy.sql import Select, compiler, sqltypes
 from sqlalchemy.sql.ddl import _DropView as BaseDropView
 from sqlalchemy.sql.elements import (
@@ -436,11 +438,24 @@ class HANADDLCompiler(compiler.DDLCompiler):
             return f"DROP VIEW {self.preparer.format_table(drop.element)}"
         return f"DROP VIEW {drop.name}"
 
+    def visit_create_column(
+        self, create: CreateColumn, first_pk: bool = False, **kw: Any
+    ) -> str:
+        if create.element.autoincrement is True and not create.element.identity:
+            create.element.identity = Identity()
+        return super().visit_create_column(create, first_pk, **kw)
+
 
 class HANAExecutionContext(default.DefaultExecutionContext):
     def fire_sequence(self, seq: Sequence, type_: Integer) -> int:
         seq = self.identifier_preparer.format_sequence(seq)
         return self._execute_scalar(f"SELECT {seq}.NEXTVAL FROM DUMMY", type_)
+
+    def get_lastrowid(self) -> int:
+        self.cursor.execute("SELECT CURRENT_IDENTITY_VALUE() FROM DUMMY")
+        res = self.cursor.fetchone()
+        assert res, "No lastrowid available"
+        return res[0]
 
 
 class HANAInspector(reflection.Inspector):
@@ -475,14 +490,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     div_is_floordiv = False
     implicit_returning = False
-    postfetch_lastrowid = False
+    postfetch_lastrowid = True
     requires_name_normalize = True
     returns_native_bytes = False
     supports_comments = True
     supports_default_values = False
     supports_empty_insert = False
     supports_for_update_of = True
-    supports_identity_columns = False
+    supports_identity_columns = True
     supports_is_distinct_from = True
     supports_native_boolean = True
     supports_native_decimal = True
