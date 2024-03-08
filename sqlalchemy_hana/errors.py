@@ -188,6 +188,5 @@ __all__ = (
     "DatabaseOverloadedError",
     "StatementExecutionError",
     "InvalidObjectNameError",
-    "InternalQueryExecutionError",
     "convert_dbapi_error",
 )
