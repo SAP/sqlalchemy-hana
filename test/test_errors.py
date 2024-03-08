@@ -115,7 +115,7 @@ class TestWrapHdbcliError(TestBase):
     @pytest.mark.parametrize(
         "errorcode,errortext",
         [
-            (123, "An error occurred while opening the channel"),
+            (123, "An error occurred while doing something"),
             (-10800, ""),
             (123, "some error"),
         ],
