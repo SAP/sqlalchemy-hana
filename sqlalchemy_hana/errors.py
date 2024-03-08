@@ -163,9 +163,11 @@ def wrap_hdbcli_error(error: HdbcliError) -> None:
         raise DatabaseConnectNotPossibleError from error
     if (
         # 129 -> ERR_TX_ROLLBACK: transaction rolled back by an internal error
-        # 2048 -> ERR_CS: Column store error
-        error.errorcode in [129, 2048]
-        and "An error occurred while opening the channel" in error.errortext
+        error.errorcode in [129, 145]
+        or "An error occurred while opening the channel" in error.errortext
+        or "Exception in executor plan" in error.errortext
+        or "DTX commit(first phase commit) failed" in error.errortext
+        or "An error occurred while reading from the channel" in error.errortext
     ):
         raise StatementExecutionError from error
     if error.errorcode == 397:
