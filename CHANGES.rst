@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.4.0
+-----
+
+Features
+~~~~~~~~
+- Support ``Identity`` columns
+- Support additional cases for ``StatementExecutionError``
+
 1.3.0
 -----
 
