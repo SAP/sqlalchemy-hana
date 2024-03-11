@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlalchemy-hana"
-version = "1.4.0"
+version = "2.0.0"
 description = "SQLAlchemy dialect for SAP HANA"
 keywords = ["sqlalchemy", "sap", "hana"]
 requires-python = "~=3.8"
@@ -43,6 +43,7 @@ dev = [
     "pylint==3.1.0",
     "mypy==1.8.0",
     "types-hdbcli==2.19.0.20240106",
+    "typing-extensions==4.10.0"
 ]
 test = [
     "pytest==8.0.2",
@@ -124,6 +125,7 @@ disable = [
     "too-many-function-args",
     "too-many-lines",
     "too-many-branches",
+    "too-many-return-statements",
 ]
 
 [tool.pylint.basic]
