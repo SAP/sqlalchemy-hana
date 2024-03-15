@@ -1,18 +1,35 @@
 """HANA error handling for humans.
 
 This module contains improved error handling for hdbcli errors.
-Basically it takes a py:exc:`hdbcli.dbapi.Error` or :py:exc:`sqlalchemy.exc.DBAPIError` instance
-and raises a more specific exception if possible.
+Basically it takes a :py:exc:`sqlalchemy.exc.DBAPIError` instance and returns a more specific
+exception if possible.
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, cast
+
 from hdbcli.dbapi import Error as HdbcliError
 from sqlalchemy.exc import DBAPIError
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
-class HANAError(Exception):
+
+class HANAError(DBAPIError):
     """Base class for all sqlalchemy-hana errors."""
+
+    @classmethod
+    def from_dbapi_error(cls, error: DBAPIError) -> Self:
+        """Create a new exception instance based on the given dbapi error."""
+        return cls(
+            statement=error.statement,
+            params=error.params,
+            orig=cast(BaseException, error.orig),
+            hide_parameters=error.hide_parameters,
+            code=error.code,
+            ismulti=error.ismulti,
+        )
 
 
 class SequenceCacheTimeoutError(HANAError):
@@ -63,55 +80,25 @@ class InvalidObjectNameError(HANAError):
     """Error when an invalid object name is referenced."""
 
 
-def wrap_dbapi_error(error: DBAPIError) -> None:
-    """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and raises a more specific exception if possible.
+def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
+    """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and returns a more specific error if possible.
 
     For that the :py:data:`sqlalchemy.exc.DBAPIError.orig` attribute is checked for a
     :py:exc:`hdbcli.dbapi.Error`.
-    If found, :py:func:`wrap_hdbcli_error` is called with it.
-    Else ``None`` is returned.
+    If it does not contain a hdbcli error, the original exception is returned.
 
-    Args:
-        error: The error to be wrapped
-
-    Returns:
-        None
-    """
-    if isinstance(error.orig, HdbcliError):
-        wrap_hdbcli_error(error.orig)
-
-
-def convert_dbapi_error(error: DBAPIError) -> DBAPIError | HANAError:
-    """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and converts it to a more specific exception.
-
-    Similar to :py:func:`~wrap_dbapi_error`, but instead of throwing the error, it returns it as
-    an object.
-    """
-    try:
-        wrap_dbapi_error(error)
-    except HANAError as thrown:
-        return thrown
-    return error
-
-
-def wrap_hdbcli_error(error: HdbcliError) -> None:
-    """Wraps the given :py:exc:`hdbcli.dbapi.Error` and raises specific exception if possible.
-
-    For this, the error code and error text are checked.
-    If a specific exception is raised, the original exception is set as the new exception's cause.
+    Else the error code and error text are further checked.
 
     In addition, an edge case is handled where SQLAlchemy creates a savepoint and the same
     transaction later fails leading to an automatic rollback by HANA.
     However, SQLAlchemy still tries to roll back the savepoint, which fails because the savepoint
     is no longer valid.
-    In this case, the cause of the exception is used for further processing.
-
-    Args:
-        error: The error to be wrapped
-
-    Returns:
-        None
+    In this case, the cause of the exception is used for further processing
     """
+    error = dbapi_error.orig
+    if not isinstance(error, HdbcliError):
+        return dbapi_error
+
     # extract hidden inner exceptions
     # TxSavepoint not found should normally only happen if a transaction was rolled back by HANA,
     # but SQLAlchemy also tries to perform a savepoint rollback, which fails due to the transaction
@@ -123,44 +110,45 @@ def wrap_hdbcli_error(error: HdbcliError) -> None:
         and "TxSavepoint not found" in error.errortext
     ):
         error = error.__context__
+        dbapi_error.orig = error
 
     if error.errorcode in [-10807, -10709]:  # sqldbc error codes for connection errors
-        raise ClientConnectionError from error
+        return ClientConnectionError.from_dbapi_error(dbapi_error)
     if error.errorcode == 613:
-        raise StatementTimeoutError from error
+        return StatementTimeoutError.from_dbapi_error(dbapi_error)
     if (
         error.errorcode == 139
         and "current operation cancelled by request and transaction rolled back"
         in error.errortext
     ):
-        raise TransactionCancelledError from error
+        return TransactionCancelledError.from_dbapi_error(dbapi_error)
     if "Lock timeout occurs while waiting sequence cache lock" in str(error.errortext):
-        raise SequenceCacheTimeoutError from error
+        return SequenceCacheTimeoutError.from_dbapi_error(dbapi_error)
     if error.errorcode == 131:
-        raise LockWaitTimeoutError from error
+        return LockWaitTimeoutError.from_dbapi_error(dbapi_error)
     if error.errorcode == 146:
-        raise LockAcquisitionError from error
+        return LockAcquisitionError.from_dbapi_error(dbapi_error)
     if error.errorcode == 133:
-        raise DeadlockError from error
+        return DeadlockError.from_dbapi_error(dbapi_error)
     if (
         "OutOfMemory exception" in error.errortext
         or "cannot allocate enough memory" in error.errortext
         or "Allocation failed" in error.errortext
         or error.errorcode == 4
     ):
-        raise DatabaseOutOfMemoryError from error
+        return DatabaseOutOfMemoryError.from_dbapi_error(dbapi_error)
     if (
         error.errorcode == 129
         and "max number of SqlExecutor threads are exceeded" in error.errortext
     ):
-        raise DatabaseOverloadedError from error
+        return DatabaseOverloadedError.from_dbapi_error(dbapi_error)
     if (
         # ERR_SQL_CONNECT_NOT_ALLOWED: user not allowed to connect from client
         error.errorcode == 663
         # GBA503: geo blocking service responded with a 503
         and "Error GBA503: Service is unavailable" in error.errortext
     ):
-        raise DatabaseConnectNotPossibleError from error
+        return DatabaseConnectNotPossibleError.from_dbapi_error(dbapi_error)
     if (
         # 129 -> ERR_TX_ROLLBACK: transaction rolled back by an internal error
         error.errorcode in [129, 145]
@@ -169,14 +157,13 @@ def wrap_hdbcli_error(error: HdbcliError) -> None:
         or "DTX commit(first phase commit) failed" in error.errortext
         or "An error occurred while reading from the channel" in error.errortext
     ):
-        raise StatementExecutionError from error
+        return StatementExecutionError.from_dbapi_error(dbapi_error)
     if error.errorcode == 397:
-        raise InvalidObjectNameError from error
+        return InvalidObjectNameError.from_dbapi_error(dbapi_error)
+    return dbapi_error
 
 
 __all__ = (
-    "wrap_dbapi_error",
-    "wrap_hdbcli_error",
     "HANAError",
     "SequenceCacheTimeoutError",
     "LockWaitTimeoutError",

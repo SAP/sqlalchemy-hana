@@ -1,6 +1,19 @@
 Changelog
 =========
 
+2.0.0
+-----
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+Reworked the ``sqlalchemy_hana.errors`` package so that it can be used inside a SQLAlchemy
+``handle_error`` event hook. Therefore
+
+- ``wrap_dbapi_error`` was removed
+- ``wrap_hdbcli_error`` was removed
+- ``HANAError`` now extends ``sqlalchemy.exc.DBAPIError``
+
+
 1.4.0
 -----
 

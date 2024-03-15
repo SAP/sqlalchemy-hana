@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from unittest import mock
-
 import pytest
 from hdbcli.dbapi import Error as HdbcliError
 from sqlalchemy.exc import DBAPIError
@@ -23,37 +21,16 @@ from sqlalchemy_hana.errors import (
     StatementTimeoutError,
     TransactionCancelledError,
     convert_dbapi_error,
-    wrap_dbapi_error,
-    wrap_hdbcli_error,
 )
 
 
-class TestWrapDbapiError(TestBase):
-    def test_calls_wrap_hdbcli_error(self) -> None:
-        hdbcli_error = HdbcliError()
-        error = DBAPIError("", None, orig=hdbcli_error)
-
-        with mock.patch("sqlalchemy_hana.errors.wrap_hdbcli_error") as mocked:
-            wrap_dbapi_error(error)
-
-        mocked.assert_called_once_with(hdbcli_error)
-
-    def test_calls_not_wrap_hdbcli_error(self) -> None:
-        error = DBAPIError("", None, orig=ValueError())
-
-        with mock.patch("sqlalchemy_hana.errors.wrap_hdbcli_error") as mocked:
-            wrap_dbapi_error(error)
-
-        mocked.assert_not_called()
-
-
-class TestWrapHdbcliError(TestBase):
-    def test_wrap_hdbcli_error_txsavepoint_not_found(self) -> None:
+class TestConvertDBAPIError(TestBase):
+    def test_convert_dbapi_error_txsavepoint_not_found(self) -> None:
         error = HdbcliError(128, "TxSavepoint not found")
         error.__context__ = HdbcliError(133, "some deadlock")
+        dbapi_error = DBAPIError(None, None, error)
 
-        with pytest.raises(DeadlockError):
-            wrap_hdbcli_error(error)
+        assert isinstance(convert_dbapi_error(dbapi_error), DeadlockError)
 
     @pytest.mark.parametrize(
         "errorcode,errortext,expected_exception",
@@ -101,16 +78,15 @@ class TestWrapHdbcliError(TestBase):
             (397, "", InvalidObjectNameError),
         ],
     )
-    def test_wrap_hdbcli_error(
+    def test_convert_dbapi_error(
         self,
         errorcode: int,
         errortext: str,
         expected_exception: type[Exception],
     ) -> None:
         error = HdbcliError(errorcode, errortext)
-
-        with pytest.raises(expected_exception):
-            wrap_hdbcli_error(error)
+        dbapi_error = DBAPIError(None, None, error)
+        assert isinstance(convert_dbapi_error(dbapi_error), expected_exception)
 
     @pytest.mark.parametrize(
         "errorcode,errortext",
@@ -120,29 +96,7 @@ class TestWrapHdbcliError(TestBase):
             (123, "some error"),
         ],
     )
-    def test_wrap_hdbcli_error_no_wrap(self, errorcode: int, errortext: str) -> None:
+    def test_convert_dbapi_error_no_wrap(self, errorcode: int, errortext: str) -> None:
         error = HdbcliError(errorcode, errortext)
-        wrap_hdbcli_error(error)
-
-
-class TestConvertDbapiError(TestBase):
-    def test_calls_wrap_dbapi_error_throw(self) -> None:
-        error = DBAPIError("", None, orig=HdbcliError())
-
-        with mock.patch(
-            "sqlalchemy_hana.errors.wrap_dbapi_error", side_effect=StatementTimeoutError
-        ) as mocked:
-            new_error = convert_dbapi_error(error)
-            assert isinstance(new_error, StatementTimeoutError)
-
-        mocked.assert_called_once_with(error)
-
-    def test_calls_not_wrap_hdbcli_error_no_throw(self) -> None:
-        error = DBAPIError("", None, orig=ValueError())
-
-        with mock.patch(
-            "sqlalchemy_hana.errors.wrap_dbapi_error", return_value=None
-        ) as mocked:
-            assert convert_dbapi_error(error) == error
-
-        mocked.assert_called_once_with(error)
+        dbapi_error = DBAPIError(None, None, error)
+        assert convert_dbapi_error(dbapi_error) is dbapi_error
