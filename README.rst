@@ -38,8 +38,8 @@ For these, only exported members (part of ``__all__`` ) are guaranteed to be sta
 Supported HANA Versions/Editions
 --------------------------------
 * SAP HANA Cloud
-* SAP HANA 2 (on-premise/cloud)
-* SAO HANA express-edition 2 (on-premise)
+* SAP HANA
+* SAP HANA, express edition
 
 Getting started
 ---------------
