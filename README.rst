@@ -35,6 +35,12 @@ Please note, that only the following modules are considered to be part of the pu
 
 For these, only exported members (part of ``__all__`` ) are guaranteed to be stable.
 
+Supported HANA Versions/Editions
+--------------------------------
+* SAP HANA Cloud
+* SAP HANA
+* SAP HANA, express edition
+
 Getting started
 ---------------
 If you do not have access to a SAP HANA server, you can also use the
