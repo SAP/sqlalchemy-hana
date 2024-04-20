@@ -774,6 +774,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         tables = list(self.normalize_name(row[0]) for row in result.fetchall())
         return tables
 
+    @cache
     def get_temp_table_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -793,6 +794,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return temp_table_names
 
+    @cache
     def get_view_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -809,6 +811,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         views = list(self.normalize_name(row[0]) for row in result.fetchall())
         return views
 
+    @cache
     def get_view_definition(
         self,
         connection: Connection,
@@ -831,6 +834,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             raise exc.NoSuchTableError()
         return result
 
+    @cache
     def get_columns(
         self,
         connection: Connection,
@@ -911,6 +915,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return [self.normalize_name(row[0]) for row in result]
 
+    @cache
     def get_foreign_keys(
         self,
         connection: Connection,
@@ -968,6 +973,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             ),
         )
 
+    @cache
     def get_indexes(
         self,
         connection: Connection,
@@ -1018,6 +1024,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             key=lambda index: (index["name"] is not None, index["name"]),
         )
 
+    @cache
     def get_pk_constraint(
         self,
         connection: Connection,
@@ -1052,6 +1059,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             "constrained_columns": constrained_columns,
         }
 
+    @cache
     def get_unique_constraints(
         self,
         connection: Connection,
@@ -1101,6 +1109,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             key=lambda constraint: (constraint["name"] is not None, constraint["name"]),
         )
 
+    @cache
     def get_check_constraints(
         self,
         connection: Connection,
@@ -1141,6 +1150,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             ),
         )
 
+    @cache
     def get_table_oid(
         self,
         connection: Connection,
@@ -1161,6 +1171,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return cast(int, result.scalar())
 
+    @cache
     def get_table_comment(
         self,
         connection: Connection,
