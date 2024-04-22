@@ -1,7 +1,7 @@
 Changelog
 =========
 
-some text
+some text2
 
 2.0.0
 -----
