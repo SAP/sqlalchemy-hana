@@ -21,7 +21,7 @@ jobs:
     -   name: run pre-commit
         run: pre-commit run --all
   ci-test:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request_target' }}
     strategy:
       fail-fast: false
       matrix:
