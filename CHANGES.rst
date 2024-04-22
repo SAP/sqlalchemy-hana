@@ -1,6 +1,8 @@
 Changelog
 =========
 
+some text
+
 2.0.0
 -----
 
