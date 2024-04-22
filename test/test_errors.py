@@ -60,6 +60,11 @@ class TestConvertDBAPIError(TestBase):
                 DatabaseConnectNotPossibleError,
             ),
             (
+                1897,
+                "HANA Cloud region is in maintenance window",
+                DatabaseConnectNotPossibleError,
+            ),
+            (
                 129,
                 "An error occurred while opening the channel",
                 StatementExecutionError,
