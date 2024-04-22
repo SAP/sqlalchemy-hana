@@ -3,7 +3,7 @@ Changelog
 
 2.0.0
 -----
-some
+some2
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
