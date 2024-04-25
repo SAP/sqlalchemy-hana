@@ -11,7 +11,7 @@ Features
 
 Bugfixes
 ~~~~~~~~
-- Fixed an issue causing ``get_table_oid `` to fails of the inspector
+- Fixed an issue causing ``get_table_oid`` to fails of the inspector
   was created based on an engine (contributed by @Masterchen09)
 
 2.0.0
