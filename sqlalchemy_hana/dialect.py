@@ -462,12 +462,13 @@ class HANAInspector(reflection.Inspector):
     dialect: HANAHDBCLIDialect
 
     def get_table_oid(self, table_name: str, schema: str | None = None) -> int:
-        return self.dialect.get_table_oid(
-            self.bind,  # type:ignore[arg-type]
-            table_name,
-            schema,
-            info_cache=self.info_cache,
-        )
+        with self._operation_context() as conn:
+            return self.dialect.get_table_oid(
+                conn,
+                table_name,
+                schema,
+                info_cache=self.info_cache,
+            )
 
 
 class HANAHDBCLIDialect(default.DefaultDialect):
