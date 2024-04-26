@@ -1,6 +1,19 @@
 Changelog
 =========
 
+2.1.0
+-----
+
+Features
+~~~~~~~~
+- Add error handling for SAP HANA Cloud region maintenance error
+- Add additional caching to reflection methods (contributed by @Masterchen09)
+
+Bugfixes
+~~~~~~~~
+- Fixed an issue causing ``get_table_oid`` to fails of the inspector
+  was created based on an engine (contributed by @Masterchen09)
+
 2.0.0
 -----
 
