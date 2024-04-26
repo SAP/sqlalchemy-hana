@@ -32,6 +32,7 @@ only be added in major releases.
 Please note, that only the following modules are considered to be part of the public API
 
 - ``sqlalchemy_hana.types``
+- ``sqlalchemy_hana.errors``
 
 For these, only exported members (part of ``__all__`` ) are guaranteed to be stable.
 
