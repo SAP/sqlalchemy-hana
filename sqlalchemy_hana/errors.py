@@ -146,7 +146,10 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         error.errorcode == 663
         # GBA503: geo blocking service responded with a 503
         and "Error GBA503: Service is unavailable" in error.errortext
-    ) or error.errortext == "HANA Cloud region is in maintenance window":
+    ) or error.errortext in [
+        "HANA Cloud region is in maintenance window",
+        "HANA Database instance upgrade in progress",
+    ]:
         return DatabaseConnectNotPossibleError.from_dbapi_error(dbapi_error)
     if (
         # 129 -> ERR_TX_ROLLBACK: transaction rolled back by an internal error
