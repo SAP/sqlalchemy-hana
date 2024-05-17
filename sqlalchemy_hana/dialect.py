@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import contextlib
 from contextlib import closing
 from types import ModuleType
