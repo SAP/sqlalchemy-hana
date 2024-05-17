@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import json
 import contextlib
 from contextlib import closing
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, cast
 
 import hdbcli.dbapi
 import sqlalchemy
@@ -476,14 +475,6 @@ class HANAInspector(reflection.Inspector):
             )
 
 
-def json_loads(_, v):
-    return json.loads(v)
-
-
-def json_dumps(_, v):
-    return json.dumps(v)
-
-
 class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
     driver = "hdbcli"
@@ -544,18 +535,22 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     isolation_level = None
     default_schema_name: str  # this is always set for us
 
-    _json_deserializer = json_loads
-    _json_serializer = json_dumps
+    _json_deserializer = None
+    _json_serializer = None
 
     def __init__(
         self,
         isolation_level: str | None = None,
         use_native_boolean: bool = True,
+        json_serializer: Callable[[Dict], str] = None,
+        json_deserializer: Callable[[str], Dict] = None,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
         self.supports_native_boolean = use_native_boolean
+        self._json_serializer = json_serializer
+        self._json_deserializer = json_deserializer
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:
