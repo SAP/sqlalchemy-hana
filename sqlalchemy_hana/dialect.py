@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 from contextlib import closing
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
 import hdbcli.dbapi
 import sqlalchemy
