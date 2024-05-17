@@ -476,6 +476,7 @@ class HANAInspector(reflection.Inspector):
             )
 
 
+# pylint: disable=unnecessary-lambda-assignment
 class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
     driver = "hdbcli"
