@@ -535,6 +535,9 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     isolation_level = None
     default_schema_name: str  # this is always set for us
 
+    _json_deserializer = lambda _, v: json.loads(v)
+    _json_serializer = lambda _, v: json.dumps(v)
+
     def __init__(
         self,
         isolation_level: str | None = None,
