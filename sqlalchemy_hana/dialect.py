@@ -476,7 +476,14 @@ class HANAInspector(reflection.Inspector):
             )
 
 
-# pylint: disable=unnecessary-lambda-assignment
+def json_loads(_, v):
+    return json.loads(v)
+
+
+def json_dumps(_, v):
+    return json.dumps(v)
+
+
 class HANAHDBCLIDialect(default.DefaultDialect):
     name = "hana"
     driver = "hdbcli"
@@ -537,8 +544,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     isolation_level = None
     default_schema_name: str  # this is always set for us
 
-    _json_deserializer = lambda _, v: json.loads(v)
-    _json_serializer = lambda _, v: json.dumps(v)
+    _json_deserializer = json_loads
+    _json_serializer = json_dumps
 
     def __init__(
         self,
