@@ -369,6 +369,7 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
         return self._render_string_type(type_, "NVARCHAR", length_override=32)
 
+    # pylint: disable=invalid-name
     def visit_JSON(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return self.visit_NCLOB(type_, **kw)
 
