@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 from contextlib import closing
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, cast
 
 import hdbcli.dbapi
 import sqlalchemy
@@ -542,8 +542,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self,
         isolation_level: str | None = None,
         use_native_boolean: bool = True,
-        json_serializer: Callable[[Dict], str] = None,
-        json_deserializer: Callable[[str], Dict] = None,
+        json_serializer: Optional[Callable[[Any], str]] = None,
+        json_deserializer: Optional[Callable[[str], Any]] = None,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
