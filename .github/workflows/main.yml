@@ -21,7 +21,15 @@ jobs:
         run: pip install -e .[dev,test,alembic]
     -   name: run pre-commit
         run: pre-commit run --all
+  testing-approval:
+    if: ${{ github.event_name == 'pull_request_target' }}
+    environment: testing
+    runs-on: ubuntu-latest
+    steps:
+    -   name: Log
+        run: echo 'Running tests was approved'
   ci-test:
+    needs: [testing-approval]
     if: ${{ github.event_name == 'pull_request_target' }}
     strategy:
       fail-fast: false
@@ -29,7 +37,6 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         sqlalchemy-version: [1.4.*, 2.0.*]
     runs-on: ubuntu-latest
-    environment: testing
     steps:
     -   uses: actions/checkout@v3
         with:
