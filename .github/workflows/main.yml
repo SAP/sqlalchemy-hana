@@ -7,7 +7,14 @@ on:
     branches: [main]
 
 jobs:
+  ci-approval:
+    environment: testing
+    runs-on: ubuntu-latest
+    steps:
+    -   name: Log
+        run: echo 'Running tests was approved'
   ci-pre-commit:
+    needs: [ci-approval]
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v3
@@ -22,6 +29,7 @@ jobs:
     -   name: run pre-commit
         run: pre-commit run --all
   ci-test:
+    needs: [ci-approval]
     if: ${{ github.event_name == 'pull_request_target' }}
     strategy:
       fail-fast: false
