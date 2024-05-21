@@ -8,6 +8,7 @@ on:
 
 jobs:
   ci-approval:
+    if: ${{ github.event_name == 'pull_request_target' }}
     environment: testing
     runs-on: ubuntu-latest
     steps:
@@ -15,6 +16,8 @@ jobs:
         run: echo 'Running tests was approved'
   ci-pre-commit:
     needs: [ci-approval]
+    # run this job if it was approved by ci-approval or ci-approval was skipped and we are in a push event
+    if: ${{ success() || ( needs.ci-approval.result == 'skipped' &&  github.event_name == 'push' ) }}
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v3
