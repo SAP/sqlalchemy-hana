@@ -9,6 +9,7 @@ on:
 jobs:
   ci-pre-commit:
     runs-on: ubuntu-latest
+    environment: testing
     steps:
     -   uses: actions/checkout@v3
         with:
