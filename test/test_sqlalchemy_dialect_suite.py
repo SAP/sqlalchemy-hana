@@ -33,6 +33,7 @@ from sqlalchemy.testing.suite.test_reflection import (
 from sqlalchemy.testing.suite.test_select import (
     IdentityColumnTest as _IdentityColumnTest,
 )
+from sqlalchemy.testing.suite.test_types import JSONTest as _JSONTest
 
 # Import dialect test suite provided by SQLAlchemy into SQLAlchemy-HANA test collection.
 # Please don't add other tests in this file. Only adjust or overview SQLAlchemy tests
@@ -160,3 +161,25 @@ class IdentityColumnTest(_IdentityColumnTest):
             )
 
         assert_raises((DBAPIError,), fn)
+
+
+class JSONTest(_JSONTest):
+    @classmethod
+    def define_tables(cls, metadata):
+        Table(
+            "data_table",
+            metadata,
+            Column("id", Integer, autoincrement=True, primary_key=True),
+            Column("name", String(30), nullable=False),
+            Column("data", cls.datatype, nullable=False),
+            Column("nulldata", cls.datatype(none_as_null=True)),
+        )
+
+    def test_index_typed_access(self):
+        pytest.skip("Index typed access is not supported")
+
+    def test_index_typed_comparison(self):
+        pytest.skip("Index typed access is not supported")
+
+    def test_path_typed_comparison(self):
+        pytest.skip("Path typed access is not supported")
