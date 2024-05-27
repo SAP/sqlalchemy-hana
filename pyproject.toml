@@ -43,7 +43,7 @@ dev = [
     "pylint==3.2.2",
     "mypy==1.10.0",
     "types-hdbcli==2.20.0.20240418",
-    "typing-extensions==4.11.0",
+    "typing-extensions==4.12.0",
 ]
 test = [
     "pytest==8.2.1",
