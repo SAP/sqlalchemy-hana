@@ -35,7 +35,11 @@ jobs:
   ci-test:
     needs: [ci-approval]
     # run this job if we have a PR and it was approved by ci-approval or ci-approval was skipped and dependabot created the PR
-    if: ${{ github.event_name == 'pull_request_target' && ( success() || ( needs.ci-approval.result == 'skipped' && github.actor == 'dependabot[bot]' ) ) }}
+    if: >-
+      ${{
+        github.event_name == 'pull_request_target' &&
+        ( success() || ( needs.ci-approval.result == 'skipped' && github.actor == 'dependabot[bot]' ) )
+      }}
     strategy:
       fail-fast: false
       matrix:
