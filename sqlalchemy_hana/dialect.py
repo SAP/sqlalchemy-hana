@@ -263,10 +263,9 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     ) -> str:
         return f"{self.process(element.element, **kw)} = FALSE"
 
-    # visit_json_getitem_op_binary and visit_json_path_getitem_op_binary
-
-    def visit_json_getitem_op_binary(self, *args, **kwargs):
-        raise NotImplementedError("JSON-based filtering is not supported for HANA")
+    # SAP HANA does not support JSON based operations
+    def visit_json_getitem_op_binary(self, *args: Any, **kwargs: Any) -> Any:
+        raise NotImplementedError("JSON-based filtering is not supported by SAP HANA")
 
     visit_json_path_getitem_op_binary = visit_json_getitem_op_binary
 
