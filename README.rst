@@ -194,7 +194,9 @@ The type compiler will then just ignore these arguments are render a type which 
 SQL error.
 
 The ``ARRAY`` datatype is not supported because ``hdbcli`` does not yet provide support for it.
-The ``JSON``datatype only supports saving/updating field contents, but no json-based filters/deep indexing, as these are not supported by HANA.
+
+The ``JSON``datatype only supports saving/updating field contents, but no json-based filters/deep indexing,
+as these are not supported by SAP HANA.
 
 Regex
 ~~~~~
