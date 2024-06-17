@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.2.0
+-----
+
+Features
+~~~~~~~~
+
+- Added basic JSON support (contributed by @Zahlii)
+- ``sqlalchemy_hana.errors`` will now raise a ``DatabaseConnectNotPossibleError`` error for hdbcli
+  error code ``1888``
+
 2.1.0
 -----
 
