@@ -144,6 +144,10 @@ class NCLOB(sqltypes.UnicodeText):
     __visit_name__ = "NCLOB"
 
 
+class JSON(sqltypes.JSON):
+    pass
+
+
 __all__ = (
     "ALPHANUM",
     "BIGINT",
@@ -156,6 +160,7 @@ __all__ = (
     "DOUBLE",
     "FLOAT",
     "INTEGER",
+    "JSON",
     "LONGDATE",
     "NCHAR",
     "NCLOB",

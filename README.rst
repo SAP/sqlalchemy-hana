@@ -185,6 +185,8 @@ The following table shows the mapping:
       - BLOB
     * - UnicodeText
       - NCLOB
+    * - JSON
+      - NCLOB
 
 Please note, that some types might not support a length, precision or scale, even if the SQLAlchemy
 type class accepts them.
@@ -192,6 +194,9 @@ The type compiler will then just ignore these arguments are render a type which 
 SQL error.
 
 The ``ARRAY`` datatype is not supported because ``hdbcli`` does not yet provide support for it.
+
+The ``JSON`` datatype only supports saving/updating field contents, but no json-based filters/deep indexing,
+as these are not supported by SAP HANA.
 
 Regex
 ~~~~~

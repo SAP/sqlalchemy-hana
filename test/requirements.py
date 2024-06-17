@@ -318,3 +318,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def autoincrement_insert(self) -> compound:
         return exclusions.open()
+
+    @property
+    def json_type(self) -> compound:
+        return exclusions.open()

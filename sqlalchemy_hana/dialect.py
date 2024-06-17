@@ -263,6 +263,12 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     ) -> str:
         return f"{self.process(element.element, **kw)} = FALSE"
 
+    # SAP HANA does not support JSON based operations
+    def visit_json_getitem_op_binary(self, *args: Any, **kwargs: Any) -> Any:
+        raise NotImplementedError("JSON-based filtering is not supported by SAP HANA")
+
+    visit_json_path_getitem_op_binary = visit_json_getitem_op_binary
+
     def _regexp_match(
         self, op: str, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
@@ -368,6 +374,9 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_uuid(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
         return self._render_string_type(type_, "NVARCHAR", length_override=32)
+
+    def visit_JSON(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+        return self.visit_NCLOB(type_, **kw)
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -535,11 +544,15 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self,
         isolation_level: str | None = None,
         use_native_boolean: bool = True,
+        json_serializer: Callable[[Any], str] | None = None,
+        json_deserializer: Callable[[str], Any] | None = None,
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
         self.isolation_level = isolation_level
         self.supports_native_boolean = use_native_boolean
+        self._json_serializer = json_serializer
+        self._json_deserializer = json_deserializer
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:

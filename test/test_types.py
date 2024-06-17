@@ -211,6 +211,15 @@ class NCLOBTest(_TypeBaseTest):
     data = "some test text"
 
 
+class JSONTest(_TypeBaseTest):
+    column_type = hana_types.JSON()
+    data = {"a": 1, "b": "2", "c": None}
+
+    @property
+    def reflected_column_type(self):
+        return hana_types.NCLOB()
+
+
 class AlphanumTest(TestBase):
     # no real test possible because ALPHANUM is not supported in SAP HANA Cloud
 
