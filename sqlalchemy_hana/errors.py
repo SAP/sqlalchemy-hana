@@ -142,14 +142,20 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         and "max number of SqlExecutor threads are exceeded" in error.errortext
     ):
         return DatabaseOverloadedError.from_dbapi_error(dbapi_error)
-    if (  # ERR_SQL_CONNECT_NOT_ALLOWED: user not allowed to connect from client
-        error.errorcode == 663
-        # GBA503: geo blocking service responded with a 503
-        and "Error GBA503: Service is unavailable" in error.errortext
-    ) or error.errortext in [
-        "HANA Cloud region is in maintenance window",
-        "HANA Database instance upgrade in progress",
-    ]:
+    if (
+        (  # ERR_SQL_CONNECT_NOT_ALLOWED: user not allowed to connect from client
+            error.errorcode == 663
+            # GBA503: geo blocking service responded with a 503
+            and "Error GBA503: Service is unavailable" in error.errortext
+        )
+        or error.errortext
+        in [
+            "HANA Cloud region is in maintenance window",
+            "HANA Database instance upgrade in progress",
+        ]
+        # ERR_URS_INSTANCE_NOT_AVAILABLE: HANA Database service is not available
+        or error.errorcode == 1888
+    ):
         return DatabaseConnectNotPossibleError.from_dbapi_error(dbapi_error)
     if (
         # 129 -> ERR_TX_ROLLBACK: transaction rolled back by an internal error
