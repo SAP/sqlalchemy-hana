@@ -20,6 +20,7 @@ from sqlalchemy_hana.errors import (
     StatementExecutionError,
     StatementTimeoutError,
     TransactionCancelledError,
+    WriteInReadOnlyReplicationError,
     convert_dbapi_error,
 )
 
@@ -81,6 +82,11 @@ class TestConvertDBAPIError(TestBase):
             ),
             (613, "", StatementTimeoutError),
             (397, "", InvalidObjectNameError),
+            (
+                7,
+                "'feature not supported: writable statement not allowed in read-enabled replication: line 1 col 1",
+                WriteInReadOnlyReplicationError,
+            ),
         ],
     )
     def test_convert_dbapi_error(

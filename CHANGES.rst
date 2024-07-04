@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.3.0
+-----
+
+Features
+~~~~~~~~
+
+- ``sqlalchemy_hana.errors`` will now raise a ``WriteInReadOnlyReplicationError`` error for error
+  messages indicating a write statement in a read-only replication
+
 2.2.0
 -----
 

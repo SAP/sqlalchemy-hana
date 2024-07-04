@@ -36,6 +36,10 @@ class SequenceCacheTimeoutError(HANAError):
     """Exception raised when the sequence cache times out."""
 
 
+class WriteInReadOnlyReplicationError(HANAError):
+    """Exception raised when a write statement is executed in a red only replication."""
+
+
 class LockWaitTimeoutError(HANAError):
     """Exception raised when a lock wait times out."""
 
@@ -168,6 +172,10 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         return StatementExecutionError.from_dbapi_error(dbapi_error)
     if error.errorcode == 397:
         return InvalidObjectNameError.from_dbapi_error(dbapi_error)
+    if error.errortext.startswith(
+        "feature not supported: writable statement not allowed in read-enabled replication"
+    ):
+        return WriteInReadOnlyReplicationError.from_dbapi_error(dbapi_error)
     return dbapi_error
 
 
@@ -184,4 +192,5 @@ __all__ = (
     "StatementExecutionError",
     "InvalidObjectNameError",
     "convert_dbapi_error",
+    "WriteInReadOnlyReplicationError",
 )
