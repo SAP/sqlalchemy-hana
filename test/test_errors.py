@@ -84,7 +84,8 @@ class TestConvertDBAPIError(TestBase):
             (397, "", InvalidObjectNameError),
             (
                 7,
-                "'feature not supported: writable statement not allowed in read-enabled replication: line 1 col 1",
+                "feature not supported: writable statement not allowed in "
+                "read-enabled replication: line 1 col 1",
                 WriteInReadOnlyReplicationError,
             ),
         ],
