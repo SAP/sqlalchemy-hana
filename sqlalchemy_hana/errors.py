@@ -37,7 +37,7 @@ class SequenceCacheTimeoutError(HANAError):
 
 
 class WriteInReadOnlyReplicationError(HANAError):
-    """Exception raised when a write statement is executed in a red only replication."""
+    """Exception raised when a write statement is executed in a read only replication."""
 
 
 class LockWaitTimeoutError(HANAError):
