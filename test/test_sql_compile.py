@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import literal, select, true
+from sqlalchemy import func, literal, select, true
 from sqlalchemy.sql.expression import column, table
 from sqlalchemy.testing.assertions import AssertsCompiledSQL
 from sqlalchemy.testing.fixtures import TestBase
@@ -52,4 +52,9 @@ class SQLCompileTest(TestBase, AssertsCompiledSQL):
         self.assert_compile(
             select(literal(1)).offset(100),
             "SELECT __[POSTCOMPILE_param_1] AS anon_1 FROM DUMMY LIMIT 2147384648 OFFSET ?",
+        )
+
+    def test_sql_now_function(self) -> None:
+        self.assert_compile(
+            select(func.now()), "SELECT CURRENT_TIMESTAMP AS now_1 FROM DUMMY"
         )

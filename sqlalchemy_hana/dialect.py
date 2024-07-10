@@ -22,7 +22,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.engine import Connection, default, reflection
 from sqlalchemy.schema import CreateColumn
-from sqlalchemy.sql import Select, compiler, sqltypes
+from sqlalchemy.sql import Select, compiler, functions, sqltypes
 from sqlalchemy.sql.ddl import _DropView as BaseDropView
 from sqlalchemy.sql.elements import (
     BinaryExpression,
@@ -322,6 +322,9 @@ class HANAStatementCompiler(compiler.SQLCompiler):
                 statement += f" WHERE {where}"
 
         return statement
+
+    def visit_now_func(self, fn: functions.now, **kw: Any) -> str:
+        return "CURRENT_TIMESTAMP"
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
