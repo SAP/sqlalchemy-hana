@@ -47,7 +47,9 @@ class AlembicHANAOperationTest(TestBase):
                 "column_a", sqlalchemy.TIMESTAMP, server_default=sqlalchemy.func.now()
             ),
         )
-        context.assert_("ALTER TABLE some_table ADD (column_a TIMESTAMP DEFAULT now())")
+        context.assert_(
+            "ALTER TABLE some_table ADD (column_a TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+        )
 
     def test_drop_column(self):
         context = op_fixture("hana")
@@ -88,7 +90,7 @@ class AlembicHANAOperationTest(TestBase):
             server_default=sqlalchemy.func.now(),
         )
         context.assert_(
-            "ALTER TABLE some_table ALTER (column_a VARCHAR(500) DEFAULT now())"
+            "ALTER TABLE some_table ALTER (column_a VARCHAR(500) DEFAULT CURRENT_TIMESTAMP)"
         )
 
     def test_rename_simple_column(self):
