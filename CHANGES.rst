@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.4.0
+-----
+
+Features
+~~~~~~~~
+
+- ``sqlalchemy.func.now`` will be rendered as ``CURRENT_TIMESTAMP``
+
 2.3.0
 -----
 
