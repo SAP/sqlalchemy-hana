@@ -40,7 +40,7 @@ dev = [
     "black==24.4.2",
     "pre-commit==3.7.1",
     "flake8==7.1.0",
-    "pylint==3.2.5",
+    "pylint==3.2.6",
     "mypy==1.11.0",
     "types-hdbcli==2.21.0.20240621",
     "typing-extensions==4.12.2",
