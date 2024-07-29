@@ -374,9 +374,9 @@ error and raise a more specific exception if possible.
 
 Development Setup
 -----------------
-We recommend the usage of ``pyenv`` to install a proper 3.11 python version for development.
+We recommend the usage of ``pyenv`` to install a proper 3.12 python version for development.
 
-* ``pyenv install 3.11``
+* ``pyenv install 3.12``
 * ``python311 -m venv venv``
 * ``source venv/bin/activate``
 * ``pip install -U pip``
