@@ -38,7 +38,7 @@ dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli~=2.10"]
 dev = [
     "isort==5.13.2",
     "black==24.4.2",
-    "pre-commit==3.7.1",
+    "pre-commit==3.8.0",
     "flake8==7.1.0",
     "pylint==3.2.6",
     "mypy==1.11.0",
