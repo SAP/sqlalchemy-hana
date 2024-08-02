@@ -44,6 +44,10 @@ class LockWaitTimeoutError(HANAError):
     """Exception raised when a lock wait times out."""
 
 
+class SequenceLockTimeoutError(LockWaitTimeoutError):
+    """Exception raised when a sequence lock wait times out."""
+
+
 class LockAcquisitionError(HANAError):
     """Exception raised when a lock acquisition fails."""
 
@@ -128,6 +132,11 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         return TransactionCancelledError.from_dbapi_error(dbapi_error)
     if "Lock timeout occurs while waiting sequence cache lock" in str(error.errortext):
         return SequenceCacheTimeoutError.from_dbapi_error(dbapi_error)
+    if (
+        error.errorcode == 131
+        and "Lock timeout occurs while waiting sequence lock" in error.errortext
+    ):
+        return SequenceLockTimeoutError.from_dbapi_error(dbapi_error)
     if error.errorcode == 131:
         return LockWaitTimeoutError.from_dbapi_error(dbapi_error)
     if error.errorcode == 146:
@@ -193,4 +202,5 @@ __all__ = (
     "InvalidObjectNameError",
     "convert_dbapi_error",
     "WriteInReadOnlyReplicationError",
+    "SequenceLockTimeoutError",
 )

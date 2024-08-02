@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.5.0
+-----
+
+Features
+~~~~~~~~
+
+- ``sqlalchemy_hana.errors`` will now raise a ``SequenceLockTimeoutError`` error for error
+  messages a lock wait timeout error caused by a sequence
+
 2.4.0
 -----
 
