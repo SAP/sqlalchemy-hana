@@ -204,7 +204,11 @@ This does not effect the python side, meaning depending on the ``as_uuid`` flag,
 objects or strings are used.
 To use this feature in a database agnostic way, use
 ``UuidType = Uuid.with_variant(sqlalchemy_hana.types.Uuid(as_varbinary=True), "hana")``.
-
+Note, that SAP HANA offers two UUID functions
+(`NEWUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-sql-reference-guide/newuid-function-miscellaneous?locale=en-US>`_
+and `SYSUUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-sql-reference-guide/sysuuid-function-miscellaneous?locale=en-US>`_
+) which can be used to generate e.g. default values like
+``Column('id', Uuid, server_default=func.NEWUID)``.
 
 Regex
 ~~~~~
