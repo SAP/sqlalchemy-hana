@@ -9,6 +9,8 @@ Features
 
 - ``sqlalchemy_hana.errors`` will now raise a ``SequenceLockTimeoutError`` error for error
   messages a lock wait timeout error caused by a sequence
+- uuid types can now be backed by ``VARBINARY`` instead of ``NVARCHAR``. For this use the
+  ``sqlalchemy_hana.types.Uuid`` type with ``as_varbinary=True``
 
 2.4.0
 -----
