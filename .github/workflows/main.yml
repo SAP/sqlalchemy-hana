@@ -66,5 +66,5 @@ jobs:
           pytest -v --cov sqlalchemy_hana --cov-report html --cov-report xml test/
           python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
     -   name: run diff-cover
-        if: ${{ matrix.sqlalchemy-version }} == '2.0.*'
+        if: ${{ matrix.sqlalchemy-version == '2.0.*' }}
         run: diff-cover --config-file pyproject.toml coverage.xml
