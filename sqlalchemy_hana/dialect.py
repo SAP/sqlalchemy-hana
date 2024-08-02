@@ -529,11 +529,13 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
-        types.Uuid: hana_types.Uuid,
         # these classes extend a mapped class (left side of this map); without listing them here,
         # the wrong class will be used
         hana_types.SECONDDATE: hana_types.SECONDDATE,
     }
+    if sqlalchemy.__version__ >= "2":
+        colspecs[types.Uuid] = hana_types.Uuid
+
     types_with_length = [
         hana_types.VARCHAR,
         hana_types.NVARCHAR,
