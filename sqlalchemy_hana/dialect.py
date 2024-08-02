@@ -375,7 +375,8 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         return super().visit_DOUBLE(type_, **kw)
 
     def visit_uuid(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
+        if isinstance(type_, hana_types.Uuid) and type_.as_varbinary:
+            return "VARBINARY(16)"
         return self._render_string_type(type_, "NVARCHAR", length_override=32)
 
     def visit_JSON(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
@@ -521,12 +522,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     supports_statement_cache = True
     supports_unicode_binds = True
     supports_unicode_statements = True
+    supports_native_uuid = False
     support_views = True
 
     colspecs = {
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
+        types.Uuid: hana_types.Uuid,
         # these classes extend a mapped class (left side of this map); without listing them here,
         # the wrong class will be used
         hana_types.SECONDDATE: hana_types.SECONDDATE,
