@@ -178,6 +178,7 @@ __all__ = [
 
 
 if sqlalchemy.__version__ >= "2":
+    # pylint: disable=unused-import
     from sqlalchemy_hana._uuid import Uuid
 
     __all__.append("Uuid")
