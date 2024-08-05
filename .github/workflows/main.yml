@@ -21,11 +21,11 @@ jobs:
     if: ${{ success() || ( needs.ci-approval.result == 'skipped' && ( github.event_name == 'push' || github.actor == 'dependabot[bot]' ) ) }}
     runs-on: ubuntu-latest
     steps:
-    -   uses: actions/checkout@v4.1.7
+    -   uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-    -   uses: actions/setup-python@v5.1.1
+    -   uses: actions/setup-python@v5
         with:
           python-version: '3.12'
     -   name: Install project
@@ -47,11 +47,11 @@ jobs:
         sqlalchemy-version: [1.4.*, 2.0.*]
     runs-on: ubuntu-latest
     steps:
-    -   uses: actions/checkout@v4.1.7
+    -   uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-    -   uses: actions/setup-python@v5.1.1
+    -   uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
     -   name: Install project

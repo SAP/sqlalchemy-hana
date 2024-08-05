@@ -14,9 +14,9 @@ jobs:
       contents: write
     steps:
     -   name: Checkout repository
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
     -   name: Setup python
-        uses: actions/setup-python@v5.1.1
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
     -   name: Install project
