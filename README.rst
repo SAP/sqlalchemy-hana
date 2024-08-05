@@ -180,7 +180,7 @@ The following table shows the mapping:
     * - DOUBLE_PRECISION
       - DOUBLE
     * - Uuid
-      - NVARCHAR(32)
+      - NVARCHAR(32) / VARBINARY(16)
     * - LargeBinary
       - BLOB
     * - UnicodeText
@@ -197,6 +197,18 @@ The ``ARRAY`` datatype is not supported because ``hdbcli`` does not yet provide 
 
 The ``JSON`` datatype only supports saving/updating field contents, but no json-based filters/deep indexing,
 as these are not supported by SAP HANA.
+
+The ``Uuid`` (note the casing) supports a special flag ``as_varbinary``.
+If set to true (by default false), the UUID will be stored as a ``VARBINARY(16)`` instead of a ``NVARCHAR(32)``.
+This does not effect the python side, meaning depending on the ``as_uuid`` flag, either uuid
+objects or strings are used.
+To use this feature in a database agnostic way, use
+``UuidType = Uuid.with_variant(sqlalchemy_hana.types.Uuid(as_varbinary=True), "hana")``.
+Note, that SAP HANA offers two UUID functions
+(`NEWUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-sql-reference-guide/newuid-function-miscellaneous?locale=en-US>`_
+and `SYSUUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-sql-reference-guide/sysuuid-function-miscellaneous?locale=en-US>`_
+) which can be used to generate e.g. default values like
+``Column('id', Uuid, server_default=func.NEWUID)``.
 
 Regex
 ~~~~~

@@ -148,7 +148,7 @@ class JSON(sqltypes.JSON):
     pass
 
 
-__all__ = (
+__all__ = [
     "ALPHANUM",
     "BIGINT",
     "BLOB",
@@ -174,4 +174,11 @@ __all__ = (
     "TINYINT",
     "VARBINARY",
     "VARCHAR",
-)
+]
+
+
+if sqlalchemy.__version__ >= "2":
+    # pylint: disable=unused-import
+    from sqlalchemy_hana._uuid import Uuid  # noqa: F401
+
+    __all__.append("Uuid")

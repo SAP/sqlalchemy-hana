@@ -375,7 +375,8 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         return super().visit_DOUBLE(type_, **kw)
 
     def visit_uuid(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        # SAP HANA has no UUID type, therefore delegate to NVARCHAR(32)
+        if isinstance(type_, hana_types.Uuid) and type_.as_varbinary:
+            return "VARBINARY(16)"
         return self._render_string_type(type_, "NVARCHAR", length_override=32)
 
     def visit_JSON(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
@@ -521,6 +522,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     supports_statement_cache = True
     supports_unicode_binds = True
     supports_unicode_statements = True
+    supports_native_uuid = False
     support_views = True
 
     colspecs = {
@@ -531,6 +533,9 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         # the wrong class will be used
         hana_types.SECONDDATE: hana_types.SECONDDATE,
     }
+    if sqlalchemy.__version__ >= "2":
+        colspecs[types.Uuid] = hana_types.Uuid
+
     types_with_length = [
         hana_types.VARCHAR,
         hana_types.NVARCHAR,
