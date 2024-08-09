@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.6.0
+-----
+
+Features
+~~~~~~~~
+
+- An error during a rollback to a savepoint is ignored, if the transaction was already
+  rolled back by SAP HANA.
+  Based on this feature, ``sqlalchemy_hana.errors`` will no longer extract an inner error
+  if a savepoint was not found.
+
 2.5.0
 -----
 
