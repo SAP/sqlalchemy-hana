@@ -27,13 +27,6 @@ from sqlalchemy_hana.errors import (
 
 
 class TestConvertDBAPIError(TestBase):
-    def test_convert_dbapi_error_txsavepoint_not_found(self) -> None:
-        error = HdbcliError(128, "TxSavepoint not found")
-        error.__context__ = HdbcliError(133, "some deadlock")
-        dbapi_error = DBAPIError(None, None, error)
-
-        assert isinstance(convert_dbapi_error(dbapi_error), DeadlockError)
-
     @pytest.mark.parametrize(
         "errorcode,errortext,expected_exception",
         [

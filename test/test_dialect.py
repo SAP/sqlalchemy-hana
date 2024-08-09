@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import sys
+from unittest import mock
 from unittest.mock import Mock
 
 import pytest
 from hdbcli.dbapi import Error
 from sqlalchemy import create_engine
+from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.engine.url import make_url
-from sqlalchemy.exc import ArgumentError
+from sqlalchemy.exc import ArgumentError, DBAPIError
 from sqlalchemy.testing import assert_raises_message, config, eq_
 from sqlalchemy.testing.engines import testing_engine
 from sqlalchemy.testing.fixtures import TestBase
@@ -176,3 +179,40 @@ class DialectTest(TestBase):
             NON_DEFAULT_ISOLATION_LEVEL,
         )
         conn.close()
+
+    def test_do_rollback_to_savepoint_no_error(self) -> None:
+        dialect = config.db.dialect
+        connection = Mock()
+
+        with mock.patch.object(
+            DefaultDialect, "do_rollback_to_savepoint"
+        ) as super_rollback:
+            dialect.do_rollback_to_savepoint(connection, "savepoint")
+            super_rollback.assert_called_once_with(connection, "savepoint")
+
+    def test_do_rollback_to_savepoint_unrelated_error(self) -> None:
+        dialect = config.db.dialect
+        connection = Mock()
+
+        with mock.patch.object(
+            sys, "exc_info", return_value=(ValueError, ValueError(), Mock())
+        ), mock.patch.object(
+            DefaultDialect, "do_rollback_to_savepoint"
+        ) as super_rollback:
+            dialect.do_rollback_to_savepoint(connection, "savepoint")
+            super_rollback.assert_called_once_with(connection, "savepoint")
+
+    def test_do_rollback_to_savepoint_ignores_error(self) -> None:
+        dialect = config.db.dialect
+        connection = Mock()
+
+        error = Error(133, "transaction rolled back: deadlock")
+        dbapi_error = DBAPIError(None, None, error)
+
+        with mock.patch.object(
+            sys, "exc_info", return_value=(DBAPIError, dbapi_error, Mock())
+        ), mock.patch.object(
+            DefaultDialect, "do_rollback_to_savepoint"
+        ) as super_rollback:
+            dialect.do_rollback_to_savepoint(connection, "savepoint")
+            super_rollback.assert_not_called()

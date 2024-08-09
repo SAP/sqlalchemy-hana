@@ -96,29 +96,10 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
     If it does not contain a hdbcli error, the original exception is returned.
 
     Else the error code and error text are further checked.
-
-    In addition, an edge case is handled where SQLAlchemy creates a savepoint and the same
-    transaction later fails leading to an automatic rollback by HANA.
-    However, SQLAlchemy still tries to roll back the savepoint, which fails because the savepoint
-    is no longer valid.
-    In this case, the cause of the exception is used for further processing
     """
     error = dbapi_error.orig
     if not isinstance(error, HdbcliError):
         return dbapi_error
-
-    # extract hidden inner exceptions
-    # TxSavepoint not found should normally only happen if a transaction was rolled back by HANA,
-    # but SQLAlchemy also tries to perform a savepoint rollback, which fails due to the transaction
-    # rollback. In this case, we need to check the inner exception (__context__)
-    if (
-        error.__context__
-        and isinstance(error.__context__, HdbcliError)
-        and error.errorcode == 128
-        and "TxSavepoint not found" in error.errortext
-    ):
-        error = error.__context__
-        dbapi_error.orig = error
 
     if error.errorcode in [-10807, -10709]:  # sqldbc error codes for connection errors
         return ClientConnectionError.from_dbapi_error(dbapi_error)
