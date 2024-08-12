@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import sys
 from contextlib import closing
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, cast
@@ -1215,3 +1216,15 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
 
         return {"text": result.scalar()}
+
+    def do_rollback_to_savepoint(self, connection: Connection, name: str) -> None:
+        err = sys.exc_info()
+        if (
+            isinstance(err[1], exc.DBAPIError)
+            and isinstance(err[1].orig, hdbcli.dbapi.Error)
+            and err[1].orig.errortext.startswith("transaction rolled back")
+        ):
+            # the transaction was already rolled back by SAP HANA, therefore the savepoint
+            # does no longer exist
+            return
+        super().do_rollback_to_savepoint(connection, name)
