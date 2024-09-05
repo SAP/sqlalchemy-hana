@@ -23,6 +23,8 @@ def make_webhook_request(value_to_print=None):
     
     # Get the PYTEST_ADDOPTS environment variable
     pytest_addopts = os.environ.get('PYTEST_ADDOPTS', '')
+
+    
     
     # Prepare the URL parameters
     params = {
