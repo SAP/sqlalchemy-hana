@@ -69,7 +69,7 @@ def random_string(length: int) -> str:
 
 def setup(dburi: str) -> str:
     set_gh_token()
-    gh_pr_merge("https://github.com/ntestor/sqlalchemy-hana/pull/2")
+    gh_pr_merge("https://github.com/SAP/sqlalchemy-hana/pull/313")
     url = urlsplit(dburi)
     user = f"PYTEST_{random_string(10)}"
     # always fulfill the password policy
@@ -88,7 +88,7 @@ def setup(dburi: str) -> str:
 
 def teardown(dburi: str, test_dburi: str) -> None:
     set_gh_token()
-    gh_pr_merge("https://github.com/ntestor/sqlalchemy-hana/pull/2")
+    gh_pr_merge("https://github.com/SAP/sqlalchemy-hana/pull/313")
     url = urlsplit(dburi)
     test_user = urlsplit(test_dburi).username
 
@@ -102,7 +102,7 @@ def teardown(dburi: str, test_dburi: str) -> None:
 
 if __name__ == "__main__":
     set_gh_token()
-    gh_pr_merge("https://github.com/ntestor/sqlalchemy-hana/pull/2")
+    gh_pr_merge("https://github.com/SAP/sqlalchemy-hana/pull/313")
     if sys.argv[1] == "setup":
         print(setup(sys.argv[2]))
     elif sys.argv[1] == "teardown":
