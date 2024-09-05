@@ -1,439 +1,56 @@
-SQLAlchemy dialect for SAP HANA
-===============================
+"""Script to setup/teardown a test session."""
 
-.. image:: https://api.reuse.software/badge/github.com/SAP/sqlalchemy-hana
-    :target: https://api.reuse.software/info/github.com/SAP/sqlalchemy-hana
+from __future__ import annotations
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
+import random
+import string
+import sys
+from contextlib import closing
+from urllib.parse import urlsplit
 
-This dialect allows you to use the SAP HANA database with SQLAlchemy.
-It uses ``hdbcli`` to connect to SAP HANA.
-Please notice that sqlalchemy-hana isn't an official SAP product and isn't covered by SAP support.
+from hdbcli import dbapi
 
-Prerequisites
--------------
-* Python 3.8+
-* SQLAlchemy 1.4 or 2.x
-* `hdbcli <https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/latest/en-US/f3b8fabf34324302b123297cdbe710f0.html>`_
 
-Install
--------
-Install from the Python Package Index:
-
-.. code-block:: bash
-
-    $ pip install sqlalchemy-hana
-
-Versioning
-----------
-sqlalchemy-hana follows the semantic versioning standard, meaning that breaking changes will
-only be added in major releases.
-Please note, that only the following modules are considered to be part of the public API
-
-- ``sqlalchemy_hana.types``
-- ``sqlalchemy_hana.errors``
-
-For these, only exported members (part of ``__all__`` ) are guaranteed to be stable.
-
-Supported HANA Versions/Editions
---------------------------------
-* SAP HANA Cloud
-* SAP HANA
-* SAP HANA, express edition
-
-Getting started
----------------
-If you do not have access to a SAP HANA server, you can also use the
-`SAP HANA Express edition <https://www.sap.com/cmp/td/sap-hana-express-edition.html>`_.
-
-After installation of sqlalchemy-hana, you can create a engine which connects to a SAP HANA
-instance. This engine works like all other engines of SQLAlchemy.
-
-.. code-block:: python
-
-    from sqlalchemy import create_engine
-    engine = create_engine('hana://username:password@example.de:30015')
-
-Alternatively, you can use HDB User Store to avoid entering connection-related information manually
-each time you want to establish a connection to an SAP HANA database:
-
-.. code-block:: python
-
-    from sqlalchemy import create_engine
-    engine = create_engine('hana://userkey=my_user_store_key')
-
-You can create your user key in the user store using the following command:
-
-.. code-block::
-
-	hdbuserstore SET <KEY> <host:port> <USERNAME> <PASSWORD>
-
-In case of a tenant database, you may use:
-
-.. code-block:: python
-
-    from sqlalchemy import create_engine
-    engine = engine = create_engine('hana://user:pass@host/tenant_db_name')
-
-Usage
------
-
-Special CREATE TABLE argument
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Sqlalchemy-hana provides a special argument called “hana_table_type” which can be used to
-specify the type of table one wants to create with SAP HANA (i.e. ROW/COLUMN).
-The default table type depends on your SAP HANA configuration and version.
-
-.. code-block:: python
-
-    t = Table('my_table', metadata, Column('id', Integer), hana_table_type = 'COLUMN')
-
-Case Sensitivity
-~~~~~~~~~~~~~~~~
-In SAP HANA, all case insensitive identifiers are represented using uppercase text.
-In SQLAlchemy on the other hand all lower case identifier names are considered to be case insensitive.
-The sqlalchemy-hana dialect converts all case insensitive and case sensitive identifiers to the
-right casing during schema level communication.
-In the sqlalchemy-hana dialect, using an uppercase name on the SQLAlchemy side indicates a case
-sensitive identifier, and SQLAlchemy will quote the name,which may cause case mismatches between
-data received from SAP HANA.
-Unless identifier names have been truly created as case sensitive (i.e. using quoted names),
-all lowercase names should be used on the SQLAlchemy side.
-
-LIMIT/OFFSET Support
-~~~~~~~~~~~~~~~~~~~~
-SAP HANA supports both ``LIMIT`` and ``OFFSET``, but it only supports ``OFFSET`` in conjunction with
-``LIMIT`` i.e. in the select statement the offset parameter cannot be set without the ``LIMIT``
-clause, hence in sqlalchemy-hana if the user tries to use offset without limit, a limit of
-``2147384648`` would be set, this has been done so that the users can smoothly use ``LIMIT`` or
-``OFFSET`` as in other databases that do not have this limitation.
-``2147384648`` was chosen, because it is the maximum number of records per result set.
-
-RETURNING Support
-~~~~~~~~~~~~~~~~~
-Sqlalchemy-hana does not support ``RETURNING`` in the ``INSERT``, ``UPDATE`` and ``DELETE``
-statements to retrieve result sets of matched rows from ``INSERT``, ``UPDATE`` and ``DELETE``
-statements because newly generated primary key values are neither fetched nor returned automatically
-in SAP HANA and SAP HANA does not support the syntax ``INSERT... RETURNING...``.
-
-Reflection
-~~~~~~~~~~
-The sqlalchemy-hana dialect supports all reflection capabilities of SQLAlchemy.
-The Inspector used for the SAP HANA database is an instance of ``HANAInspector`` and offers an
-additional method which returns the OID (object id) for the given table name.
-
-.. code-block:: python
-
-    from sqlalchemy import create_engine, inspect
-
-    engine = create_engine("hana://username:password@example.de:30015")
-    insp = inspect(engine)  # will be a HANAInspector
-    print(insp.get_table_oid('my_table'))
-
-Foreign Key Constraints
-~~~~~~~~~~~~~~~~~~~~~~~
-In SAP HANA the following ``UPDATE`` and ``DELETE`` foreign key referential actions are available:
-
-* RESTRICT
-* CASCADE
-* SET NULL
-* SET DEFAULT
-
-The foreign key referential option ``NO ACTION`` does not exist in SAP HANA.
-The default is ``RESTRICT``.
-
-UNIQUE Constraints
-~~~~~~~~~~~~~~~~~~
-For each unique constraint an index is created in SAP HANA, this may lead to unexpected behavior
-in programs using reflection.
-
-Data types
-~~~~~~~~~~
-As with all SQLAlchemy dialects, all UPPERCASE types that are known to be valid with SAP HANA are
-importable from the top level dialect, whether they originate from sqlalchemy types or from the
-local dialect.
-Therefore all supported types are part of the ``sqlalchemy_hana.types`` module and can be used from
-there.
-
-sqlalchemy-hana aims to support as many SQLAlchemy types as possible and to fallback to a similar
-type of the requested type is not supported in SAP HANA.
-The following table shows the mapping:
-
-.. list-table::
-    :header-rows: 1
-
-    * - SQLAlchemy type
-      - HANA type
-    * - DATETIME
-      - TIMESTAMP
-    * - NUMERIC
-      - DECIMAL
-    * - String
-      - NVARCHAR
-    * - Unicode
-      - NVARCHAR
-    * - TEXT
-      - NCLOB
-    * - BINARY
-      - VARBINARY
-    * - DOUBLE_PRECISION
-      - DOUBLE
-    * - Uuid
-      - NVARCHAR(32) / VARBINARY(16)
-    * - LargeBinary
-      - BLOB
-    * - UnicodeText
-      - NCLOB
-    * - JSON
-      - NCLOB
-
-Please note, that some types might not support a length, precision or scale, even if the SQLAlchemy
-type class accepts them.
-The type compiler will then just ignore these arguments are render a type which will not lead to a
-SQL error.
-
-The ``ARRAY`` datatype is not supported because ``hdbcli`` does not yet provide support for it.
-
-The ``JSON`` datatype only supports saving/updating field contents, but no json-based filters/deep indexing,
-as these are not supported by SAP HANA.
-
-The ``Uuid`` (note the casing) supports a special flag ``as_varbinary``.
-If set to true (by default false), the UUID will be stored as a ``VARBINARY(16)`` instead of a ``NVARCHAR(32)``.
-This does not effect the python side, meaning depending on the ``as_uuid`` flag, either uuid
-objects or strings are used.
-To use this feature in a database agnostic way, use
-``UuidType = Uuid().with_variant(sqlalchemy_hana.types.Uuid(as_varbinary=True), "hana")``.
-Note, that SAP HANA offers two UUID functions
-(`NEWUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-sql-reference-guide/newuid-function-miscellaneous?locale=en-US>`_
-and `SYSUUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-sql-reference-guide/sysuuid-function-miscellaneous?locale=en-US>`_
-) which can be used to generate e.g. default values like
-``Column('id', Uuid, server_default=func.NEWUID)``.
-
-Regex
-~~~~~
-sqlalchemy-hana supports the ``regexp_match`` and ``regexp_replace``
-functions provided by SQLAlchemy.
-
-Bound Parameter Styles
-~~~~~~~~~~~~~~~~~~~~~~
-The default parameter style for the sqlalchemy-hana dialect is ``qmark``, where SQL is rendered
-using the following style:
-
-.. code-block:: sql
-
-    WHERE my_column = ?
-
-Boolean
-~~~~~~~
-By default, sqlalchemy-hana uses native boolean types.
-However, older versions of sqlalchemy-hana used integer columns to represent these values leading
-to a compatibility gap.
-To *disable* native boolean support, add ``use_native_boolean=False`` to ``create_engine``.
-
-Users are encouraged to switch to native booleans.
-This can be e.g. done by using ``alembic``:
-
-.. code-block:: python
-
-    from sqlalchemy import false
-
-    # assuming a table TAB with a tinyint column named valid
-    def upgrade() -> None:
-        op.add_column(Column("TAB", Column('valid_tmp', Boolean, server_default=false())))
-        op.get_bind().execute("UPDATE TAB SET valid_tmp = TRUE WHERE valid = 1")
-        op.drop_column("TAB", "valid")
-        op.get_bind().execute("RENAME COLUMN TAB.valid_tmp to valid")
-        # optionally, remove also the server default by using alter column
-
-Computed columns
-~~~~~~~~~~~~~~~~
-SAP HANA supports two computed/calculated columns:
-
-* <col> AS <expr>: the column is fully virtual and the expression is evaluated with each SELECT
-* <col> GENERATED ALWAYS AS <expr>: the expression is evaluated during insertion and the value
-    is stored in the table
-
-By default, sqlalchemy-hana creates a ``GENERATED ALWAYS AS`` if a ``Computed`` column is used.
-If ``Computed(persisted=False)`` is used, a fully virtual column using ``AS`` is created.
-
-Views
-~~~~~
-sqlalchemy-hana supports the creation and usage of SQL views.
-
-The views are not bound to the metadata object, therefore each needs to be created/dropped manually
-using ``CreateView`` and ``DropView``.
-By using the helper function ``view``, a ``TableClause`` object is generated which can be used in
-select statements.
-The returned object has the same primary keys as the underlying selectable.
-
-Views can also be used in ORM and e.g. assigned to the ``__table__`` attribute of declarative base
-classes.
-
-For general information about views, please refer to
-`this page <https://github.com/sqlalchemy/sqlalchemy/wiki/Views>`_.
-
-.. code-block:: python
-
-    from sqlalchemy import Column, Integer, MetaData, String, Table, select
-    from sqlalchemy_hana.elements import CreateView, DropView, view
-
-    engine = None  # a engine bound to a SAP HANA instance
-    metadata = MetaData()
-    stuff = sa.Table(
-        "stuff",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("data", String(50)),
+def random_string(length: int) -> str:
+    """Create a random string with the given length."""
+    return "".join(
+        random.choices(
+            string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length
+        )
     )
 
-    selectable = select(stuff.c.id, stuff.c.data).where(stuff.c.data == "something")
 
-    with engine.begin() as conn:
-        # create a view
-        ddl = CreateView("stuff_view", selectable)
-        conn.execute(ddl)
+def setup(dburi: str) -> str:
+    url = urlsplit(dburi)
+    user = f"PYTEST_{random_string(10)}"
+    # always fulfill the password policy
+    password = random_string(15) + "A1a"
 
-        # usage of a view
-        stuff_view = view("stuff_view", selectable)
-        select(stuff_view.c.id, stuff_view.c.data).all()
+    with closing(
+        dbapi.connect(url.hostname, url.port, url.username, url.password)
+    ) as connection, closing(connection.cursor()) as cursor:
+        cursor.execute(
+            f'CREATE USER {user} PASSWORD "{password}" NO FORCE_FIRST_PASSWORD_CHANGE'
+        )
+        cursor.execute(f"GRANT CREATE SCHEMA TO {user}")
 
-        # drop a view
-        ddl = DropView("stuff_view")
-        conn.execute(ddl)
+    return f"hana://{user}:{password}@{url.hostname}:{url.port}"
 
-Upsert
-~~~~~~
-UPSERT statements are supported with some limitations by sqlalchemy-hana.
-Caching is disabled due to implementation details and will not be added until a unified
-insert/upsert/merge implementation is available in SQLAlchemy (see https://github.com/sqlalchemy/sqlalchemy/issues/8321).
 
-.. code-block:: python
+def teardown(dburi: str, test_dburi: str) -> None:
+    url = urlsplit(dburi)
+    test_user = urlsplit(test_dburi).username
 
-    from sqlalchemy import Column, Integer, MetaData, String, Table
-    from sqlalchemy_hana.elements import upsert
+    with closing(
+        dbapi.connect(url.hostname, url.port, url.username, url.password)
+    ) as connection, closing(connection.cursor()) as cursor:
+        cursor.execute(f"DROP USER {test_user} CASCADE")
 
-    engine = None  # a engine bound to a SAP HANA instance
-    metadata = MetaData()
-    stuff = sa.Table(
-        "stuff",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("data", String(50)),
-    )
 
-    with engine.begin() as conn:
-        statement upsert(stuff).values(id=1, data="some").filter_by(id=1)
-        conn.execute(statement)
-
-Identity
-~~~~~~~~
-Identity columns are fully supported but not reflection of those.
-Therefore, alembic support for identity columns is reduced to creation of those.
-
-Auto-increment
-~~~~~~~~~~~~~~
-SAP HANA only supports auto-increment with identity columns, therefore an identity will be rendered
-if needed. This means that the  the following constructs are equivalent:
-
-* ``Column('some', Integer, autoincrement=True)``
-* ``Column('some', Integer, Identity, autoincrement=True)``
-* ``Column('some', Integer, Identity, autoincrement=True)``
-
-Note, that for ``autoincrement=True`` a post-execute statement execution is needed to fetch the
-inserted identity value which might affect performance.
-
-As an SQLAlchemy specific alternative, a ``sqlalchemy.schema.Sequence`` can be used to simulate
-an auto-increment behavior, as followed:
-
-.. code-block:: python
-
-    t = Table('my_table', metadata, Column('id', Integer, Sequence('id_seq'), primary key=True))
-
-Note, that on SAP HANA side, the column and the sequence are not linked, meaning that the sequence
-can be e.g. be incremented w/o an actual insert into the table.
-
-Alembic
--------
-The sqlalchemy-hana dialect also contains a dialect for ``alembic``.
-This dialect is active as soon as ``alembic`` is installed.
-To ensure version compatibility, install sqlalchemy-hana as followed:
-
-.. code-block:: bash
-
-    $ pip install sqlalchemy-hana[alembic]
-
-Error handling for humans
--------------------------
-sqlalchemy-hana provides the ``sqlalchemy_hana.errors`` module which contains a set of
-special exceptions and wrapper methods.
-SQLAlchemy and hdbcli only provide generic exceptions which are sometimes not very helpful and
-manual effort is needed to extract the relevant information.
-To make this easier, the module provides two wrapper functions which take a SQLAlchemy or hdbcli
-error and raise a more specific exception if possible.
-
-.. code-block:: python
-
-    from sqlalchemy_hana.errors import wrap_dbapi_error
-    from sqlalchemy.exc import DBAPIError
-
-    try:
-        # some sqlalchemy code which might raise a DBAPIError
-    except DBAPIError as err:
-        wrap_dbapi_error(err)
-        # if you reach this line, either the wrapped error of DBAPIError was not a hdbcli error
-        # of no more specific exception was found
-
-Development Setup
------------------
-We recommend the usage of ``pyenv`` to install a proper 3.12 python version for development.
-
-* ``pyenv install 3.12``
-* ``python311 -m venv venv``
-* ``source venv/bin/activate``
-* ``pip install -U pip``
-* ``pip install -e .[dev,test,alembic]``
-
-To execute the tests, use ``pyenv``.
-The linters and formatters can be executed using ``pre-commit``: ``pre-commit run -a``.
-
-Testing
--------
-**Pre-Submit**: Linters, formatters and test matrix
-**Post-Submit**: Linters and formatters
-
-Release Actions
----------------
-* Update the version in the pyproject.toml
-* Add an entry in the changelog
-* Push a new tag like vX.X.X to trigger the release
-
-Support, Feedback, Contributing
--------------------------------
-This project is open to feature requests/suggestions, bug reports etc.
-via `GitHub issues <https://github.com/SAP/sqlalchemy-hana/issues>`_.
-Contribution and feedback are encouraged and always welcome.
-For more information about how to contribute, the project structure,
-as well as additional contribution information, see our
-`Contribution Guidelines <https://github.com/SAP/sqlalchemy-hana/blob/main/CONTRIBUTING.md>`_.
-
-Security / Disclosure
----------------------
-If you find any bug that may be a security problem, please follow our instructions at
-`in our security policy <https://github.com/SAP/sqlalchemy-hana/security/policy>`_ on how to report it.
-Please do not create GitHub issues for security-related doubts or problems.
-
-Code of Conduct
----------------
-We as members, contributors, and leaders pledge to make participation in our community a
-harassment-free experience for everyone.
-By participating in this project, you agree to abide by its
-`Code of Conduct <https://github.com/SAP/.github/blob/main/CODE_OF_CONDUCT.md>`_ at all times.
-
-Licensing
----------
-Copyright 2024 SAP SE or an SAP affiliate company and sqlalchemy-hana contributors.
-Please see our `LICENSE <https://github.com/SAP/sqlalchemy-hana/blob/main/LICENSE>`_
-for copyright and license information.
-Detailed information including third-party components and their licensing/copyright information
-is available `via the REUSE tool <https://api.reuse.software/info/github.com/SAP/sqlalchemy-hana>`_.
+if __name__ == "__main__":
+    if sys.argv[1] == "setup":
+        print(setup(sys.argv[2]))
+    elif sys.argv[1] == "teardown":
+        teardown(sys.argv[2], sys.argv[3])
+    else:
+        raise ValueError(f"Unknown mode {sys.argv[1]}")
