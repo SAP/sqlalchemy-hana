@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci-approval:
-    if: ${{ github.event_name == 'pull_request_target' && github.actor != 'dependabot[bot]' }}
+    if: ${{ github.event_name != 'push' }}
     environment: testing
     runs-on: ubuntu-latest
     steps:
@@ -17,8 +17,7 @@ jobs:
   ci-pre-commit:
     needs: [ci-approval]
     # run this job if it was approved by ci-approval or ci-approval was skipped and we are in a push event
-    # or dependabot created the PR
-    if: ${{ success() || ( needs.ci-approval.result == 'skipped' && ( github.event_name == 'push' || github.actor == 'dependabot[bot]' ) ) }}
+    if: ${{ success() || ( needs.ci-approval.result == 'skipped' && github.event_name == 'push' ) }}
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v4
@@ -34,12 +33,8 @@ jobs:
         run: pre-commit run --all
   ci-test:
     needs: [ci-approval]
-    # run this job if we have a PR and it was approved by ci-approval or ci-approval was skipped and dependabot created the PR
-    if: >-
-      ${{
-        github.event_name == 'pull_request_target' &&
-        ( success() || ( needs.ci-approval.result == 'skipped' && github.actor == 'dependabot[bot]' ) )
-      }}
+    # run this job if we have a PR
+    if: ${{ github.event_name == 'pull_request_target' }}
     strategy:
       fail-fast: false
       matrix:
