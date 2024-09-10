@@ -127,11 +127,12 @@ disable = [
     "too-many-branches",
     "too-many-return-statements",
     "too-many-boolean-expressions",
+    "too-many-arguments",
     "duplicate-code",
 ]
 
 [tool.pylint.basic]
-good-names = ["visit_TINYINT", "visit_SMALLDECIMAL", "visit_SECONDDATE", "visit_ALPHANUM", "visit_JSON"]
+good-names = ["visit_TINYINT", "visit_SMALLDECIMAL", "visit_SECONDDATE", "visit_ALPHANUM", "visit_JSON", "visit_REAL_VECTOR", "REAL_VECTOR"]
 
 [tool.mypy]
 # formatting

@@ -3,11 +3,20 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time
-from typing import Callable, Literal
+from typing import TYPE_CHECKING, Callable, Generic, List, Literal, Tuple, TypeVar
 
 import sqlalchemy
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
+from sqlalchemy.sql.type_api import TypeEngine
+
+if TYPE_CHECKING:
+    StrTypeEngine = TypeEngine[str]
+
+else:
+    StrTypeEngine = TypeEngine
+
+_RV = TypeVar("_RV", Tuple[float, ...], List[float], memoryview)
 
 
 class DATE(sqltypes.DATE):
@@ -146,6 +155,13 @@ class NCLOB(sqltypes.UnicodeText):
 
 class JSON(sqltypes.JSON):
     pass
+
+
+class REAL_VECTOR(TypeEngine[_RV], Generic[_RV]):
+    __visit_name__ = "REAL_VECTOR"
+
+    def __init__(self, length: int | None = None) -> None:
+        self.length = length
 
 
 __all__ = [

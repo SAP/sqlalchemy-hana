@@ -210,6 +210,27 @@ and `SYSUUID <https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-h
 ) which can be used to generate e.g. default values like
 ``Column('id', Uuid, server_default=func.NEWUID)``.
 
+The ``REAL_VECTOR`` datatype is only supported within SAP HANA and needs to be imported from
+``sqlalchemy_hana.types``. See below for more details.
+
+Real Vector
+~~~~~~~~~~~
+By default, vectors are represented using a python ``list``.
+This can be changed using the engine parameter ``vector_output_type``, which can be set to
+``list`` (default), ``tuple`` or ``memoryview``.
+Note that this setting is applied globally and cannot be adapted on a column basis.
+
+For proper typing, the ``REAL_VECTOR`` class is generic and be set to the proper type like
+
+.. code-block:: python
+
+    from sqlalchemy_hana.types import REAL_VECTOR
+
+    Column("v1", REAL_VECTOR[list[float]](length=10))
+
+Please note, that the generic type and ``vector_output_type`` should be kept in sync; this is not
+enforced.
+
 Regex
 ~~~~~
 sqlalchemy-hana supports the ``regexp_match`` and ``regexp_replace``
