@@ -158,6 +158,7 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         or "Exception in executor plan" in error.errortext
         or "DTX commit(first phase commit) failed" in error.errortext
         or "An error occurred while reading from the channel" in error.errortext
+        or "temp index not exists" in error.errortext
     ):
         return StatementExecutionError.from_dbapi_error(dbapi_error)
     if error.errorcode == 397:

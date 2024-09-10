@@ -1,6 +1,16 @@
 Changelog
 =========
 
+
+2.7.0
+-----
+
+Features
+~~~~~~~~
+
+- ``sqlalchemy_hana.errors`` will now raise a ``StatementExecutionError``if the messages contains
+  ``temp index not exists``
+
 2.6.0
 -----
 
