@@ -86,7 +86,7 @@ class DialectTest(TestBase):
         _, result_kwargs = config.db.dialect.create_connect_args(
             make_url("hana://userkey=myuserkeyname")
         )
-        assert result_kwargs == {"userkey": "myuserkeyname"}
+        assert result_kwargs == {"userkey": "myuserkeyname", "vectoroutputtype": "list"}
 
     def test_pass_uri_query_as_kwargs(self) -> None:
         """SQLAlchemy-HANA should passes all URL parameters to hdbcli."""
@@ -216,3 +216,20 @@ class DialectTest(TestBase):
         ) as super_rollback:
             dialect.do_rollback_to_savepoint(connection, "savepoint")
             super_rollback.assert_not_called()
+
+    def test_vectoroutputtype_is_blocked(self) -> None:
+        url = "hana://username:secret-password@example.com/?encrypt=true&vectoroutputtype=list"
+        with pytest.raises(ValueError, match="vectoroutputtype"):
+            config.db.dialect.create_connect_args(make_url(url))
+
+    @pytest.mark.parametrize(
+        "kwargs,vector_output_type",
+        [
+            ({}, "list"),
+            ({"vector_output_type": "list"}, "list"),
+            ({"vector_output_type": "memoryview"}, "memoryview"),
+        ],
+    )
+    def test_vector_output_type(self, kwargs: dict, vector_output_type: str) -> None:
+        engine = create_engine("hana://username:secret-password@example.com", **kwargs)
+        assert engine.dialect.vector_output_type == vector_output_type

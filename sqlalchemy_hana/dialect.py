@@ -6,7 +6,7 @@ import contextlib
 import sys
 from contextlib import closing
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, Literal, cast
 
 import hdbcli.dbapi
 import sqlalchemy
@@ -383,6 +383,12 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
     def visit_JSON(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
         return self.visit_NCLOB(type_, **kw)
 
+    def visit_REAL_VECTOR(self, type_: hana_types.REAL_VECTOR[Any], **kw: Any) -> str:
+        # SAP HANA special type
+        if type_.length is not None:
+            return f"REAL_VECTOR({type_.length})"
+        return "REAL_VECTOR"
+
 
 class HANADDLCompiler(compiler.DDLCompiler):
     def visit_unique_constraint(
@@ -555,6 +561,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         use_native_boolean: bool = True,
         json_serializer: Callable[[Any], str] | None = None,
         json_deserializer: Callable[[str], Any] | None = None,
+        vector_output_type: Literal["list", "tuple", "memoryview"] = "list",
         **kw: Any,
     ) -> None:
         super().__init__(**kw)
@@ -562,6 +569,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self.supports_native_boolean = use_native_boolean
         self._json_serializer = json_serializer
         self._json_deserializer = json_deserializer
+        self.vector_output_type = vector_output_type
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:
@@ -585,6 +593,13 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             if kwargs.get("databaseName"):
                 port = 30013
             kwargs.setdefault("port", port)
+
+        if "vectoroutputtype" in kwargs:
+            raise ValueError(
+                "Explicit vectoroutputtype is not supported, "
+                "use the vector_output_type kwarg instead"
+            )
+        kwargs["vectoroutputtype"] = self.vector_output_type
 
         return (), kwargs
 
@@ -917,6 +932,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                 column["type"] = hana_types.DECIMAL(row[4], row[5])
             elif column["type"] == hana_types.FLOAT:
                 column["type"] = hana_types.FLOAT(row[4])
+            elif column["type"] == hana_types.REAL_VECTOR:
+                column["type"] = hana_types.REAL_VECTOR(row[4] if row[4] > 0 else None)
             elif column["type"] in self.types_with_length:
                 column["type"] = column["type"](row[4])
 

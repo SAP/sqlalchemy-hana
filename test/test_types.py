@@ -232,6 +232,30 @@ class AlphanumTest(TestBase):
         )
 
 
+class RealVectorTest(_TypeBaseTest):
+    column_type = hana_types.REAL_VECTOR()
+    data = [1, 2, 3]
+
+    @property
+    def reflected_column_type(self):
+        return hana_types.REAL_VECTOR()
+
+    @testing.provide_metadata
+    def test_reflection_with_length(self):
+        with testing.db.connect() as connection, connection.begin():
+            table = Table(
+                "t",
+                self.metadata,
+                Column("vec1", hana_types.REAL_VECTOR(length=10)),
+                Column("vec2", hana_types.REAL_VECTOR()),
+            )
+            table.create(bind=connection)
+
+            columns = sqlalchemy.inspect(connection).get_columns("t")
+            assert columns[0]["type"].length == 10
+            assert columns[1]["type"].length is None
+
+
 if sqlalchemy.__version__ >= "2":
 
     class StringUUIDAsStringTest(_TypeBaseTest):
