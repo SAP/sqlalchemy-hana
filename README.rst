@@ -33,6 +33,8 @@ Please note, that only the following modules are considered to be part of the pu
 
 - ``sqlalchemy_hana.types``
 - ``sqlalchemy_hana.errors``
+- ``sqlalchemy_hana.elements``
+- ``sqlalchemy_hana.functions``
 
 For these, only exported members (part of ``__all__`` ) are guaranteed to be stable.
 
@@ -230,6 +232,9 @@ For proper typing, the ``REAL_VECTOR`` class is generic and be set to the proper
 
 Please note, that the generic type and ``vector_output_type`` should be kept in sync; this is not
 enforced.
+
+The ``sqlalchemy_hana.functions`` package defines certain utility functions like
+``cosine_similarity``.
 
 Regex
 ~~~~~
