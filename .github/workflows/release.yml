@@ -32,7 +32,7 @@ jobs:
           version="${GITHUB_REF_NAME:1}"
           echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
     -   name: Release on GitHub
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           name: Version ${{ env.RELEASE_VERSION }}
