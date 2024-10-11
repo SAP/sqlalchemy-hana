@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.8.0
+-----
+
+Features
+~~~~~~~~
+
+- Support python 3.13
+- Added support for the ``REAL_VECTOR`` type incl. various utility function
 
 2.7.0
 -----
