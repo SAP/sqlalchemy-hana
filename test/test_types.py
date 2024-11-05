@@ -141,11 +141,15 @@ class BooleanTest(_TypeBaseTest):
         [(True, hana_types.BOOLEAN), (False, hana_types.TINYINT)],
     )
     def test_native_boolean(self, supports_native_boolean, type_):
-        with mock.patch.object(
-            testing.db.engine.dialect,
-            "supports_native_boolean",
-            supports_native_boolean,
-        ), testing.db.connect() as connection, connection.begin():
+        with (
+            mock.patch.object(
+                testing.db.engine.dialect,
+                "supports_native_boolean",
+                supports_native_boolean,
+            ),
+            testing.db.connect() as connection,
+            connection.begin(),
+        ):
             table = Table("t", self.metadata, Column("x", types.Boolean))
             table.create(bind=connection)
 

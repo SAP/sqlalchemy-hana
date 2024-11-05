@@ -194,11 +194,14 @@ class DialectTest(TestBase):
         dialect = config.db.dialect
         connection = Mock()
 
-        with mock.patch.object(
-            sys, "exc_info", return_value=(ValueError, ValueError(), Mock())
-        ), mock.patch.object(
-            DefaultDialect, "do_rollback_to_savepoint"
-        ) as super_rollback:
+        with (
+            mock.patch.object(
+                sys, "exc_info", return_value=(ValueError, ValueError(), Mock())
+            ),
+            mock.patch.object(
+                DefaultDialect, "do_rollback_to_savepoint"
+            ) as super_rollback,
+        ):
             dialect.do_rollback_to_savepoint(connection, "savepoint")
             super_rollback.assert_called_once_with(connection, "savepoint")
 
@@ -209,11 +212,14 @@ class DialectTest(TestBase):
         error = Error(133, "transaction rolled back: deadlock")
         dbapi_error = DBAPIError(None, None, error)
 
-        with mock.patch.object(
-            sys, "exc_info", return_value=(DBAPIError, dbapi_error, Mock())
-        ), mock.patch.object(
-            DefaultDialect, "do_rollback_to_savepoint"
-        ) as super_rollback:
+        with (
+            mock.patch.object(
+                sys, "exc_info", return_value=(DBAPIError, dbapi_error, Mock())
+            ),
+            mock.patch.object(
+                DefaultDialect, "do_rollback_to_savepoint"
+            ) as super_rollback,
+        ):
             dialect.do_rollback_to_savepoint(connection, "savepoint")
             super_rollback.assert_not_called()
 

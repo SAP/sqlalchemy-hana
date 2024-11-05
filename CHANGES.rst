@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.0.0
+-----
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Removed support for Python 3.8
+
 2.8.0
 -----
 

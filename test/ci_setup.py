@@ -26,9 +26,12 @@ def setup(dburi: str) -> str:
     # always fulfill the password policy
     password = random_string(15) + "A1a"
 
-    with closing(
-        dbapi.connect(url.hostname, url.port, url.username, url.password)
-    ) as connection, closing(connection.cursor()) as cursor:
+    with (
+        closing(
+            dbapi.connect(url.hostname, url.port, url.username, url.password)
+        ) as connection,
+        closing(connection.cursor()) as cursor,
+    ):
         cursor.execute(
             f'CREATE USER {user} PASSWORD "{password}" NO FORCE_FIRST_PASSWORD_CHANGE'
         )
@@ -41,9 +44,12 @@ def teardown(dburi: str, test_dburi: str) -> None:
     url = urlsplit(dburi)
     test_user = urlsplit(test_dburi).username
 
-    with closing(
-        dbapi.connect(url.hostname, url.port, url.username, url.password)
-    ) as connection, closing(connection.cursor()) as cursor:
+    with (
+        closing(
+            dbapi.connect(url.hostname, url.port, url.username, url.password)
+        ) as connection,
+        closing(connection.cursor()) as cursor,
+    ):
         cursor.execute(f"DROP USER {test_user} CASCADE")
 
 
