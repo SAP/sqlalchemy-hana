@@ -13,7 +13,7 @@ Please notice that sqlalchemy-hana isn't an official SAP product and isn't cover
 
 Prerequisites
 -------------
-* Python 3.8+
+* Python 3.9+
 * SQLAlchemy 1.4 or 2.x
 * `hdbcli <https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/latest/en-US/f3b8fabf34324302b123297cdbe710f0.html>`_
 
