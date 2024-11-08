@@ -12,7 +12,7 @@ readme = "README.rst"
 authors = [{ name = "Christoph Heer", email = "christoph.heer@sap.com" }]
 maintainers = [
     { name = "Christoph Heer", email = "christoph.heer@sap.com" },
-    { name = "Kai Mueller", email = "kai.mueller01@sap.com" },
+    { name = "Kai Harder", email = "kai.harder@sap.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
