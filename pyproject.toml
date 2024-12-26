@@ -41,7 +41,7 @@ dev = [
     "pre-commit==4.0.1",
     "flake8==7.1.1",
     "pylint==3.3.2",
-    "mypy==1.13.0",
+    "mypy==1.14.0",
     "types-hdbcli==2.23.0.20241221",
     "typing-extensions==4.12.2",
 ]
