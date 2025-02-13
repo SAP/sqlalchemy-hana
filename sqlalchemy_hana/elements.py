@@ -35,9 +35,18 @@ class DropView(DDLElement):
 def view(name: str, selectable: AnySelect) -> TableClause:
     """Helper function to create a view clause element."""
     clause = table_clause(name)
-    clause._columns._populate_separate_keys(
-        col._make_proxy(clause) for col in selectable.selected_columns
-    )
+
+    iter_ = []
+    for col in selectable.selected_columns:
+        try:
+            iter_.append(col._make_proxy(clause))  # type:ignore
+        except TypeError:
+            iter_.append(
+                col._make_proxy(
+                    clause, clause.primary_key, clause.foreign_keys  # type:ignore
+                )
+            )
+    clause._columns._populate_separate_keys(iter_)
     return clause
 
 
