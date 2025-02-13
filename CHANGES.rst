@@ -1,6 +1,13 @@
 Changelog
 =========
 
+3.0.1
+
+Fixes
+~~~~~
+
+- Fixed an issue causing `sqlalchemy_hana.elements.view` to fail with sqlalchemy 2.0.38
+
 3.0.0
 -----
 
