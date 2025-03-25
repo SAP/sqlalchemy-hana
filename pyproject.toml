@@ -17,7 +17,6 @@ maintainers = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",
@@ -33,6 +32,8 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli~=2.10"]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
@@ -61,9 +62,6 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 Repository = "https://github.com/SAP/sqlalchemy-hana"
 "Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
 Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES.rst"
-
-[project.license]
-text = "Apache-2.0"
 
 [tool.setuptools.packages.find]
 include = ["sqlalchemy_hana"]
