@@ -573,7 +573,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:
-        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment,misc]
         return hdbcli.dbapi
 
     if sqlalchemy.__version__ < "2":  # pragma: no cover
