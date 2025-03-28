@@ -1,10 +1,24 @@
 [flake8]
 max-line-length = 100
+enable-extensions = FT
 select =
     C901,  # flake8-mccabe
     E,  # flake8-pycodestyle
     F,  # flake8-pyflakes
     W,  # flake8-pycodestyle
+    FT,  # flake8-tergeo
 ignore=
     # conflict with black formatter
     W503,E203,E704,
+    # ignore !r recommendation
+    FTB907,
+    # false positive caused by sqlalchemy tests
+    FTT009,
+    # sqlalchemy has attributes shadowing
+    FTU003,
+    # TODO fix and remove the ignore
+    FTU005,
+
+ftp-python-version = 3.9.0
+ftp-auto-manage-options = true
+ftp-pytest-parametrize-names-type = csv

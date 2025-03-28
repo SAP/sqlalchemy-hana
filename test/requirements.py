@@ -184,7 +184,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
         return exclusions.open()
 
     @property
-    def has_temp_table(self) -> compound:
+    def has_temp_table(self) -> compound:  # noqa: FTP093
         return exclusions.open()
 
     @property

@@ -179,13 +179,14 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         # With the effect that "select([literal(1)])" will return the string '1' instead of
         # an integer.
         # The following logic detects such requests and rewriting the bindparam into a literal
-        if kw.get("within_columns_clause") and kw.get("within_label_clause"):
-            if (
-                bindparam.value
-                and bindparam.callable is None
-                and not getattr(bindparam, "expanding", False)
-            ):
-                kw["literal_execute"] = True
+        if (
+            kw.get("within_columns_clause")
+            and kw.get("within_label_clause")
+            and bindparam.value
+            and bindparam.callable is None
+            and not getattr(bindparam, "expanding", False)
+        ):
+            kw["literal_execute"] = True
 
         return super().visit_bindparam(bindparam, **kw)
 
@@ -627,9 +628,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         if connection:
             dbapi_connection = cast(hdbcli.dbapi.Connection, connection)
             return not dbapi_connection.isconnected()
-        if isinstance(e, hdbcli.dbapi.Error):
-            if e.errorcode == -10709:
-                return True
+        if isinstance(e, hdbcli.dbapi.Error) and e.errorcode == -10709:
+            return True
         return super().is_disconnect(e, connection, cursor)
 
     _isolation_lookup = {
@@ -792,7 +792,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     def get_schema_names(self, connection: Connection, **kw: Any) -> list[str]:
         result = connection.execute(sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS"))
 
-        return list(self.normalize_name(name) for name, in result.fetchall())
+        return [self.normalize_name(name) for name, in result.fetchall()]
 
     @cache
     def get_table_names(
@@ -809,8 +809,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             )
         )
 
-        tables = list(self.normalize_name(row[0]) for row in result.fetchall())
-        return tables
+        return [self.normalize_name(row[0]) for row in result.fetchall()]
 
     @cache
     def get_temp_table_names(
@@ -827,10 +826,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             )
         )
 
-        temp_table_names = list(
-            self.normalize_name(row[0]) for row in result.fetchall()
-        )
-        return temp_table_names
+        return [self.normalize_name(row[0]) for row in result.fetchall()]
 
     @cache
     def get_view_names(
@@ -846,8 +842,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             )
         )
 
-        views = list(self.normalize_name(row[0]) for row in result.fetchall())
-        return views
+        return [self.normalize_name(row[0]) for row in result.fetchall()]
 
     @cache
     def get_view_definition(
@@ -923,7 +918,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             elif hasattr(types, row[1]):
                 column["type"] = getattr(types, row[1])
             else:
-                util.warn(
+                util.warn(  # noqa: FTP032, FTP035
                     f"Did not recognize type '{row[1]}' of column '{column['name']}'"
                 )
                 column["type"] = types.NULLTYPE
@@ -1060,7 +1055,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                 indexes[name]["column_names"].append(column)
 
         return sorted(
-            list(indexes.values()),
+            indexes.values(),
             key=lambda index: (index["name"] is not None, index["name"]),
         )
 
