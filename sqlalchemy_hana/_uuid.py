@@ -22,7 +22,9 @@ class Uuid(sqltypes.Uuid[_RET]):
         super().__init__(as_uuid, native_uuid)  # type:ignore
         self.as_varbinary = as_varbinary
 
-    def bind_processor(self, dialect: Dialect) -> Callable[[Any | None], Any | None]:
+    def bind_processor(
+        self, dialect: Dialect
+    ) -> Callable[[Any | None], Any | None] | None:
         if not self.as_varbinary:
             return super().bind_processor(dialect)
 
