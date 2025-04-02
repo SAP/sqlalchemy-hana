@@ -1,6 +1,13 @@
 Changelog
 =========
 
+3.0.2
+
+Fixes
+~~~~~
+
+- Fixed an issue causing issues with sqlalchemy 2.0.40
+
 3.0.1
 
 Fixes
