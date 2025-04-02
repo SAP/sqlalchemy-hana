@@ -28,7 +28,7 @@ def add_test_seq(column: Column, table: Table) -> None:
 
 
 # imports used for customizations, need to be imported AFTER SQLAlchemy plugin setup
-from sqlalchemy.testing.plugin.pytestplugin import *  # noqa: F403,F401,E402
+from sqlalchemy.testing.plugin.pytestplugin import *  # noqa: E402, F401, F403
 
 # enable the SQLAlchemy plugin after our setup is done
 from sqlalchemy import testing  # noqa: E402
