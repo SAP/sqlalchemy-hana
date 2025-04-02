@@ -273,7 +273,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def _regexp_match(
         self, op: str, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
-        flags = binary.modifiers["flags"]  # type:ignore[index]
+        flags = binary.modifiers["flags"]
         left = self.process(binary.left)
         right = self.process(binary.right)
 
@@ -297,7 +297,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_regexp_replace_op_binary(
         self, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
-        flags = binary.modifiers["flags"]  # type:ignore[index]
+        flags = binary.modifiers["flags"]
         clauses = cast("ExpressionClauseList[Any]", binary.right).clauses
 
         within = self.process(binary.left)
@@ -329,65 +329,73 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
-    def visit_NUMERIC(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_NUMERIC(self, type_: types.Numeric[Any], **kw: Any) -> str:
         # SAP HANA has no NUMERIC type, therefore delegate to DECIMAL
-        return self.visit_DECIMAL(type_)
+        return self.visit_DECIMAL(cast("types.DECIMAL[Any]", type_), **kw)
 
-    def visit_TINYINT(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_TINYINT(self, type_: hana_types.TINYINT, **kw: Any) -> str:
         # SAP HANA special type
         return "TINYINT"
 
-    def visit_SMALLDECIMAL(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_SMALLDECIMAL(self, type_: hana_types.SMALLDECIMAL, **kw: Any) -> str:
         # SAP HANA special type
         return "SMALLDECIMAL"
 
-    def visit_SECONDDATE(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_SECONDDATE(self, type_: hana_types.SECONDDATE, **kw: Any) -> str:
         # SAP HANA special type
         return "SECONDDATE"
 
-    def visit_ALPHANUM(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_ALPHANUM(self, type_: hana_types.ALPHANUM, **kw: Any) -> str:
         # SAP HANA special type
-        return self._render_string_type(type_, "ALPHANUM")
+        return self.__render_string_type("ALPHANUM", type_.length)
 
-    def visit_string(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_string(self, type_: types.String, **kw: Any) -> str:
         # Normally string renders as VARCHAR, but we want NVARCHAR
-        return self.visit_NVARCHAR(type_, **kw)
+        return self.visit_NVARCHAR(cast(types.NVARCHAR, type_), **kw)
 
-    def visit_unicode(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_unicode(self, type_: types.Unicode, **kw: Any) -> str:
         # Normally unicode renders as VARCHAR, but we want NVARCHAR
-        return self.visit_NVARCHAR(type_, **kw)
+        return self.visit_NVARCHAR(cast(types.NVARCHAR, type_), **kw)
 
-    def visit_TEXT(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_TEXT(self, type_: types.Text, **kw: Any) -> str:
         # Normally unicode renders as TEXT, but we want NCLOB
         return self.visit_NCLOB(type_, **kw)
 
-    def visit_boolean(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_boolean(self, type_: types.Boolean, **kw: Any) -> str:
         # Check if we want native or non-native booleans
         if self.dialect.supports_native_boolean:
             return self.visit_BOOLEAN(type_)
-        return self.visit_TINYINT(type_)
+        return self.visit_TINYINT(cast(hana_types.TINYINT, type_), **kw)
 
-    def visit_BINARY(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_BINARY(self, type_: types.BINARY, **kw: Any) -> str:
         # SAP HANA has no BINARY type, therefore delegate to VARBINARY
-        return super().visit_VARBINARY(type_, **kw)
+        return super().visit_VARBINARY(cast(types.VARBINARY, type_), **kw)
 
-    def visit_DOUBLE_PRECISION(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_DOUBLE_PRECISION(
+        self, type_: types.DOUBLE_PRECISION[Any], **kw: Any
+    ) -> str:
         # SAP HANA has no DOUBLE_PRECISION type, therefore delegate to DOUBLE
         return super().visit_DOUBLE(type_, **kw)
 
-    def visit_uuid(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
+    def visit_uuid(self, type_: types.Uuid[Any], **kw: Any) -> str:
         if isinstance(type_, hana_types.Uuid) and type_.as_varbinary:
             return "VARBINARY(16)"
-        return self._render_string_type(type_, "NVARCHAR", length_override=32)
+        return self.__render_string_type("NVARCHAR", length=32)
 
-    def visit_JSON(self, type_: types.TypeEngine[Any], **kw: Any) -> str:
-        return self.visit_NCLOB(type_, **kw)
+    def visit_JSON(self, type_: types.JSON, **kw: Any) -> str:
+        return self.visit_NCLOB(cast(types.TEXT, type_), **kw)
 
     def visit_REAL_VECTOR(self, type_: hana_types.REAL_VECTOR[Any], **kw: Any) -> str:
         # SAP HANA special type
         if type_.length is not None:
             return f"REAL_VECTOR({type_.length})"
         return "REAL_VECTOR"
+
+    def __render_string_type(self, name: str, length: int | None) -> str:
+        text = name
+        if length:
+            text += f"({length})"
+        return text
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
@@ -422,13 +430,15 @@ class HANADDLCompiler(compiler.DDLCompiler):
             # https://github.com/SAP/sqlalchemy-hana/issues/84
             if table._prefixes is None:
                 table._prefixes = []
+            if not isinstance(table._prefixes, list):
+                table._prefixes = list(table._prefixes)
             appended_index = len(table._prefixes)
             table._prefixes.append(table_type.upper())
 
         result = super().visit_create_table(create)
 
         if appended_index is not None:
-            table._prefixes.pop(appended_index)
+            table._prefixes.pop(appended_index)  # type:ignore[attr-defined]
 
         return result
 
@@ -573,7 +583,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     @classmethod
     def import_dbapi(cls) -> ModuleType:
-        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment]
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment,misc]
         return hdbcli.dbapi
 
     if sqlalchemy.__version__ < "2":  # pragma: no cover
@@ -605,7 +615,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
         connection = super().connect(*args, **kw)
-        connection.setautocommit(False)
+        connection.setautocommit(False)  # type:ignore[attr-defined]
         return connection
 
     def on_connect(self) -> Callable[[DBAPIConnection], None] | None:

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlalchemy-hana"
-version = "3.0.1"
+version = "3.0.2"
 description = "SQLAlchemy dialect for SAP HANA"
 keywords = ["sqlalchemy", "sap", "hana"]
 requires-python = "~=3.9"
@@ -17,7 +17,6 @@ maintainers = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",
@@ -33,13 +32,15 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = ["sqlalchemy>=1.4.0,<3", "hdbcli~=2.10"]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
     "isort==6.0.1",
     "black==25.1.0",
     "pre-commit==4.2.0",
-    "flake8==7.1.2",
+    "flake8==7.2.0",
     "pylint==3.3.6",
     "mypy==1.15.0",
     "types-hdbcli==2.24.0.20250325",
@@ -49,7 +50,7 @@ dev = [
 test = [
     "pytest==8.3.5",
     "pytest-cov==6.0.0",
-    "coverage[toml]==7.7.1",
+    "coverage[toml]==7.8.0",
     "diff-cover[toml]==9.2.4",
 ]
 alembic = ["alembic~=1.12"]
@@ -62,9 +63,6 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 Repository = "https://github.com/SAP/sqlalchemy-hana"
 "Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
 Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES.rst"
-
-[project.license]
-text = "Apache-2.0"
 
 [tool.setuptools.packages.find]
 include = ["sqlalchemy_hana"]
