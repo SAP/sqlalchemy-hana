@@ -55,7 +55,7 @@ def teardown(dburi: str, test_dburi: str) -> None:
 
 if __name__ == "__main__":
     if sys.argv[1] == "setup":
-        print(setup(sys.argv[2]))
+        print(setup(sys.argv[2]))  # noqa: FTP050
     elif sys.argv[1] == "teardown":
         teardown(sys.argv[2], sys.argv[3])
     else:

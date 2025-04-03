@@ -171,18 +171,18 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
 
 
 __all__ = (
-    "HANAError",
-    "SequenceCacheTimeoutError",
-    "LockWaitTimeoutError",
-    "LockAcquisitionError",
-    "DatabaseConnectNotPossibleError",
     "ClientConnectionError",
+    "DatabaseConnectNotPossibleError",
     "DatabaseOutOfMemoryError",
-    "DeadlockError",
     "DatabaseOverloadedError",
-    "StatementExecutionError",
+    "DeadlockError",
+    "HANAError",
     "InvalidObjectNameError",
-    "convert_dbapi_error",
-    "WriteInReadOnlyReplicationError",
+    "LockAcquisitionError",
+    "LockWaitTimeoutError",
+    "SequenceCacheTimeoutError",
     "SequenceLockTimeoutError",
+    "StatementExecutionError",
+    "WriteInReadOnlyReplicationError",
+    "convert_dbapi_error",
 )

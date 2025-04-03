@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time
-from typing import TYPE_CHECKING, Callable, Generic, List, Literal, Tuple, TypeVar
+from typing import TYPE_CHECKING, Callable, Generic, Literal, TypeVar
 
 import sqlalchemy
 from sqlalchemy import types as sqltypes
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 else:
     StrTypeEngine = TypeEngine
 
-_RV = TypeVar("_RV", Tuple[float, ...], List[float], memoryview)
+_RV = TypeVar("_RV", tuple[float, ...], list[float], memoryview)
 
 
 class DATE(sqltypes.DATE):
