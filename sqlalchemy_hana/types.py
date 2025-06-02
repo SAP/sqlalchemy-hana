@@ -182,6 +182,7 @@ __all__ = [
     "NCLOB",
     "NVARCHAR",
     "REAL",
+    "REAL_VECTOR",
     "SECONDDATE",
     "SMALLDECIMAL",
     "SMALLINT",
