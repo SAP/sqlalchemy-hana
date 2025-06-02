@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.0.3
+-----
+
+Fixes
+~~~~~
+
+- Added ``REAL_VECTOR`` to ``__all__`` of ``sqlalchemy_hana.types``
+
 3.0.2
 
 Fixes
