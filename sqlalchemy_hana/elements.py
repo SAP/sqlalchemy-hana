@@ -8,6 +8,7 @@ from sqlalchemy import table as table_clause
 from sqlalchemy.sql.ddl import DDLElement
 from sqlalchemy.sql.dml import DMLWhereBase, Insert
 from sqlalchemy.sql.selectable import Select, TableClause
+from typing_extensions import override
 
 if TYPE_CHECKING:
     AnySelect = Select[Any]
@@ -39,11 +40,13 @@ def view(name: str, selectable: AnySelect) -> TableClause:
     iter_ = []
     for col in selectable.selected_columns:
         try:
-            iter_.append(col._make_proxy(clause))  # type:ignore
+            iter_.append(col._make_proxy(clause))  # type:ignore[call-arg]
         except TypeError:
             iter_.append(
                 col._make_proxy(
-                    clause, clause.primary_key, clause.foreign_keys  # type:ignore
+                    clause,
+                    clause.primary_key,  # type:ignore[arg-type,misc]
+                    clause.foreign_keys,  # type:ignore[arg-type]
                 )
             )
     clause._columns._populate_separate_keys(iter_)
@@ -56,6 +59,7 @@ class Upsert(Insert, DMLWhereBase):  # type: ignore[misc]
     inherit_cache = False
 
     @property
+    @override
     def _effective_plugin_target(self) -> str:
         # somewhere in the internal logic of sqlalchemy an error occurs if this is not set
         return "insert"

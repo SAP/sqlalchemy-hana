@@ -43,7 +43,7 @@ dev = [
     "flake8==7.2.0",
     "flake8-tergeo==25.5.22.0",
     "pylint==3.3.7",
-    "mypy==1.15.0",
+    "mypy==1.16.0",
     "types-hdbcli==2.24.0.20250325",
     "typing-extensions==4.13.2",
     "yesqa==1.5.0",
@@ -141,10 +141,14 @@ pretty = true
 show_column_numbers = true
 show_error_codes = true
 # checks
+enable_error_code = ["explicit-override", "possibly-undefined", "ignore-without-code", "deprecated"]
+deprecated_calls_exclude=["sqlalchemy_hana"]
+strict_bytes = true
 strict = true
 strict_optional = true
 warn_no_return = true
 warn_return_any = false
+warn_unreachable = true
 # allow calls to untyped functions
 disallow_untyped_calls = false
 disallow_untyped_decorators = false
