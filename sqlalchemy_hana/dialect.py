@@ -736,7 +736,12 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return True
 
     @override
-    def normalize_name(self, name: str) -> str:
+    # the function can also return None, but only is rare cases
+    # as handling None values everywhere is cumbersome, we keep it simple
+    def normalize_name(self, name: str | None) -> str:
+        if name is None:
+            return None  # type:ignore[return-value]
+
         if name.upper() == name and not self.identifier_preparer._requires_quotes(
             name.lower()
         ):
@@ -747,7 +752,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return name
 
     @override
-    def denormalize_name(self, name: str) -> str:
+    # see normalize_name
+    def denormalize_name(self, name: str | None) -> str:
+        if name is None:
+            return None  # type:ignore[return-value]
+
         if name.lower() == name and not self.identifier_preparer._requires_quotes(
             name.lower()
         ):
