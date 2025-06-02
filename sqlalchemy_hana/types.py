@@ -9,6 +9,7 @@ import sqlalchemy
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
 from sqlalchemy.sql.type_api import TypeEngine
+from typing_extensions import override
 
 if TYPE_CHECKING:
     StrTypeEngine = TypeEngine[str]
@@ -20,6 +21,7 @@ _RV = TypeVar("_RV", tuple[float, ...], list[float], memoryview)
 
 
 class DATE(sqltypes.DATE):
+    @override
     def literal_processor(self, dialect: Dialect) -> Callable[[date], str]:
         def process(value: date) -> str:
             return f"TO_DATE('{value}')"
@@ -28,6 +30,7 @@ class DATE(sqltypes.DATE):
 
 
 class TIME(sqltypes.TIME):
+    @override
     def literal_processor(self, dialect: Dialect) -> Callable[[time], str]:
         def process(value: time) -> str:
             return f"TO_TIME('{value}')"
@@ -38,6 +41,7 @@ class TIME(sqltypes.TIME):
 class SECONDDATE(sqltypes.DateTime):
     __visit_name__ = "SECONDDATE"
 
+    @override
     def literal_processor(self, dialect: Dialect) -> Callable[[datetime], str]:
         def process(value: datetime) -> str:
             return f"TO_SECONDDATE('{value}')"
@@ -46,6 +50,7 @@ class SECONDDATE(sqltypes.DateTime):
 
 
 class TIMESTAMP(sqltypes.TIMESTAMP):
+    @override
     def literal_processor(self, dialect: Dialect) -> Callable[[datetime], str]:
         def process(value: datetime) -> str:
             return f"TO_TIMESTAMP('{value}')"

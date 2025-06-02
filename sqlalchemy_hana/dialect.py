@@ -31,6 +31,7 @@ from sqlalchemy.sql.elements import (
     UnaryExpression,
     quoted_name,
 )
+from typing_extensions import override
 
 from sqlalchemy_hana import types as hana_types
 from sqlalchemy_hana.elements import CreateView, DropView, Upsert
@@ -171,6 +172,7 @@ class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
 
 class HANAStatementCompiler(compiler.SQLCompiler):
+    @override
     def visit_bindparam(  # type:ignore[override] # pylint: disable=arguments-differ
         self, bindparam: BindParameter[Any], **kw: Any
     ) -> Any:
@@ -190,16 +192,20 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
         return super().visit_bindparam(bindparam, **kw)
 
+    @override
     def visit_sequence(self, sequence: Sequence, **kw: Any) -> str:
         return self.preparer.format_sequence(sequence) + ".NEXTVAL"
 
+    @override
     def visit_empty_set_expr(self, element_types: Any, **kw: Any) -> str:
         columns = ", ".join(["1" for _ in element_types])
         return f"SELECT {columns} FROM DUMMY WHERE 1 != 1"
 
+    @override
     def default_from(self) -> str:
         return " FROM DUMMY"
 
+    @override
     def limit_clause(self, select: Select[Any], **kw: Any) -> str:
         text = ""
         if select._limit_clause is not None:
@@ -212,6 +218,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             text += " OFFSET " + self.process(select._offset_clause, **kw)
         return text
 
+    @override
     def for_update_clause(self, select: Select[Any], **kw: Any) -> str:
         for_update = cast("ForUpdateArg", select._for_update_arg)
         tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
@@ -254,12 +261,13 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     # where clause like:
     #   SELECT 1 FROM DUMMY WHERE TRUE
     #   SELECT 1 FROM DUMMY WHERE FALSE
-
+    @override
     def visit_is_true_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
         return f"{self.process(element.element, **kw)} = TRUE"
 
+    @override
     def visit_is_false_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
@@ -285,16 +293,19 @@ class HANAStatementCompiler(compiler.SQLCompiler):
             )
         return statement
 
+    @override
     def visit_regexp_match_op_binary(
         self, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
         return self._regexp_match("LIKE_REGEXPR", binary, operator, **kw)
 
+    @override
     def visit_not_regexp_match_op_binary(
         self, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
         return self._regexp_match("NOT LIKE_REGEXPR", binary, operator, **kw)
 
+    @override
     def visit_regexp_replace_op_binary(
         self, binary: BinaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
@@ -330,6 +341,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
+    @override
     def visit_NUMERIC(self, type_: types.Numeric[Any], **kw: Any) -> str:
         # SAP HANA has no NUMERIC type, therefore delegate to DECIMAL
         return self.visit_DECIMAL(cast("types.DECIMAL[Any]", type_), **kw)
@@ -350,34 +362,41 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
         # SAP HANA special type
         return self.__render_string_type("ALPHANUM", type_.length)
 
+    @override
     def visit_string(self, type_: types.String, **kw: Any) -> str:
         # Normally string renders as VARCHAR, but we want NVARCHAR
         return self.visit_NVARCHAR(cast(types.NVARCHAR, type_), **kw)
 
+    @override
     def visit_unicode(self, type_: types.Unicode, **kw: Any) -> str:
         # Normally unicode renders as VARCHAR, but we want NVARCHAR
         return self.visit_NVARCHAR(cast(types.NVARCHAR, type_), **kw)
 
+    @override
     def visit_TEXT(self, type_: types.Text, **kw: Any) -> str:
         # Normally unicode renders as TEXT, but we want NCLOB
         return self.visit_NCLOB(type_, **kw)
 
+    @override
     def visit_boolean(self, type_: types.Boolean, **kw: Any) -> str:
         # Check if we want native or non-native booleans
         if self.dialect.supports_native_boolean:
             return self.visit_BOOLEAN(type_)
         return self.visit_TINYINT(cast(hana_types.TINYINT, type_), **kw)
 
+    @override
     def visit_BINARY(self, type_: types.BINARY, **kw: Any) -> str:
         # SAP HANA has no BINARY type, therefore delegate to VARBINARY
         return super().visit_VARBINARY(cast(types.VARBINARY, type_), **kw)
 
+    @override
     def visit_DOUBLE_PRECISION(
         self, type_: types.DOUBLE_PRECISION[Any], **kw: Any
     ) -> str:
         # SAP HANA has no DOUBLE_PRECISION type, therefore delegate to DOUBLE
         return super().visit_DOUBLE(type_, **kw)
 
+    @override
     def visit_uuid(self, type_: types.Uuid[Any], **kw: Any) -> str:
         if isinstance(type_, hana_types.Uuid) and type_.as_varbinary:
             return "VARBINARY(16)"
@@ -400,6 +419,7 @@ class HANATypeCompiler(compiler.GenericTypeCompiler):
 
 
 class HANADDLCompiler(compiler.DDLCompiler):
+    @override
     def visit_unique_constraint(
         self, constraint: ColumnCollectionConstraint, **kw: Any
     ) -> str:
@@ -417,6 +437,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         text += self.define_constraint_deferrability(constraint)
         return text
 
+    @override
     def visit_create_table(self, create: CreateTable, **kw: Any) -> str:
         table = create.element
 
@@ -430,7 +451,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         if table_type:
             # https://github.com/SAP/sqlalchemy-hana/issues/84
             if table._prefixes is None:
-                table._prefixes = []
+                table._prefixes = []  # type:ignore[unreachable]
             if not isinstance(table._prefixes, list):
                 table._prefixes = list(table._prefixes)
             appended_index = len(table._prefixes)
@@ -443,12 +464,14 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
         return result
 
+    @override
     def visit_drop_constraint(self, drop: DropConstraint, **kw: Any) -> str:
         if isinstance(drop.element, PrimaryKeyConstraint):
             table = self.preparer.format_table(drop.element.table)
             return f"ALTER TABLE {table} DROP PRIMARY KEY"
         return super().visit_drop_constraint(drop, **kw)
 
+    @override
     def visit_computed_column(self, generated: Computed, **kw: Any) -> str:
         clause = (
             "GENERATED ALWAYS AS"
@@ -464,11 +487,13 @@ class HANADDLCompiler(compiler.DDLCompiler):
         selectable = self.sql_compiler.process(create.selectable, literal_binds=True)
         return f"CREATE VIEW {create.name} AS {selectable}"
 
+    @override
     def visit_drop_view(self, drop: DropView | BaseDropView, **kw: Any) -> str:
         if isinstance(drop, BaseDropView):
             return f"DROP VIEW {self.preparer.format_table(drop.element)}"
         return f"DROP VIEW {drop.name}"
 
+    @override
     def visit_create_column(
         self, create: CreateColumn, first_pk: bool = False, **kw: Any
     ) -> str:
@@ -478,10 +503,12 @@ class HANADDLCompiler(compiler.DDLCompiler):
 
 
 class HANAExecutionContext(default.DefaultExecutionContext):
+    @override
     def fire_sequence(self, seq: Sequence, type_: Integer) -> int:
         seq = self.identifier_preparer.format_sequence(seq)
         return self._execute_scalar(f"SELECT {seq}.NEXTVAL FROM DUMMY", type_)
 
+    @override
     def get_lastrowid(self) -> int:
         self.cursor.execute("SELECT CURRENT_IDENTITY_VALUE() FROM DUMMY")
         res = self.cursor.fetchone()
@@ -583,6 +610,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         self.vector_output_type = vector_output_type
 
     @classmethod
+    @override
     def import_dbapi(cls) -> ModuleType:
         hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment,misc]
         return hdbcli.dbapi
@@ -590,6 +618,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     if sqlalchemy.__version__ < "2":  # pragma: no cover
         dbapi = import_dbapi  # type:ignore[assignment]
 
+    @override
     def create_connect_args(self, url: URL) -> ConnectArgsType:
         if url.host and url.host.lower().startswith("userkey="):
             kwargs = url.translate_connect_args(host="userkey")
@@ -614,11 +643,13 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return (), kwargs
 
+    @override
     def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
         connection = super().connect(*args, **kw)
         connection.setautocommit(False)  # type:ignore[attr-defined]
         return connection
 
+    @override
     def on_connect(self) -> Callable[[DBAPIConnection], None] | None:
         if self.isolation_level is not None:
 
@@ -629,6 +660,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             return connect
         return None
 
+    @override
     def is_disconnect(
         self,
         e: Exception,
@@ -649,6 +681,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         "REPEATABLE READ",
     }
 
+    @override
     def set_isolation_level(
         self, dbapi_connection: DBAPIConnection, level: str
     ) -> None:
@@ -667,6 +700,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             with hana_connection.cursor() as cursor:
                 cursor.execute(f"SET TRANSACTION ISOLATION LEVEL {level}")
 
+    @override
     def get_isolation_level(  # type:ignore[override]
         self, dbapi_connection: hdbcli.dbapi.Connection
     ) -> str:
@@ -677,12 +711,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         assert result, "no current transaction isolation level found"
         return cast(str, result[0])
 
+    @override
     def _get_server_version_info(self, connection: Connection) -> tuple[int, ...]:
         result: str = connection.execute(  # type:ignore[assignment]
             sql.text("SELECT VERSION FROM SYS.M_DATABASE")
         ).scalar()
         return tuple(int(i) for i in result.split("."))
 
+    @override
     def _get_default_schema_name(self, connection: Connection) -> str:
         # In this case, the SQLAlchemy Connection object is not yet "ready".
         # Therefore we need to use the raw DBAPI connection object
@@ -699,10 +735,8 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     def _check_unicode_description(self, connection: Connection) -> bool:
         return True
 
+    @override
     def normalize_name(self, name: str) -> str:
-        if name is None:
-            return None
-
         if name.upper() == name and not self.identifier_preparer._requires_quotes(
             name.lower()
         ):
@@ -712,16 +746,15 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return name
 
+    @override
     def denormalize_name(self, name: str) -> str:
-        if name is None:
-            return None
-
         if name.lower() == name and not self.identifier_preparer._requires_quotes(
             name.lower()
         ):
             name = name.upper()
         return name
 
+    @override
     @cache
     def has_table(
         self,
@@ -746,6 +779,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
+    @override
     @cache
     def has_schema(self, connection: Connection, schema_name: str, **kw: Any) -> bool:
         result = connection.execute(
@@ -755,6 +789,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
+    @override
     @cache
     def has_index(
         self,
@@ -778,6 +813,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
+    @override
     @cache
     def has_sequence(
         self,
@@ -798,12 +834,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return bool(result.first())
 
+    @override
     @cache
     def get_schema_names(self, connection: Connection, **kw: Any) -> list[str]:
         result = connection.execute(sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS"))
 
         return [self.normalize_name(name) for name, in result.fetchall()]
 
+    @override
     @cache
     def get_table_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
@@ -821,6 +859,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return [self.normalize_name(row[0]) for row in result.fetchall()]
 
+    @override
     @cache
     def get_temp_table_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
@@ -838,6 +877,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return [self.normalize_name(row[0]) for row in result.fetchall()]
 
+    @override
     @cache
     def get_view_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
@@ -854,6 +894,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return [self.normalize_name(row[0]) for row in result.fetchall()]
 
+    @override
     @cache
     def get_view_definition(
         self,
@@ -877,6 +918,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             raise exc.NoSuchTableError()
         return result
 
+    @override
     @cache
     def get_columns(
         self,
@@ -946,6 +988,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return columns
 
+    @override
     @cache
     def get_sequence_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
@@ -960,6 +1003,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return [self.normalize_name(row[0]) for row in result]
 
+    @override
     @cache
     def get_foreign_keys(
         self,
@@ -1018,6 +1062,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             ),
         )
 
+    @override
     @cache
     def get_indexes(
         self,
@@ -1069,6 +1114,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             key=lambda index: (index["name"] is not None, index["name"]),
         )
 
+    @override
     @cache
     def get_pk_constraint(
         self,
@@ -1104,6 +1150,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             "constrained_columns": constrained_columns,
         }
 
+    @override
     @cache
     def get_unique_constraints(
         self,
@@ -1147,13 +1194,16 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                         constraint_name
                     )
                 constraints.append(constraint)
-            constraint["column_names"].append(self.normalize_name(column_name))
+            constraint["column_names"].append(  # type:ignore[possibly-undefined]
+                self.normalize_name(column_name)
+            )
 
         return sorted(
             constraints,
             key=lambda constraint: (constraint["name"] is not None, constraint["name"]),
         )
 
+    @override
     @cache
     def get_check_constraints(
         self,
@@ -1216,6 +1266,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
         return cast(int, result.scalar())
 
+    @override
     @cache
     def get_table_comment(
         self,
@@ -1239,6 +1290,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
         return {"text": result.scalar()}
 
+    @override
     def do_rollback_to_savepoint(self, connection: Connection, name: str) -> None:
         err = sys.exc_info()
         if (

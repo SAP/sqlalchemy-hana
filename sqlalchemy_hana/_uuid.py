@@ -7,6 +7,7 @@ from uuid import UUID as PyUUID
 
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
+from typing_extensions import override
 
 _RET = TypeVar("_RET", str, PyUUID)
 
@@ -19,9 +20,10 @@ class Uuid(sqltypes.Uuid[_RET]):
         native_uuid: bool = True,
         as_varbinary: bool = False,
     ) -> None:
-        super().__init__(as_uuid, native_uuid)  # type:ignore
+        super().__init__(as_uuid, native_uuid)  # type:ignore[call-overload,misc]
         self.as_varbinary = as_varbinary
 
+    @override
     def bind_processor(
         self, dialect: Dialect
     ) -> Callable[[Any | None], Any | None] | None:
@@ -36,6 +38,7 @@ class Uuid(sqltypes.Uuid[_RET]):
 
         return process
 
+    @override
     def result_processor(
         self, dialect: Dialect, coltype: Any
     ) -> Callable[[Any | None], Any | None]:

@@ -21,6 +21,7 @@ from alembic.ddl.base import (
 from alembic.ddl.impl import DefaultImpl
 from sqlalchemy import ForeignKeyConstraint
 from sqlalchemy.ext.compiler import compiles
+from typing_extensions import override
 
 if TYPE_CHECKING:
     from sqlalchemy_hana.dialect import HANADDLCompiler
@@ -33,10 +34,12 @@ class HANAImpl(DefaultImpl):
     transactional_ddl = True
     type_synonyms = DefaultImpl.type_synonyms + ({"FLOAT", "DOUBLE"},)
 
+    @override
     def start_migrations(self) -> None:
         # Activate transactional DDL statements
         self.execute("SET TRANSACTION AUTOCOMMIT DDL OFF")
 
+    @override
     def correct_for_autogen_foreignkeys(
         self,
         conn_fks: set[ForeignKeyConstraint],
