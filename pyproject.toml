@@ -49,7 +49,7 @@ dev = [
     "yesqa==1.5.0",
 ]
 test = [
-    "pytest==8.3.5",
+    "pytest==8.4.0",
     "pytest-cov==6.1.1",
     "coverage[toml]==7.8.2",
     "diff-cover[toml]==9.3.2",
@@ -81,6 +81,8 @@ xfail_strict = true
 filterwarnings = [
     # all warnings are errors
     "error",
+    # created by SQLAlchemy
+    "ignore:There is no current event loop:DeprecationWarning",
 ]
 markers = [
     # used by sqlalchemy; registered to avoid warnings
