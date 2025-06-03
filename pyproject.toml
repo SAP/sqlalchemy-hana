@@ -81,6 +81,8 @@ xfail_strict = true
 filterwarnings = [
     # all warnings are errors
     "error",
+    # created by SQLAlchemy
+    "ignore:There is no current event loop:DeprecationWarning",
 ]
 markers = [
     # used by sqlalchemy; registered to avoid warnings
