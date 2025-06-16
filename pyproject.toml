@@ -41,7 +41,7 @@ dev = [
     "black==25.1.0",
     "pre-commit==4.2.0",
     "flake8==7.2.0",
-    "flake8-tergeo==25.5.22.0",
+    "flake8-tergeo==25.6.11.0",
     "pylint==3.3.7",
     "mypy==1.16.0",
     "types-hdbcli==2.24.0.20250325",
