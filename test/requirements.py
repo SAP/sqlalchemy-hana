@@ -24,7 +24,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def datetime_literals(self) -> compound:
-        """HANA has the function to_date, to_time, to_timestamp"""
+        """HANA has the function to_date, to_time, to_timestamp."""
         return exclusions.open()
 
     @property

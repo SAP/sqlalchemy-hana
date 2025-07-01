@@ -79,7 +79,9 @@ class DialectTest(TestBase):
         assert result_kwargs["databaseName"] == "TENANT_NAME"
 
     def test_parsing_userkey_hdbcli(self) -> None:
-        """With HDBCLI, the user may reference to a local HDBUserStore key which holds
+        """Test that a userkey can be parsed.
+
+        With HDBCLI, the user may reference to a local HDBUserStore key which holds
         the connection details. SQLAlchemy-HANA should only pass the userkey name to
         HDBCLI for the connection creation.
         """

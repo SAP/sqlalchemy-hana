@@ -18,6 +18,11 @@ ignore=
     FTU003,
     # TODO fix and remove the ignore
     FTU005,
+    # some things don't need a docstring
+    FTP305,FTP306
+per-file-ignores =
+    test/*:FTP300,FTP301,FTP302,FTP303,FTP304
+    sqlalchemy_hana/dialect.py:FTP301,FTP302,FTP303
 
 ftp-python-version = 3.9.0
 ftp-auto-manage-options = true
