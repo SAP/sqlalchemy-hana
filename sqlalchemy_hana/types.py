@@ -122,11 +122,9 @@ _BaseDouble = sqltypes.FLOAT if sqlalchemy.__version__ < "2" else sqltypes.DOUBL
 class DOUBLE(_BaseDouble):  # type:ignore[valid-type,misc]
     """SAP HANA DOUBLE type.
 
-    In SQLAlchemy 2.x, this extends for sqltypes.DOUBLE.
-    In SQLAlchemy 1.x, this extends sqltypes.FLOAT.
+    In SQLAlchemy 2.x, this extends DOUBLE.
+    In SQLAlchemy 1.x, this extends FLOAT.
     """
-
-    __visit_name__ = "DOUBLE"
 
 
 class FLOAT(sqltypes.FLOAT):  # type:ignore[type-arg]
