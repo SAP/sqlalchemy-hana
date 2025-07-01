@@ -54,6 +54,8 @@ def view(name: str, selectable: AnySelect) -> TableClause:
 
 
 class Upsert(Insert, DMLWhereBase):  # type: ignore[misc]
+    """Upsert element for SAP HANA."""
+
     __visit_name__ = "upsert"
     # until https://github.com/sqlalchemy/sqlalchemy/issues/8321 is implemented we don't cache
     inherit_cache = False
@@ -66,6 +68,7 @@ class Upsert(Insert, DMLWhereBase):  # type: ignore[misc]
 
 
 def upsert(table: Any) -> Upsert:
+    """Helper function to create an upsert clause element."""
     return Upsert(table)
 
 

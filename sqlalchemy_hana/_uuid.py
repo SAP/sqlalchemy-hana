@@ -13,6 +13,7 @@ _RET = TypeVar("_RET", str, PyUUID)
 
 
 class Uuid(sqltypes.Uuid[_RET]):
+    """SAP HANA UUID type."""
 
     def __init__(
         self,
@@ -30,13 +31,13 @@ class Uuid(sqltypes.Uuid[_RET]):
         if not self.as_varbinary:
             return super().bind_processor(dialect)
 
-        def process(value: Any | None) -> Any | None:
+        def _process(value: Any | None) -> Any | None:
             if value is None:
                 return value
             uuid = value if isinstance(value, PyUUID) else PyUUID(value)
             return uuid.bytes
 
-        return process
+        return _process
 
     @override
     def result_processor(
@@ -45,11 +46,11 @@ class Uuid(sqltypes.Uuid[_RET]):
         if not self.as_varbinary:
             return super().result_processor(dialect, coltype)
 
-        def process(value: Any | None) -> Any | None:
+        def _process(value: Any | None) -> Any | None:
             if value is None:
                 return value
             if self.as_uuid:
                 return PyUUID(bytes=value.tobytes())
             return str(PyUUID(bytes=value.tobytes()))
 
-        return process
+        return _process
