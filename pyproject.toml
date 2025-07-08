@@ -47,6 +47,7 @@ dev = [
     "types-hdbcli==2.24.0.20250325",
     "typing-extensions==4.14.1",
     "yesqa==1.5.0",
+    "pyupgrade==3.20.0",
 ]
 test = [
     "pytest==8.4.1",
