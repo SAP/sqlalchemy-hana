@@ -22,7 +22,6 @@ from sqlalchemy import (
     util,
 )
 from sqlalchemy.engine import Connection, default, reflection
-from sqlalchemy.engine.interfaces import DBAPIModule
 from sqlalchemy.schema import CreateColumn
 from sqlalchemy.sql import Select, compiler, functions, sqltypes
 from sqlalchemy.sql.ddl import _DropView as BaseDropView
@@ -45,6 +44,7 @@ if TYPE_CHECKING:
     from sqlalchemy.engine.interfaces import (
         DBAPIConnection,
         DBAPICursor,
+        DBAPIModule,
         ReflectedCheckConstraint,
         ReflectedColumn,
         ReflectedForeignKeyConstraint,
