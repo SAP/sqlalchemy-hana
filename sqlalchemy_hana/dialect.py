@@ -22,6 +22,7 @@ from sqlalchemy import (
     util,
 )
 from sqlalchemy.engine import Connection, default, reflection
+from sqlalchemy.engine.interfaces import DBAPIModule
 from sqlalchemy.schema import CreateColumn
 from sqlalchemy.sql import Select, compiler, functions, sqltypes
 from sqlalchemy.sql.ddl import _DropView as BaseDropView
@@ -646,7 +647,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     @override
     def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
         connection = super().connect(*args, **kw)
-        connection.setautocommit(False)  # type:ignore[attr-defined]
+        connection.setautocommit(False)
         return connection
 
     @override
@@ -663,7 +664,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     @override
     def is_disconnect(
         self,
-        e: Exception,
+        e: DBAPIModule.Error,
         connection: PoolProxiedConnection | DBAPIConnection | None,
         cursor: DBAPICursor | None,
     ) -> bool:
