@@ -322,3 +322,19 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def json_type(self) -> compound:
         return exclusions.open()
+
+    @property
+    def nvarchar_types(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def skip_autocommit_rollback(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def ctes_with_values(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def temp_table_comment_reflection(self) -> compound:
+        return exclusions.open()
