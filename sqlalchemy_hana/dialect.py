@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from sqlalchemy.engine.interfaces import (
         DBAPIConnection,
         DBAPICursor,
+        DBAPIModule,
         ReflectedCheckConstraint,
         ReflectedColumn,
         ReflectedForeignKeyConstraint,
@@ -646,7 +647,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     @override
     def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
         connection = super().connect(*args, **kw)
-        connection.setautocommit(False)  # type:ignore[attr-defined]
+        connection.setautocommit(False)
         return connection
 
     @override
@@ -663,7 +664,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     @override
     def is_disconnect(
         self,
-        e: Exception,
+        e: DBAPIModule.Error,
         connection: PoolProxiedConnection | DBAPIConnection | None,
         cursor: DBAPICursor | None,
     ) -> bool:
