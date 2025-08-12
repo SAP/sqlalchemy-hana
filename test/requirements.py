@@ -329,11 +329,11 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
 
     @property
     def skip_autocommit_rollback(self) -> compound:
-        return exclusions.open()
+        return exclusions.closed()
 
     @property
     def ctes_with_values(self) -> compound:
-        return exclusions.open()
+        return exclusions.closed()
 
     @property
     def temp_table_comment_reflection(self) -> compound:
