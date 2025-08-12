@@ -44,7 +44,7 @@ dev = [
     "flake8-tergeo==25.7.9.0",
     "pylint==3.3.7",
     "mypy==1.17.0",
-    "types-hdbcli==2.25.0.20250715",
+    "types-hdbcli==2.25.0.20250809",
     "typing-extensions==4.14.1",
     "yesqa==1.5.0",
     "pyupgrade==3.20.0",
