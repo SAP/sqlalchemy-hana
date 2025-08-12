@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
+import sqlalchemy.types as sql_types
 from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
@@ -22,6 +23,9 @@ from sqlalchemy.testing.schema import Column, Table
 from sqlalchemy.testing.suite import *  # noqa: F401, F403
 from sqlalchemy.testing.suite.test_cte import CTETest as _CTETest
 from sqlalchemy.testing.suite.test_reflection import (
+    BizarroCharacterTest as _BizarroCharacterTest,
+)
+from sqlalchemy.testing.suite.test_reflection import (
     ComponentReflectionTest as _ComponentReflectionTest,
 )
 from sqlalchemy.testing.suite.test_reflection import (
@@ -29,6 +33,9 @@ from sqlalchemy.testing.suite.test_reflection import (
 )
 from sqlalchemy.testing.suite.test_reflection import (
     IdentityReflectionTest as _IdentityReflectionTest,
+)
+from sqlalchemy.testing.suite.test_reflection import (
+    TempTableElementsTest as _TempTableElementsTest,
 )
 from sqlalchemy.testing.suite.test_select import (
     IdentityColumnTest as _IdentityColumnTest,
@@ -107,6 +114,27 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
         opts = insp.get_foreign_keys("user")[0]["options"]
         eq_(opts, options)
 
+    @testing.requires.table_reflection
+    @testing.combinations(
+        sql_types.String,
+        sql_types.VARCHAR,
+        sql_types.CHAR,
+        (sql_types.NVARCHAR, testing.requires.nvarchar_types),
+        (sql_types.NCHAR, testing.requires.nvarchar_types),
+        argnames="type_",
+    )
+    def test_string_length_reflection(self, connection, metadata, type_):
+        typ = self._type_round_trip(connection, metadata, type_(52))[0]
+        if issubclass(type_, sql_types.VARCHAR):
+            assert isinstance(typ, (sql_types.VARCHAR, sql_types.NVARCHAR))
+        elif issubclass(type_, sql_types.CHAR):
+            assert isinstance(typ, (sql_types.CHAR, sql_types.NCHAR))
+        else:
+            assert isinstance(typ, sql_types.String)
+
+        eq_(typ.length, 52)
+        assert isinstance(typ.length, int)
+
 
 class ComponentReflectionTest(_ComponentReflectionTest):
     def _check_table_dict(self, result, exp, req_keys=None, make_lists=False):
@@ -183,3 +211,15 @@ class JSONTest(_JSONTest):
 
     def test_path_typed_comparison(self):
         pytest.skip("Path typed access is not supported")
+
+
+class BizarroCharacterTest(_BizarroCharacterTest):
+
+    def test_reflect_identity(self):
+        pytest.skip("Identity reflection is not supported")
+
+
+class TempTableElementsTest(_TempTableElementsTest):
+
+    def test_reflect_identity(self):
+        pytest.skip("Identity reflection is not supported")
