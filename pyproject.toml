@@ -36,6 +36,9 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 
 [project.optional-dependencies]
+alembic = ["alembic~=1.12"]
+
+[dependency-groups]
 dev = [
     "isort==6.0.1",
     "black==25.1.0",
@@ -55,7 +58,6 @@ test = [
     "coverage[toml]==7.10.2",
     "diff-cover[toml]==9.6.0",
 ]
-alembic = ["alembic~=1.12"]
 
 [project.entry-points."sqlalchemy.dialects"]
 hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
