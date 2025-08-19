@@ -1,4 +1,4 @@
-"""test sqlalchemy.elements."""
+"""Tests for sqlalchemy.elements."""
 
 from __future__ import annotations
 
