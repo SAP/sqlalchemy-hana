@@ -113,7 +113,7 @@ class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
 
 
 class REAL(sqltypes.REAL):  # type:ignore[type-arg]
-    """ "SAP HANA REAL type."""
+    """SAP HANA REAL type."""
 
 
 _BaseDouble = sqltypes.FLOAT if sqlalchemy.__version__ < "2" else sqltypes.DOUBLE
