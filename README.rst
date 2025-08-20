@@ -421,7 +421,7 @@ We recommend the usage of ``pyenv`` to install a proper 3.13 python version for 
 * ``python311 -m venv venv``
 * ``source venv/bin/activate``
 * ``pip install -U pip``
-* ``pip install -e .[dev,test,alembic]``
+* ``pip install --group dev --group test -e .[alembic]``
 
 To execute the tests, use ``pyenv``.
 The linters and formatters can be executed using ``pre-commit``: ``pre-commit run -a``.
