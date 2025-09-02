@@ -49,6 +49,9 @@ license-files = [
 ]
 
 [project.optional-dependencies]
+alembic = ["alembic~=1.12"]
+
+[dependency-groups]
 dev = [
     "isort==6.0.1",
     "black==25.1.0",
