@@ -63,7 +63,7 @@ dev = [
     "pyupgrade==3.20.0",
 ]
 test = [
-    "pytest==8.4.1",
+    "pytest==8.4.2",
     "pytest-cov==6.2.1",
     "coverage[toml]==7.10.5",
     "diff-cover[toml]==9.6.0",
