@@ -37,6 +37,25 @@ license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 alembic = ["alembic~=1.12"]
+dev = [
+    "isort==6.0.1",
+    "black==25.1.0",
+    "pre-commit==4.3.0",
+    "flake8==7.3.0",
+    "flake8-tergeo==25.7.9.0",
+    "pylint==3.3.8",
+    "mypy==1.17.1",
+    "types-hdbcli==2.25.0.20250809",
+    "typing-extensions==4.14.1",
+    "yesqa==1.5.0",
+    "pyupgrade==3.20.0",
+]
+test = [
+    "pytest==8.4.1",
+    "pytest-cov==6.2.1",
+    "coverage[toml]==7.10.2",
+    "diff-cover[toml]==9.6.0",
+]
 
 [dependency-groups]
 dev = [
