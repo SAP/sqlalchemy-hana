@@ -69,7 +69,7 @@ test = [
     "pytest==8.4.2",
     "pytest-cov==7.0.0",
     "coverage[toml]==7.10.7",
-    "diff-cover[toml]==9.6.0",
+    "diff-cover[toml]==9.7.1",
     "pytest-randomly==4.0.1",
 ]
 alembic = [
