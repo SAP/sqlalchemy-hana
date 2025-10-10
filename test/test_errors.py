@@ -18,6 +18,7 @@ from sqlalchemy_hana.errors import (
     LockWaitTimeoutError,
     SequenceCacheTimeoutError,
     SequenceLockTimeoutError,
+    SessionContextError,
     StatementExecutionError,
     StatementTimeoutError,
     TransactionCancelledError,
@@ -86,6 +87,11 @@ class TestConvertDBAPIError(TestBase):
                 "feature not supported: writable statement not allowed in "
                 "read-enabled replication: line 1 col 1",
                 WriteInReadOnlyReplicationError,
+            ),
+            (
+                597,
+                "session context error: failed remote communication",
+                SessionContextError,
             ),
         ],
     )
