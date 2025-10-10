@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.1.0
+-----
+
+Features
+~~~~~~~~
+
+- Support python 3.14
+
+
 3.0.3
 -----
 

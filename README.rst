@@ -415,9 +415,9 @@ error and raise a more specific exception if possible.
 
 Development Setup
 -----------------
-We recommend the usage of ``pyenv`` to install a proper 3.13 python version for development.
+We recommend the usage of ``pyenv`` to install a proper 3.14 python version for development.
 
-* ``pyenv install 3.13``
+* ``pyenv install 3.14``
 * ``python311 -m venv venv``
 * ``source venv/bin/activate``
 * ``pip install -U pip``
