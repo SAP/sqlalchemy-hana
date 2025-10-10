@@ -92,7 +92,7 @@ class InvalidObjectNameError(HANAError):
     """Error when an invalid object name is referenced."""
 
 
-class SessionContextError(ConnectionError):
+class SessionContextError(HANAConnectionError):
     """Error when there is a problem with the session context."""
 
 
