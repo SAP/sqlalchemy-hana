@@ -32,7 +32,7 @@ class HANAError(DBAPIError):
         )
 
 
-class ConnectionError(HANAError):
+class HANAConnectionError(HANAError):
     """Error when there is a problem with the connection."""
 
 
@@ -56,7 +56,7 @@ class LockAcquisitionError(HANAError):
     """Exception raised when a lock acquisition fails."""
 
 
-class DatabaseConnectNotPossibleError(ConnectionError):
+class DatabaseConnectNotPossibleError(HANAConnectionError):
     """Exception raised when the database is unavailable."""
 
 
@@ -182,11 +182,11 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
 
 __all__ = (
     "ClientConnectionError",
-    "ConnectionError",
     "DatabaseConnectNotPossibleError",
     "DatabaseOutOfMemoryError",
     "DatabaseOverloadedError",
     "DeadlockError",
+    "HANAConnectionError",
     "HANAError",
     "InvalidObjectNameError",
     "LockAcquisitionError",
