@@ -32,6 +32,10 @@ class HANAError(DBAPIError):
         )
 
 
+class HANAConnectionError(HANAError):
+    """Error when there is a problem with the connection."""
+
+
 class SequenceCacheTimeoutError(HANAError):
     """Exception raised when the sequence cache times out."""
 
@@ -52,7 +56,7 @@ class LockAcquisitionError(HANAError):
     """Exception raised when a lock acquisition fails."""
 
 
-class DatabaseConnectNotPossibleError(HANAError):
+class DatabaseConnectNotPossibleError(HANAConnectionError):
     """Exception raised when the database is unavailable."""
 
 
@@ -86,6 +90,10 @@ class TransactionCancelledError(HANAError):
 
 class InvalidObjectNameError(HANAError):
     """Error when an invalid object name is referenced."""
+
+
+class SessionContextError(HANAConnectionError):
+    """Error when there is a problem with the session context."""
 
 
 def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
@@ -167,6 +175,8 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         "feature not supported: writable statement not allowed in read-enabled replication"
     ):
         return WriteInReadOnlyReplicationError.from_dbapi_error(dbapi_error)
+    if error.errorcode == 597:
+        return SessionContextError.from_dbapi_error(dbapi_error)
     return dbapi_error
 
 
@@ -176,12 +186,14 @@ __all__ = (
     "DatabaseOutOfMemoryError",
     "DatabaseOverloadedError",
     "DeadlockError",
+    "HANAConnectionError",
     "HANAError",
     "InvalidObjectNameError",
     "LockAcquisitionError",
     "LockWaitTimeoutError",
     "SequenceCacheTimeoutError",
     "SequenceLockTimeoutError",
+    "SessionContextError",
     "StatementExecutionError",
     "WriteInReadOnlyReplicationError",
     "convert_dbapi_error",
