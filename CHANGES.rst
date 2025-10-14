@@ -8,6 +8,7 @@ Features
 ~~~~~~~~
 
 - Support python 3.14
+- Add error handling of session context error
 
 
 3.0.3
