@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import date, datetime, time
-from typing import TYPE_CHECKING, Callable, Generic, Literal, TypeVar
+from typing import TYPE_CHECKING, Generic, Literal, TypeVar
 
-import sqlalchemy
 from sqlalchemy import types as sqltypes
 from sqlalchemy.engine import Dialect
 from sqlalchemy.sql.type_api import TypeEngine
 from typing_extensions import override
+
+from sqlalchemy_hana._uuid import Uuid
 
 if TYPE_CHECKING:
     StrTypeEngine = TypeEngine[str]
@@ -116,15 +118,8 @@ class REAL(sqltypes.REAL):  # type:ignore[type-arg]
     """SAP HANA REAL type."""
 
 
-_BaseDouble = sqltypes.FLOAT if sqlalchemy.__version__ < "2" else sqltypes.DOUBLE
-
-
-class DOUBLE(_BaseDouble):  # type:ignore[valid-type,misc]
-    """SAP HANA DOUBLE type.
-
-    In SQLAlchemy 2.x, this extends DOUBLE.
-    In SQLAlchemy 1.x, this extends FLOAT.
-    """
+class DOUBLE(sqltypes.DOUBLE):  # type:ignore[type-arg]
+    """SAP HANA DOUBLE type."""
 
 
 class FLOAT(sqltypes.FLOAT):  # type:ignore[type-arg]
@@ -225,13 +220,7 @@ __all__ = [
     "TIME",
     "TIMESTAMP",
     "TINYINT",
+    "Uuid",
     "VARBINARY",
     "VARCHAR",
 ]
-
-
-if sqlalchemy.__version__ >= "2":
-    # pylint: disable=unused-import
-    from sqlalchemy_hana._uuid import Uuid  # noqa: F401
-
-    __all__.append("Uuid")

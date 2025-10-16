@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import contextlib
 import sys
+from collections.abc import Callable
 from contextlib import closing
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import hdbcli.dbapi
-import sqlalchemy
 from sqlalchemy import (
     Computed,
     Identity,
@@ -158,14 +158,6 @@ RESERVED_WORDS = {
     "while",
     "with",
 }
-
-if sqlalchemy.__version__ < "2":  # pragma: no cover
-    # sqlalchemy 1.4 does not like annotations and caching
-    def cache(func: Callable[PARAM, RET]) -> Callable[PARAM, RET]:
-        return func
-
-else:
-    cache = reflection.cache  # type:ignore[assignment]
 
 
 class HANAIdentifierPreparer(compiler.IdentifierPreparer):
@@ -575,12 +567,11 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         types.Date: hana_types.DATE,
         types.Time: hana_types.TIME,
         types.DateTime: hana_types.TIMESTAMP,
+        types.Uuid: hana_types.Uuid,
         # these classes extend a mapped class (left side of this map); without listing them here,
         # the wrong class will be used
         hana_types.SECONDDATE: hana_types.SECONDDATE,
     }
-    if sqlalchemy.__version__ >= "2":
-        colspecs[types.Uuid] = hana_types.Uuid
 
     types_with_length = [
         hana_types.VARCHAR,
@@ -615,9 +606,6 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     def import_dbapi(cls) -> ModuleType:
         hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment,misc]
         return hdbcli.dbapi
-
-    if sqlalchemy.__version__ < "2":  # pragma: no cover
-        dbapi = import_dbapi  # type:ignore[assignment]
 
     @override
     def create_connect_args(self, url: URL) -> ConnectArgsType:
@@ -765,7 +753,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return name
 
     @override
-    @cache
+    @reflection.cache
     def has_table(
         self,
         connection: Connection,
@@ -790,7 +778,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return bool(result.first())
 
     @override
-    @cache
+    @reflection.cache
     def has_schema(self, connection: Connection, schema_name: str, **kw: Any) -> bool:
         result = connection.execute(
             sql.text(
@@ -800,7 +788,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return bool(result.first())
 
     @override
-    @cache
+    @reflection.cache
     def has_index(
         self,
         connection: Connection,
@@ -824,7 +812,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return bool(result.first())
 
     @override
-    @cache
+    @reflection.cache
     def has_sequence(
         self,
         connection: Connection,
@@ -845,14 +833,14 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return bool(result.first())
 
     @override
-    @cache
+    @reflection.cache
     def get_schema_names(self, connection: Connection, **kw: Any) -> list[str]:
         result = connection.execute(sql.text("SELECT SCHEMA_NAME FROM SYS.SCHEMAS"))
 
         return [self.normalize_name(name) for name, in result.fetchall()]
 
     @override
-    @cache
+    @reflection.cache
     def get_table_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -870,7 +858,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return [self.normalize_name(row[0]) for row in result.fetchall()]
 
     @override
-    @cache
+    @reflection.cache
     def get_temp_table_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -888,7 +876,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return [self.normalize_name(row[0]) for row in result.fetchall()]
 
     @override
-    @cache
+    @reflection.cache
     def get_view_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -905,7 +893,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return [self.normalize_name(row[0]) for row in result.fetchall()]
 
     @override
-    @cache
+    @reflection.cache
     def get_view_definition(
         self,
         connection: Connection,
@@ -929,7 +917,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return result
 
     @override
-    @cache
+    @reflection.cache
     def get_columns(
         self,
         connection: Connection,
@@ -999,7 +987,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return columns
 
     @override
-    @cache
+    @reflection.cache
     def get_sequence_names(
         self, connection: Connection, schema: str | None = None, **kw: Any
     ) -> list[str]:
@@ -1014,7 +1002,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return [self.normalize_name(row[0]) for row in result]
 
     @override
-    @cache
+    @reflection.cache
     def get_foreign_keys(
         self,
         connection: Connection,
@@ -1073,7 +1061,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
 
     @override
-    @cache
+    @reflection.cache
     def get_indexes(
         self,
         connection: Connection,
@@ -1125,7 +1113,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
 
     @override
-    @cache
+    @reflection.cache
     def get_pk_constraint(
         self,
         connection: Connection,
@@ -1161,7 +1149,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         }
 
     @override
-    @cache
+    @reflection.cache
     def get_unique_constraints(
         self,
         connection: Connection,
@@ -1214,7 +1202,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         )
 
     @override
-    @cache
+    @reflection.cache
     def get_check_constraints(
         self,
         connection: Connection,
@@ -1255,7 +1243,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             ),
         )
 
-    @cache
+    @reflection.cache
     def get_table_oid(
         self,
         connection: Connection,
@@ -1277,7 +1265,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
         return cast(int, result.scalar())
 
     @override
-    @cache
+    @reflection.cache
     def get_table_comment(
         self,
         connection: Connection,

@@ -1,14 +1,16 @@
 Changelog
 =========
 
-3.1.0
+4.0.0
 -----
 
 Features
 ~~~~~~~~
 
 - Support python 3.14
-
+- Add error handling of session context error
+- Removed support for python 3.9
+- Removed support for sqlalchemy 1.4
 
 3.0.3
 -----
