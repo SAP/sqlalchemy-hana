@@ -7,7 +7,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-import sqlalchemy
 import sqlalchemy.types as sql_types
 from sqlalchemy import (
     ForeignKey,
@@ -24,6 +23,9 @@ from sqlalchemy.testing.schema import Column, Table
 from sqlalchemy.testing.suite import *  # noqa: F401, F403
 from sqlalchemy.testing.suite.test_cte import CTETest as _CTETest
 from sqlalchemy.testing.suite.test_reflection import (
+    BizarroCharacterTest as _BizarroCharacterTest,
+)
+from sqlalchemy.testing.suite.test_reflection import (
     ComponentReflectionTest as _ComponentReflectionTest,
 )
 from sqlalchemy.testing.suite.test_reflection import (
@@ -32,21 +34,13 @@ from sqlalchemy.testing.suite.test_reflection import (
 from sqlalchemy.testing.suite.test_reflection import (
     IdentityReflectionTest as _IdentityReflectionTest,
 )
+from sqlalchemy.testing.suite.test_reflection import (
+    TempTableElementsTest as _TempTableElementsTest,
+)
 from sqlalchemy.testing.suite.test_select import (
     IdentityColumnTest as _IdentityColumnTest,
 )
 from sqlalchemy.testing.suite.test_types import JSONTest as _JSONTest
-
-if sqlalchemy.__version__ > "2":
-    from sqlalchemy.testing.suite.test_reflection import (
-        BizarroCharacterTest as _BizarroCharacterTest,
-    )
-    from sqlalchemy.testing.suite.test_reflection import (
-        TempTableElementsTest as _TempTableElementsTest,
-    )
-else:
-    _BizarroCharacterTest = object
-    _TempTableElementsTest = object
 
 # Import dialect test suite provided by SQLAlchemy into SQLAlchemy-HANA test collection.
 # Please don't add other tests in this file. Only adjust or overview SQLAlchemy tests
@@ -132,9 +126,9 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
     def test_string_length_reflection(self, connection, metadata, type_):
         typ = self._type_round_trip(connection, metadata, type_(52))[0]
         if issubclass(type_, sql_types.VARCHAR):
-            assert isinstance(typ, (sql_types.VARCHAR, sql_types.NVARCHAR))
+            assert isinstance(typ, sql_types.VARCHAR | sql_types.NVARCHAR)
         elif issubclass(type_, sql_types.CHAR):
-            assert isinstance(typ, (sql_types.CHAR, sql_types.NCHAR))
+            assert isinstance(typ, sql_types.CHAR | sql_types.NCHAR)
         else:
             assert isinstance(typ, sql_types.String)
 

@@ -6,14 +6,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlalchemy-hana"
-version = "3.1.0"
+version = "4.0.0"
 description = "SQLAlchemy dialect for SAP HANA"
 keywords = [
     "sqlalchemy",
     "sap",
     "hana",
 ]
-requires-python = "~=3.9"
+requires-python = "~=3.10"
 readme = "README.rst"
 authors = [
     { name = "Christoph Heer", email = "christoph.heer@sap.com" },
@@ -27,7 +27,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -41,7 +40,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "sqlalchemy>=1.4.0,<3",
+    "sqlalchemy>=2,<3",
     "hdbcli~=2.10",
 ]
 license = "Apache-2.0"
