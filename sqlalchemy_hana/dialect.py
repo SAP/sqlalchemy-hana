@@ -1,3 +1,4 @@
+# pylint:disable=import-private-name
 """Dialect for SAP HANA."""
 
 from __future__ import annotations
@@ -442,9 +443,6 @@ class HANADDLCompiler(compiler.DDLCompiler):
         table_type = table.kwargs.get("hana_table_type")
         appended_index = None
         if table_type:
-            # https://github.com/SAP/sqlalchemy-hana/issues/84
-            if table._prefixes is None:  # type:ignore[comparison-overlap]
-                table._prefixes = []  # type:ignore[unreachable]
             if not isinstance(table._prefixes, list):
                 table._prefixes = list(table._prefixes)
             appended_index = len(table._prefixes)

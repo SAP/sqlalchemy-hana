@@ -151,17 +151,17 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
             and "Error GBA503: Service is unavailable" in error.errortext
         )
         or error.errortext
-        in [
+        in {
             "HANA Cloud region is in maintenance window",
             "HANA Database instance upgrade in progress",
-        ]
+        }
         # ERR_URS_INSTANCE_NOT_AVAILABLE: HANA Database service is not available
         or error.errorcode == 1888
     ):
         return DatabaseConnectNotPossibleError.from_dbapi_error(dbapi_error)
     if (
         # 129 -> ERR_TX_ROLLBACK: transaction rolled back by an internal error
-        error.errorcode in [129, 145]
+        error.errorcode in {129, 145}
         or "An error occurred while opening the channel" in error.errortext
         or "Exception in executor plan" in error.errortext
         or "DTX commit(first phase commit) failed" in error.errortext

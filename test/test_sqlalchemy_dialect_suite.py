@@ -1,5 +1,4 @@
 # pylint: disable=wildcard-import,unused-wildcard-import,function-redefined,arguments-differ
-# pylint: disable=redefined-outer-name
 """SQLAlchemy dialect test suite."""
 
 from __future__ import annotations

@@ -189,6 +189,7 @@ disable = [
     "too-many-arguments",
     "too-many-positional-arguments",
     "duplicate-code",
+    "consider-using-assignment-expr",
 ]
 enable = [
     "all",
