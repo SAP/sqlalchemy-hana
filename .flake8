@@ -27,3 +27,7 @@ per-file-ignores =
 ftp-python-version = 3.10.0
 ftp-auto-manage-options = true
 ftp-pytest-parametrize-names-type = csv
+ftp-distribution-name = sqlalchemy-hana
+ftp-requirements-packages = test,sqlalchemy_hana
+ftp-requirements-ignore-type-checking-block = true
+ftp-pyproject-toml-file = pyproject.toml

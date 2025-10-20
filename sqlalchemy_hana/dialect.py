@@ -443,7 +443,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         appended_index = None
         if table_type:
             # https://github.com/SAP/sqlalchemy-hana/issues/84
-            if table._prefixes is None:
+            if table._prefixes is None:  # type:ignore[comparison-overlap]
                 table._prefixes = []  # type:ignore[unreachable]
             if not isinstance(table._prefixes, list):
                 table._prefixes = list(table._prefixes)
