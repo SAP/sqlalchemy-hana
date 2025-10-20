@@ -24,6 +24,6 @@ per-file-ignores =
     test/*:FTP300,FTP301,FTP302,FTP303,FTP304
     sqlalchemy_hana/dialect.py:FTP301,FTP302,FTP303
 
-ftp-python-version = 3.9.0
+ftp-python-version = 3.10.0
 ftp-auto-manage-options = true
 ftp-pytest-parametrize-names-type = csv

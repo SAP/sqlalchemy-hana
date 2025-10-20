@@ -260,36 +260,37 @@ class RealVectorTest(_TypeBaseTest):
             assert columns[1]["type"].length is None
 
 
-if sqlalchemy.__version__ >= "2":
+class StringUUIDAsStringTest(_TypeBaseTest):
+    column_type = hana_types.Uuid(as_uuid=False)
+    data = "9f01b2fb-bf0d-4b46-873c-15d0976b4100"
 
-    class StringUUIDAsStringTest(_TypeBaseTest):
-        column_type = hana_types.Uuid(as_uuid=False)
-        data = "9f01b2fb-bf0d-4b46-873c-15d0976b4100"
+    @property
+    def reflected_column_type(self):
+        return hana_types.NVARCHAR(length=32)
 
-        @property
-        def reflected_column_type(self):
-            return hana_types.NVARCHAR(length=32)
 
-    class StringUUIDAsUUIDTest(_TypeBaseTest):
-        column_type = hana_types.Uuid(as_uuid=True)
-        data = UUID("9f01b2fb-bf0d-4b46-873c-15d0976b4100")
+class StringUUIDAsUUIDTest(_TypeBaseTest):
+    column_type = hana_types.Uuid(as_uuid=True)
+    data = UUID("9f01b2fb-bf0d-4b46-873c-15d0976b4100")
 
-        @property
-        def reflected_column_type(self):
-            return hana_types.NVARCHAR(length=32)
+    @property
+    def reflected_column_type(self):
+        return hana_types.NVARCHAR(length=32)
 
-    class BinaryUUIDAsStringTest(_TypeBaseTest):
-        column_type = hana_types.Uuid(as_uuid=False, as_varbinary=True)
-        data = "9f01b2fb-bf0d-4b46-873c-15d0976b4100"
 
-        @property
-        def reflected_column_type(self):
-            return hana_types.VARBINARY(length=16)
+class BinaryUUIDAsStringTest(_TypeBaseTest):
+    column_type = hana_types.Uuid(as_uuid=False, as_varbinary=True)
+    data = "9f01b2fb-bf0d-4b46-873c-15d0976b4100"
 
-    class BinaryUUIDAsUUIDTest(_TypeBaseTest):
-        column_type = hana_types.Uuid(as_uuid=True, as_varbinary=True)
-        data = UUID("9f01b2fb-bf0d-4b46-873c-15d0976b4100")
+    @property
+    def reflected_column_type(self):
+        return hana_types.VARBINARY(length=16)
 
-        @property
-        def reflected_column_type(self):
-            return hana_types.VARBINARY(length=16)
+
+class BinaryUUIDAsUUIDTest(_TypeBaseTest):
+    column_type = hana_types.Uuid(as_uuid=True, as_varbinary=True)
+    data = UUID("9f01b2fb-bf0d-4b46-873c-15d0976b4100")
+
+    @property
+    def reflected_column_type(self):
+        return hana_types.VARBINARY(length=16)
