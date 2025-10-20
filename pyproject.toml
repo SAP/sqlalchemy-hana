@@ -88,7 +88,6 @@ test = [
 ]
 
 [tool.diff_cover]
-addopts = "--strict-markers"
 fail_under = 80
 include_untracked = true
 
@@ -199,6 +198,7 @@ per-file-ignores = [
 ]
 
 [tool.pytest.ini_options]
+addopts = "--strict-markers"
 filterwarnings = [
     "error",
     "ignore:There is no current event loop:DeprecationWarning",
