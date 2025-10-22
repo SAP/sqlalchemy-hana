@@ -35,7 +35,7 @@ from sqlalchemy import testing  # noqa: E402
 from sqlalchemy.testing.config import Config  # noqa: E402
 from sqlalchemy.testing.plugin.plugin_base import post  # noqa: E402
 
-TEST_SCHEMA = TEST_SCHEMA2 = ""
+TEST_SCHEMA = TEST_SCHEMA2 = ""  # pylint: disable=invalid-name
 
 
 def _get_main_config() -> Config:
