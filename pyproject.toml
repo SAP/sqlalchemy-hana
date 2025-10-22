@@ -1,26 +1,12 @@
 [build-system]
+build-backend = "setuptools.build_meta"
 requires = [
     "setuptools>=64",
 ]
-build-backend = "setuptools.build_meta"
 
 [project]
-name = "sqlalchemy-hana"
-version = "4.0.0"
-description = "SQLAlchemy dialect for SAP HANA"
-keywords = [
-    "sqlalchemy",
-    "sap",
-    "hana",
-]
-requires-python = "~=3.10"
-readme = "README.rst"
 authors = [
-    { name = "Christoph Heer", email = "christoph.heer@sap.com" },
-]
-maintainers = [
-    { name = "Christoph Heer", email = "christoph.heer@sap.com" },
-    { name = "Kai Harder", email = "kai.harder@sap.com" },
+    {name = "Christoph Heer", email = "christoph.heer@sap.com"},
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -43,15 +29,41 @@ dependencies = [
     "sqlalchemy>=2,<3",
     "hdbcli~=2.10",
 ]
+description = "SQLAlchemy dialect for SAP HANA"
+keywords = [
+    "sqlalchemy",
+    "sap",
+    "hana",
+]
 license = "Apache-2.0"
 license-files = [
     "LICENSE",
 ]
+maintainers = [
+    {name = "Christoph Heer", email = "christoph.heer@sap.com"},
+    {name = "Kai Harder", email = "kai.harder@sap.com"},
+]
+name = "sqlalchemy-hana"
+readme = "README.rst"
+requires-python = "~=3.10"
+version = "4.0.0"
 
 [project.optional-dependencies]
 alembic = ["alembic~=1.12"]
 
+[project.urls]
+Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES.rst"
+"Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
+Repository = "https://github.com/SAP/sqlalchemy-hana"
+
+[project.entry-points."sqlalchemy.dialects"]
+hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
+"hana.hdbcli" = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
+
 [dependency-groups]
+alembic = [
+    "alembic~=1.12",
+]
 dev = [
     "isort==6.1.0",
     "black==25.9.0",
@@ -64,6 +76,8 @@ dev = [
     "typing-extensions==4.15.0",
     "yesqa==1.5.0",
     "pyupgrade==3.21.0",
+    "pylint-per-file-ignores==2.0.3",
+    "toml-sort==0.24.3",
 ]
 test = [
     "pytest==8.4.2",
@@ -72,59 +86,84 @@ test = [
     "diff-cover[toml]==9.7.1",
     "pytest-randomly==4.0.1",
 ]
-alembic = [
-    "alembic~=1.12",
-]
 
-[project.entry-points."sqlalchemy.dialects"]
-hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
-"hana.hdbcli" = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
-
-[project.urls]
-Repository = "https://github.com/SAP/sqlalchemy-hana"
-"Issue Tracker" = "https://github.com/SAP/sqlalchemy-hana/issues"
-Changelog = "https://github.com/SAP/sqlalchemy-hana/blob/main/CHANGES.rst"
-
-[tool.setuptools.packages.find]
-include = [
-    "sqlalchemy_hana",
-]
-
-[tool.setuptools.package-data]
-sqlalchemy_hana = [
-    "py.typed",
-]
+[tool.diff_cover]
+fail_under = 80
+include_untracked = true
 
 [tool.isort]
-profile = "black"
 add_imports = [
     "from __future__ import annotations",
 ]
+profile = "black"
 
-[tool.pytest.ini_options]
-log_level = "DEBUG"
-xfail_strict = true
-filterwarnings = [
-    "error",
-    "ignore:There is no current event loop:DeprecationWarning",
+[tool.mypy]
+deprecated_calls_exclude = [
+    "sqlalchemy_hana",
 ]
-markers = [
-    "backend: used by sqlalchemy",
-    "mypy: used by sqlalchemy",
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+enable_error_code = [
+    "explicit-override",
+    "possibly-undefined",
+    "ignore-without-code",
+    "deprecated",
+    "redundant-self",
+    "truthy-iterable",
+    "unused-awaitable",
+    "exhaustive-match",
+]
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+strict = true
+strict_bytes = true
+strict_concatenate = true
+strict_equality_for_none = true
+strict_optional = true
+warn_no_return = true
+warn_return_any = false
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+ignore_errors = true
+module = [
+    "test.*",
 ]
 
-[tool.diff_cover]
-addopts = "--strict-markers"
-include_untracked = true
-fail_under = 80
+[tool.pylint.basic]
+good-names = [
+    "visit_TINYINT",
+    "visit_SMALLDECIMAL",
+    "visit_SECONDDATE",
+    "visit_ALPHANUM",
+    "visit_JSON",
+    "visit_REAL_VECTOR",
+    "REAL_VECTOR",
+]
 
-[tool.pylint.master]
+[tool.pylint.main]
+load-plugins = [
+    "pylint_per_file_ignores",
+    "pylint.extensions.bad_builtin",
+    "pylint.extensions.check_elif",
+    "pylint.extensions.code_style",
+    "pylint.extensions.comparison_placement",
+    "pylint.extensions.confusing_elif",
+    "pylint.extensions.dict_init_mutate",
+    "pylint.extensions.docparams",
+    "pylint.extensions.docstyle",
+    "pylint.extensions.empty_comment",
+    "pylint.extensions.eq_without_hash",
+    "pylint.extensions.for_any_all",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.private_import",
+    "pylint.extensions.set_membership",
+    "pylint.extensions.typing",
+]
 max-line-length = 100
 
 [tool.pylint."messages control"]
-enable = [
-    "all",
-]
 disable = [
     "fixme",
     "locally-disabled",
@@ -150,44 +189,47 @@ disable = [
     "too-many-arguments",
     "too-many-positional-arguments",
     "duplicate-code",
+    "consider-using-assignment-expr",
+]
+enable = [
+    "all",
+]
+per-file-ignores = [
+    "test/**:missing-function-docstring,missing-class-docstring,redefined-outer-name,protected-access,unused-argument,import-private-name",
 ]
 
-[tool.pylint.basic]
-good-names = [
-    "visit_TINYINT",
-    "visit_SMALLDECIMAL",
-    "visit_SECONDDATE",
-    "visit_ALPHANUM",
-    "visit_JSON",
-    "visit_REAL_VECTOR",
-    "REAL_VECTOR",
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+filterwarnings = [
+    "error",
+    "ignore:There is no current event loop:DeprecationWarning",
+]
+log_level = "DEBUG"
+markers = [
+    "backend: used by sqlalchemy",
+    "mypy: used by sqlalchemy",
+]
+xfail_strict = true
+
+[tool.setuptools.package-data]
+sqlalchemy_hana = [
+    "py.typed",
 ]
 
-[tool.mypy]
-pretty = true
-show_column_numbers = true
-show_error_codes = true
-enable_error_code = [
-    "explicit-override",
-    "possibly-undefined",
-    "ignore-without-code",
-    "deprecated",
-]
-deprecated_calls_exclude = [
+[tool.setuptools.packages.find]
+include = [
     "sqlalchemy_hana",
 ]
-strict_bytes = true
-strict = true
-strict_optional = true
-warn_no_return = true
-warn_return_any = false
-warn_unreachable = true
-disallow_untyped_calls = false
-disallow_untyped_decorators = false
-strict_concatenate = true
 
-[[tool.mypy.overrides]]
-ignore_errors = true
-module = [
-    "test.*",
+[tool.tomlsort]
+sort_first = [
+    "build-system",
+    "project",
+    "project.optional-dependencies",
+    "project.urls",
+    "project.entry-points.sqlalchemy.dialects",
+    "dependency-groups",
 ]
+sort_table_keys = true
+spaces_indent_inline_array = 4
+trailing_comma_inline_array = true

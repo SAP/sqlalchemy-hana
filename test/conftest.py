@@ -63,7 +63,7 @@ def randomize_test_schemas(*args: Any, **kwargs: Any) -> None:
     # we don't need to drop the schemas later,
     # because the user is dropped later and with it the schemas
     with config.db.connect() as connection, connection.begin():
-        for schema in [config.test_schema, config.test_schema_2]:
+        for schema in (config.test_schema, config.test_schema_2):
             connection.execute(text(f"CREATE SCHEMA {schema}"))
 
 
