@@ -65,12 +65,12 @@ alembic = [
     "alembic~=1.12",
 ]
 dev = [
-    "isort==6.1.0",
+    "isort==7.0.0",
     "black==25.9.0",
     "pre-commit==4.3.0",
     "flake8==7.3.0",
     "flake8-tergeo==25.10.9.0",
-    "pylint==3.3.9",
+    "pylint==4.0.2",
     "mypy==1.18.2",
     "types-hdbcli==2.25.0.20250915",
     "typing-extensions==4.15.0",
