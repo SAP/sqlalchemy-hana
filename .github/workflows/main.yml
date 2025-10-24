@@ -118,6 +118,7 @@ jobs:
           path: coverage_files
     -   name: Prepare coverage files
         run: |
+          uv sync --all-groups
           cd coverage_files
           uv run coverage combine
           mv .coverage ../.coverage
