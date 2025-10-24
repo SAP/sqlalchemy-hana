@@ -76,11 +76,11 @@ jobs:
         run: uv pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
     -   name: run tests (with coverage)
         run: |
-          PYTEST_DBURI=$(python -m test.ci_setup setup ${{ secrets.TEST_DBURI }})
+          PYTEST_DBURI=$(uv run python -m test.ci_setup setup ${{ secrets.TEST_DBURI }})
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI"
           uv run pytest -v --cov sqlalchemy_hana --cov test --cov-report xml test/
-          python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
+          uv run python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
     -   name: run diff-cover
         if: ${{ matrix.sqlalchemy-version == '2.0.*' }}
         run: uv run diff-cover --config-file pyproject.toml coverage.xml
