@@ -48,6 +48,14 @@ repos:
         language: system
         types: [toml]
         args: [--in-place]
+    -   id: uv-lock
+        name: uv-lock
+        entry: uv lock
+        args: [--check]
+        language: system
+        files: ^(uv\.lock|pyproject\.toml)$
+        pass_filenames: false
+        require_serial: true
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-markup
     rev: v1.0.1
     hooks:

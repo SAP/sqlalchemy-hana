@@ -15,16 +15,17 @@ jobs:
     steps:
     -   name: Checkout repository
         uses: actions/checkout@v4
-    -   name: Setup python
-        uses: actions/setup-python@v5
+    -   uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version-file: .python-version
+    -   name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version-file: pyproject.toml
     -   name: Install project
-        run: pip install -e .
-    -   name: Install libraries
-        run: pip install -U build
+        run: uv sync --all-groups
     -   name: Create wheel
-        run: python -m build -o dist/ .
+        run: uv build -o dist/.
     -   name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
     -   name: Determine version

@@ -78,6 +78,7 @@ dev = [
     "pyupgrade==3.21.0",
     "pylint-per-file-ignores==3.1.0",
     "toml-sort==0.24.3",
+    "uv==0.8.11",
 ]
 test = [
     "pytest==8.4.2",
@@ -233,3 +234,6 @@ sort_first = [
 sort_table_keys = true
 spaces_indent_inline_array = 4
 trailing_comma_inline_array = true
+
+[tool.uv]
+default-groups = []
