@@ -30,13 +30,24 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-    -   uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
+    - uses: actions/setup-python@v5
+      with:
+        python-version-file: .python-version
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version-file: pyproject.toml
     -   name: Install project
-        run: pip install --group test --group dev -e .[alembic]
+        run: uv sync --all-groups --all-extras
     -   name: run pre-commit
-        run: pre-commit run --all
+        run: uv run pre-commit run --all
+    -   name: Check for uncommitted changes
+        run: |
+          if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
+            echo "Changed files after pre-commit!"
+            git status --porcelain --untracked-files=all
+            exit 1
+          fi
   ci-test:
     needs: [ci-approval]
     # run this job if we have a PR
@@ -55,20 +66,24 @@ jobs:
     -   uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version-file: pyproject.toml
     -   name: Install project
-        run: pip install --group test -e .[alembic]
+        run: uv sync --all-groups --all-extras
     -   name: Install sqlalchemy
-        run: pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
+        run: uv pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
     -   name: run tests (with coverage)
         run: |
           PYTEST_DBURI=$(python -m test.ci_setup setup ${{ secrets.TEST_DBURI }})
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI"
-          pytest -v --cov sqlalchemy_hana --cov test --cov-report xml test/
+          uv run pytest -v --cov sqlalchemy_hana --cov test --cov-report xml test/
           python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
     -   name: run diff-cover
         if: ${{ matrix.sqlalchemy-version == '2.0.*' }}
-        run: diff-cover --config-file pyproject.toml coverage.xml
+        run: uv run diff-cover --config-file pyproject.toml coverage.xml
     -   name: Rename coverage file
         run: |
           UUID=$(uuidgen)
@@ -89,9 +104,13 @@ jobs:
     -   uses: actions/checkout@v4
         with:
           fetch-depth: 0
-    -   uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
+    - uses: actions/setup-python@v5
+      with:
+        python-version-file: .python-version
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version-file: pyproject.toml
     -   name: Download coverage files
         uses: actions/download-artifact@v4
         with:
@@ -99,12 +118,11 @@ jobs:
           path: coverage_files
     -   name: Prepare coverage files
         run: |
-          pip install coverage
           cd coverage_files
-          coverage combine
+          uv run coverage combine
           mv .coverage ../.coverage
           cd ..
-          coverage xml
+          uv run coverage xml
     -   name: Upload to Coveralls
         uses: coverallsapp/github-action@v2
         with:

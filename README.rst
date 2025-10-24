@@ -415,16 +415,13 @@ error and raise a more specific exception if possible.
 
 Development Setup
 -----------------
-We recommend the usage of ``pyenv`` to install a proper 3.14 python version for development.
+This project uses `uv`.
+To setup a venv for development use
+`python3.14 -m venv venv && pip install uv && uv sync --all-groups --all-extras && rm -rf venv/`.
+Then use `source .venv/bin/activate` to activate your venv.
 
-* ``pyenv install 3.14``
-* ``python311 -m venv venv``
-* ``source venv/bin/activate``
-* ``pip install -U pip``
-* ``pip install -e .[dev,test,alembic]``
-
-To execute the tests, use ``pyenv``.
-The linters and formatters can be executed using ``pre-commit``: ``pre-commit run -a``.
+To execute the tests, use ``uv run pytest``.
+The linters and formatters can be executed using ``pre-commit``: ``uv run pre-commit run -a``.
 
 Testing
 -------
