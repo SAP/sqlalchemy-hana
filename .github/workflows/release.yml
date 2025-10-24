@@ -15,13 +15,13 @@ jobs:
     steps:
     -   name: Checkout repository
         uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version-file: .python-version
-    - name: Install uv
-      uses: astral-sh/setup-uv@v6
-      with:
-        version-file: pyproject.toml
+    -   uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+    -   name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version-file: pyproject.toml
     -   name: Install project
         run: uv sync --all-groups
     -   name: Create wheel
