@@ -474,17 +474,17 @@ wheels = [
 
 [[package]]
 name = "hdbcli"
-version = "2.26.18"
+version = "2.26.25"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/f6/324f4ef1380aa1309cf04283a06e78be9525bcfacc3bcd4801807eec7d5a/hdbcli-2.26.18-cp38-abi3-macosx_10_15_x86_64.whl", hash = "sha256:6ca8928d22b22b15c910abd52bf36cd04b9d0afda2d75e5e505b8aa006bffe26", size = 5546004, upload-time = "2025-09-16T17:57:26.954Z" },
-    { url = "https://files.pythonhosted.org/packages/74/c8/b2e3a6c25c727cd4547ea92a50a83fc0ac04e5b972e7ea5b8d708bc2eb6e/hdbcli-2.26.18-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:8438ea58c326cf844dd5ba41fb6bfae1b53dab7f92c7ba656b521a6b07c98d66", size = 5163360, upload-time = "2025-09-16T17:57:29.648Z" },
-    { url = "https://files.pythonhosted.org/packages/4f/3c/2f57cf8bc6e4a9d9b76ab3c54a99e4b09a9b1e5c95b5b5ae1b9def76ed50/hdbcli-2.26.18-cp38-abi3-manylinux2014_aarch64.whl", hash = "sha256:762b693584e49cb8e0baee52af4ed9181c9a99c3b5097e19ffdcd3d967e772fb", size = 5590835, upload-time = "2025-09-16T17:57:31.643Z" },
-    { url = "https://files.pythonhosted.org/packages/d1/8d/607c57f57526725b6bbb6dffcdf56737a2ea92a41207d77b43c0312282e1/hdbcli-2.26.18-cp38-abi3-manylinux2014_ppc64le.whl", hash = "sha256:1de3d06e4371f252280041629059a4633aca904aed9365330291dbb279bff5a6", size = 6013675, upload-time = "2025-09-16T17:57:33.323Z" },
-    { url = "https://files.pythonhosted.org/packages/0b/7e/4bb02270886939ec417fb005ea2d7d8d669dd5cbe2cab6523fae937acfca/hdbcli-2.26.18-cp38-abi3-manylinux2014_x86_64.whl", hash = "sha256:8c6f8b188d3bd0a51175b0ba4bca0279b0207ff8eeaf6730956da8d406511d43", size = 5866263, upload-time = "2025-09-16T17:57:34.965Z" },
-    { url = "https://files.pythonhosted.org/packages/9e/c3/6f89f54a0724c26921d1fbc7cdc8b848c9cd1cdfa360d418fea22b19b265/hdbcli-2.26.18-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:9099f19d5dc07670710b769305845974c4b8e717fe18bcc8c46898d16b2ed5e2", size = 5780159, upload-time = "2025-09-16T17:57:36.741Z" },
-    { url = "https://files.pythonhosted.org/packages/af/31/f2de9f1e130cc11e4be0e53afdcab6527b884dd025a04bab33684b6abf36/hdbcli-2.26.18-cp38-abi3-win32.whl", hash = "sha256:e095fbc5db7b1f500151fb3017f454131ed7b7a58d9a10cba43ea6b962733852", size = 3349603, upload-time = "2025-09-16T17:57:38.764Z" },
-    { url = "https://files.pythonhosted.org/packages/64/8c/7cf07819c5cd56db653c5680ae3592c18814f01e83acc08b026f8d2e2bab/hdbcli-2.26.18-cp38-abi3-win_amd64.whl", hash = "sha256:18380c823bee54d23fe2bb79c56cfd0a7b5a4b17493eb51f04be8be738510c08", size = 3612995, upload-time = "2025-09-16T17:57:40.931Z" },
+    { url = "https://files.pythonhosted.org/packages/90/5c/579693b953614ed2bdc01c94c56277aaf08cbf24d99abfd6933d4dc1eb36/hdbcli-2.26.25-cp38-abi3-macosx_10_15_x86_64.whl", hash = "sha256:c15a671c9330540444bd4c34dd2b87d9f95170ebb8cdd74c328e4c0367ffa7a2", size = 5549598, upload-time = "2025-10-31T19:24:56.886Z" },
+    { url = "https://files.pythonhosted.org/packages/de/ca/90d6fdfd83c49bd39c70e1f019b6cfffe54d37da87069146b2248a951ea4/hdbcli-2.26.25-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:c465139cf523708e89acb0812719b1061cd7c984c3f9340b45d1ff108373d485", size = 5167023, upload-time = "2025-10-31T19:24:59.745Z" },
+    { url = "https://files.pythonhosted.org/packages/61/47/f565e4104a4ad18ff6a830163da40381ee31ec1a8ce4b9e10a5b978c8bb0/hdbcli-2.26.25-cp38-abi3-manylinux2014_aarch64.whl", hash = "sha256:96bce90963992766da3bd3a0b7d35524b020bc400275fc9c63dc088948c03eb1", size = 5594953, upload-time = "2025-10-31T19:25:01.687Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/d5/5d63620c14ba589dda622b613f4a19a276f6db5f30dfcd3fbd3d875dd0de/hdbcli-2.26.25-cp38-abi3-manylinux2014_ppc64le.whl", hash = "sha256:94d820732bae94d870a2f49c2e8b1fff3473d255d0b42c1f6bd53caaa6f0faaa", size = 6018597, upload-time = "2025-10-31T19:25:03.566Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/bb/8d319d5539c912615869629ff86e00a782712446ce12560d8adc64a874ce/hdbcli-2.26.25-cp38-abi3-manylinux2014_x86_64.whl", hash = "sha256:0fd25d3ae408c14413c51a52751e6946eb2a1963045e8e14dabde27266a17779", size = 5873023, upload-time = "2025-10-31T19:25:05.988Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/8f/f1e5f76b3f8c0c7ab5f07bb3cd0cbc0129aeecbf5b86aa0400a98abe440c/hdbcli-2.26.25-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:c40088be658d22c9f26fd0ab6c5eb1c715afd8d75a968e978bf251d5c89470f4", size = 5783883, upload-time = "2025-10-31T19:25:07.954Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/1b/0758e08f23e3277370336ade7724aaf2b029e0379b3c6d00927844cd591d/hdbcli-2.26.25-cp38-abi3-win32.whl", hash = "sha256:39273c712f325b204c46145a45d447d19fba2a1e4b13d3717f1f53fc30721a54", size = 3351773, upload-time = "2025-10-31T19:25:09.751Z" },
+    { url = "https://files.pythonhosted.org/packages/81/4f/0e3f7a2eadc7ff616f2c5b21e6a7f44989ba2e49ebe057a807a1946287fc/hdbcli-2.26.25-cp38-abi3-win_amd64.whl", hash = "sha256:84ebea96b2883b6a566306a2bf1b92bf4ca6a822f6330c50be9ab882f2b0f899", size = 3615128, upload-time = "2025-10-31T19:25:11.681Z" },
 ]
 
 [[package]]
