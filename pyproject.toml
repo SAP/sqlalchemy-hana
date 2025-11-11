@@ -66,7 +66,7 @@ alembic = [
 ]
 dev = [
     "isort==7.0.0",
-    "black==25.9.0",
+    "black==25.11.0",
     "pre-commit==4.3.0",
     "flake8==7.3.0",
     "flake8-tergeo==25.10.9.0",
