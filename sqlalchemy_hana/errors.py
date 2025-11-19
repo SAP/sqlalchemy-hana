@@ -157,6 +157,8 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         }
         # ERR_URS_INSTANCE_NOT_AVAILABLE: HANA Database service is not available
         or error.errorcode == 1888
+        # HANA is current starting
+        or "TransactionManager is not yet fully initialized" in error.errortext
     ):
         return DatabaseConnectNotPossibleError.from_dbapi_error(dbapi_error)
     if (

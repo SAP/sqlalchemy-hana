@@ -1,6 +1,14 @@
 Changelog
 =========
 
+4.1.0
+-----
+
+Features
+~~~~~~~~
+
+- Handle ``TransactionManager is not yet fully initialized`` as ``DatabaseConnectNotPossibleError``
+
 4.0.0
 -----
 

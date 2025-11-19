@@ -66,6 +66,11 @@ class TestConvertDBAPIError(TestBase):
                 DatabaseConnectNotPossibleError,
             ),
             (
+                2,
+                "general error: TransactionManager is not yet fully initialized",
+                DatabaseConnectNotPossibleError,
+            ),
+            (
                 129,
                 "An error occurred while opening the channel",
                 StatementExecutionError,
