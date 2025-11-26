@@ -96,6 +96,10 @@ class SessionContextError(HANAConnectionError):
     """Error when there is a problem with the session context."""
 
 
+class NumberOfTransactionsExceededError(HANAError):
+    """Exception raised when the number of allowed transactions is exceeded."""
+
+
 def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
     """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and returns a more specific error if possible.
 
@@ -179,6 +183,12 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         return WriteInReadOnlyReplicationError.from_dbapi_error(dbapi_error)
     if error.errorcode == 597:
         return SessionContextError.from_dbapi_error(dbapi_error)
+    # 128 -> ERR_TX: Transaction error
+    if (
+        error.errorcode == 128
+        and "exceed maximum number of transactions" in error.errortext
+    ):
+        return NumberOfTransactionsExceededError.from_dbapi_error(dbapi_error)
     return dbapi_error
 
 
@@ -193,6 +203,7 @@ __all__ = (
     "InvalidObjectNameError",
     "LockAcquisitionError",
     "LockWaitTimeoutError",
+    "NumberOfTransactionsExceededError",
     "SequenceCacheTimeoutError",
     "SequenceLockTimeoutError",
     "SessionContextError",
