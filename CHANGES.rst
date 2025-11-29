@@ -1,6 +1,11 @@
 Changelog
 =========
 
+4.2.0
+-----
+
+- Added ``NumberOfTransactionsExceededError`` to ``sqlalchemy_hana.errors``
+
 4.1.0
 -----
 

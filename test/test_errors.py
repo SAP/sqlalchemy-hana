@@ -16,6 +16,7 @@ from sqlalchemy_hana.errors import (
     InvalidObjectNameError,
     LockAcquisitionError,
     LockWaitTimeoutError,
+    NumberOfTransactionsExceededError,
     SequenceCacheTimeoutError,
     SequenceLockTimeoutError,
     SessionContextError,
@@ -97,6 +98,11 @@ class TestConvertDBAPIError(TestBase):
                 597,
                 "session context error: failed remote communication",
                 SessionContextError,
+            ),
+            (
+                128,
+                "transaction error: exceed maximum number of transactions",
+                NumberOfTransactionsExceededError,
             ),
         ],
     )
