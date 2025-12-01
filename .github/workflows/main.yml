@@ -76,14 +76,11 @@ jobs:
         run: uv pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
     -   name: run tests (with coverage)
         run: |
-          PYTEST_DBURI=$(uv run python -m test.ci_setup setup ${{ secrets.TEST_DBURI }})
+          PYTEST_DBURI=$(uv run --no-sync python -m test.ci_setup setup ${{ secrets.TEST_DBURI }})
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI"
-          uv run pytest -v --cov sqlalchemy_hana --cov test --cov-report xml test/
-          uv run python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
-    -   name: run diff-cover
-        if: ${{ matrix.sqlalchemy-version == '2.0.*' }}
-        run: uv run diff-cover --config-file pyproject.toml coverage.xml
+          uv run --no-sync pytest -v --cov sqlalchemy_hana --cov test --cov-report xml --cov-fail-under 0 test/
+          uv run --no-sync python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
     -   name: Rename coverage file
         run: |
           UUID=$(uuidgen)
@@ -124,6 +121,8 @@ jobs:
           mv .coverage ../.coverage
           cd ..
           uv run coverage xml
+    -   name: run diff-cover
+        run: uv run diff-cover --config-file pyproject.toml coverage.xml
     -   name: Upload to Coveralls
         uses: coverallsapp/github-action@v2
         with:
