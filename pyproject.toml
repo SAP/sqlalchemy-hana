@@ -46,7 +46,7 @@ maintainers = [
 name = "sqlalchemy-hana"
 readme = "README.rst"
 requires-python = "~=3.10"
-version = "4.1.0"
+version = "4.2.0"
 
 [project.optional-dependencies]
 alembic = ["alembic~=1.12"]
