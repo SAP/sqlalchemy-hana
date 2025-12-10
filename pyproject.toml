@@ -76,7 +76,7 @@ dev = [
     "typing-extensions==4.15.0",
     "yesqa==1.5.0",
     "pyupgrade==3.21.2",
-    "pylint-per-file-ignores==3.1.0",
+    "pylint-per-file-ignores==3.2.0",
     "toml-sort==0.24.3",
     "uv==0.9.16",
 ]
