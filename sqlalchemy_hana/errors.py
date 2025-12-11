@@ -100,6 +100,10 @@ class NumberOfTransactionsExceededError(HANAError):
     """Exception raised when the number of allowed transactions is exceeded."""
 
 
+class DistributedTransactionCommitFailureError(StatementExecutionError):
+    """Exception raised when a distributed transaction commit fails."""
+
+
 def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
     """Takes a :py:exc:`sqlalchemy.exc.DBAPIError` and returns a more specific error if possible.
 
@@ -189,6 +193,9 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         and "exceed maximum number of transactions" in error.errortext
     ):
         return NumberOfTransactionsExceededError.from_dbapi_error(dbapi_error)
+    # 149 -> ERR_TX_DIST_2PC_FAILURE
+    if error.errorcode == 149:
+        return DistributedTransactionCommitFailureError.from_dbapi_error(dbapi_error)
     return dbapi_error
 
 

@@ -5,6 +5,7 @@ Changelog
 -----
 
 - Added ``NumberOfTransactionsExceededError`` to ``sqlalchemy_hana.errors``
+- Added ``DistributedTransactionCommitFailureError`` to ``sqlalchemy_hana.errors``
 
 4.1.0
 -----
