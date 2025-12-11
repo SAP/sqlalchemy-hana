@@ -13,6 +13,7 @@ from sqlalchemy_hana.errors import (
     DatabaseOutOfMemoryError,
     DatabaseOverloadedError,
     DeadlockError,
+    DistributedTransactionCommitFailureError,
     InvalidObjectNameError,
     LockAcquisitionError,
     LockWaitTimeoutError,
@@ -104,6 +105,7 @@ class TestConvertDBAPIError(TestBase):
                 "transaction error: exceed maximum number of transactions",
                 NumberOfTransactionsExceededError,
             ),
+            (149, "something", DistributedTransactionCommitFailureError),
         ],
     )
     def test_convert_dbapi_error(
@@ -127,4 +129,5 @@ class TestConvertDBAPIError(TestBase):
     def test_convert_dbapi_error_no_wrap(self, errorcode: int, errortext: str) -> None:
         error = HdbcliError(errorcode, errortext)
         dbapi_error = DBAPIError(None, None, error)
+        assert convert_dbapi_error(dbapi_error) is dbapi_error
         assert convert_dbapi_error(dbapi_error) is dbapi_error
