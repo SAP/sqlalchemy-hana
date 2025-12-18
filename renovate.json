@@ -1,6 +1,65 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "enabledManagers": [
+        "pep621",
+        "pre-commit",
+        "github-actions"
+    ],
+    "extends": [
+        "config:recommended",
+        ":disableDependencyDashboard",
+        ":semanticCommitsDisabled",
+        ":enablePreCommit"
+    ],
+    "lockFileMaintenance": {
+        "enabled": true,
+        "automerge": true
+    },
+    "prConcurrentLimit": 5,
+    "prHourlyLimit": 2,
+    "packageRules": [
+        {
+            "enabled": false,
+            "matchPackageNames": [
+                "Python"
+            ]
+        },
+        {
+            "description": "Use widen range for install dependencies to allow compatibility updates",
+            "matchDepTypes": [
+                "project.dependencies"
+            ],
+            "matchManagers": [
+                "pep621"
+            ],
+            "rangeStrategy": "widen",
+            "automerge": false
+        },
+        {
+            "description": "Use pin range for internal dependencies",
+            "matchDepTypes": [
+                "dependency-groups"
+            ],
+            "matchManagers": [
+                "pep621"
+            ],
+            "rangeStrategy": "pin",
+            "automerge": true
+        },
+        {
+            "description": "Auto-merge pre-commit/github-actions updates",
+            "matchManagers": [
+                "pre-commit",
+                "github-actions"
+            ],
+            "automerge": true
+        },
+        {
+            "description": "Don't merge major updates automatically",
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "automerge": false
+        }
+    ]
 }
