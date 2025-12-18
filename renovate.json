@@ -27,7 +27,8 @@
         {
             "description": "Use widen range for install dependencies to allow compatibility updates",
             "matchDepTypes": [
-                "project.dependencies"
+                "project.dependencies",
+                "project.optional-dependencies"
             ],
             "matchManagers": [
                 "pep621"
