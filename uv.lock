@@ -1087,9 +1087,6 @@ alembic = [
 ]
 
 [package.dev-dependencies]
-alembic = [
-    { name = "alembic" },
-]
 dev = [
     { name = "black" },
     { name = "flake8" },
@@ -1123,7 +1120,6 @@ requires-dist = [
 provides-extras = ["alembic"]
 
 [package.metadata.requires-dev]
-alembic = [{ name = "alembic", specifier = "~=1.12" }]
 dev = [
     { name = "black", specifier = "==25.12.0" },
     { name = "flake8", specifier = "==7.3.0" },
