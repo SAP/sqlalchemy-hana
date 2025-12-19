@@ -62,7 +62,7 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 
 [dependency-groups]
 alembic = [
-    "alembic~=1.12",
+    "alembic==1.17.2",
 ]
 dev = [
     "isort==7.0.0",
