@@ -61,9 +61,6 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 "hana.hdbcli" = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 
 [dependency-groups]
-alembic = [
-    "alembic~=1.12",
-]
 dev = [
     "isort==7.0.0",
     "black==25.12.0",
