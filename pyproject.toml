@@ -205,6 +205,7 @@ filterwarnings = [
 log_level = "DEBUG"
 markers = [
     "backend: used by sqlalchemy",
+    "sparse_driver_backend: used by sqlalchemy", # TODO: Remove when part of sqlalchemy config
     "mypy: used by sqlalchemy",
 ]
 xfail_strict = true
