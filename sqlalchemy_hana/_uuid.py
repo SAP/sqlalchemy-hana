@@ -22,7 +22,7 @@ class Uuid(sqltypes.Uuid[_RET]):
         native_uuid: bool = True,
         as_varbinary: bool = False,
     ) -> None:
-        super().__init__(as_uuid, native_uuid)  # type:ignore[call-overload,misc]
+        super().__init__(as_uuid, native_uuid)  # type: ignore[call-overload,misc]
         self.as_varbinary = as_varbinary
 
     @override

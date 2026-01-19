@@ -91,11 +91,11 @@ class BIGINT(sqltypes.BIGINT):
     """SAP HANA BIGINT type."""
 
 
-class DECIMAL(sqltypes.DECIMAL):  # type:ignore[type-arg]
+class DECIMAL(sqltypes.DECIMAL):  # type: ignore[type-arg]
     """SAP HANA DECIMAL type."""
 
 
-class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
+class SMALLDECIMAL(sqltypes.Numeric):  # type: ignore[type-arg]
     """SAP HANA SMALLDECIMAL type."""
 
     __visit_name__ = "SMALLDECIMAL"
@@ -114,15 +114,15 @@ class SMALLDECIMAL(sqltypes.Numeric):  # type:ignore[type-arg]
         )
 
 
-class REAL(sqltypes.REAL):  # type:ignore[type-arg]
+class REAL(sqltypes.REAL):  # type: ignore[type-arg]
     """SAP HANA REAL type."""
 
 
-class DOUBLE(sqltypes.DOUBLE):  # type:ignore[type-arg]
+class DOUBLE(sqltypes.DOUBLE):  # type: ignore[type-arg]
     """SAP HANA DOUBLE type."""
 
 
-class FLOAT(sqltypes.FLOAT):  # type:ignore[type-arg]
+class FLOAT(sqltypes.FLOAT):  # type: ignore[type-arg]
     """SAP HANA Float type."""
 
 

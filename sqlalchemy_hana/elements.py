@@ -40,13 +40,13 @@ def view(name: str, selectable: AnySelect) -> TableClause:
     iter_ = []
     for col in selectable.selected_columns:
         try:
-            iter_.append(col._make_proxy(clause))  # type:ignore[call-arg]
+            iter_.append(col._make_proxy(clause))  # type: ignore[call-arg]
         except TypeError:
             iter_.append(
                 col._make_proxy(
                     clause,
-                    clause.primary_key,  # type:ignore[arg-type,misc]
-                    clause.foreign_keys,  # type:ignore[arg-type]
+                    clause.primary_key,  # type: ignore[arg-type,misc]
+                    clause.foreign_keys,  # type: ignore[arg-type]
                 )
             )
     clause._columns._populate_separate_keys(iter_)

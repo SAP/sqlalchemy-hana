@@ -167,7 +167,7 @@ class HANAIdentifierPreparer(compiler.IdentifierPreparer):
 
 class HANAStatementCompiler(compiler.SQLCompiler):
     @override
-    def visit_bindparam(  # type:ignore[override] # pylint: disable=arguments-differ
+    def visit_bindparam(  # type: ignore[override] # pylint: disable=arguments-differ
         self, bindparam: BindParameter[Any], **kw: Any
     ) -> Any:
         # SAP HANA supports bindparameters within the columns clause of SELECT statements
@@ -451,7 +451,7 @@ class HANADDLCompiler(compiler.DDLCompiler):
         result = super().visit_create_table(create)
 
         if appended_index is not None:
-            table._prefixes.pop(appended_index)  # type:ignore[attr-defined]
+            table._prefixes.pop(appended_index)  # type: ignore[attr-defined]
 
         return result
 
@@ -602,7 +602,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     @classmethod
     @override
     def import_dbapi(cls) -> ModuleType:
-        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type:ignore[assignment,misc]
+        hdbcli.dbapi.paramstyle = cls.default_paramstyle  # type: ignore[assignment,misc]
         return hdbcli.dbapi
 
     @override
@@ -688,7 +688,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                 cursor.execute(f"SET TRANSACTION ISOLATION LEVEL {level}")
 
     @override
-    def get_isolation_level(  # type:ignore[override]
+    def get_isolation_level(  # type: ignore[override]
         self, dbapi_connection: hdbcli.dbapi.Connection
     ) -> str:
         with closing(dbapi_connection.cursor()) as cursor:
@@ -700,7 +700,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
 
     @override
     def _get_server_version_info(self, connection: Connection) -> tuple[int, ...]:
-        result: str = connection.execute(  # type:ignore[assignment]
+        result: str = connection.execute(  # type: ignore[assignment]
             sql.text("SELECT VERSION FROM SYS.M_DATABASE")
         ).scalar()
         return tuple(int(i) for i in result.split("."))
@@ -727,7 +727,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     # as handling None values everywhere is cumbersome, we keep it simple
     def normalize_name(self, name: str | None) -> str:
         if name is None:
-            return None  # type:ignore[return-value]
+            return None  # type: ignore[return-value]
 
         if name.upper() == name and not self.identifier_preparer._requires_quotes(
             name.lower()
@@ -742,7 +742,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
     # see normalize_name
     def denormalize_name(self, name: str | None) -> str:
         if name is None:
-            return None  # type:ignore[return-value]
+            return None  # type: ignore[return-value]
 
         if name.lower() == name and not self.identifier_preparer._requires_quotes(
             name.lower()
@@ -1190,7 +1190,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
                         constraint_name
                     )
                 constraints.append(constraint)
-            constraint["column_names"].append(  # type:ignore[possibly-undefined]
+            constraint["column_names"].append(  # type: ignore[possibly-undefined]
                 self.normalize_name(column_name)
             )
 
@@ -1236,7 +1236,7 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             check_conditions,
             # technical constraints comes first
             key=lambda constraint: (
-                not constraint["name"].startswith("_SYS_"),  # type:ignore[union-attr]
+                not constraint["name"].startswith("_SYS_"),  # type: ignore[union-attr]
                 constraint["name"],
             ),
         )
