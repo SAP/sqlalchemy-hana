@@ -57,6 +57,11 @@ jobs:
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         sqlalchemy-version: [2.0.*]
+        async-mode: [non-async]
+        include:
+        -   python-version: '3.14'
+            sqlalchemy-version: 2.0.*
+            async-mode: async
     runs-on: ubuntu-latest
     steps:
     -   uses: actions/checkout@v6
@@ -76,7 +81,7 @@ jobs:
         run: uv pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
     -   name: run tests (with coverage)
         run: |
-          PYTEST_DBURI=$(uv run --no-sync python -m test.ci_setup setup ${{ secrets.TEST_DBURI }})
+          PYTEST_DBURI=$(uv run --no-sync python -m test.ci_setup setup ${{ secrets.TEST_DBURI }} ${{ matrix.async-mode }})
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI"
           uv run --no-sync pytest -v --cov sqlalchemy_hana --cov test --cov-report xml --cov-fail-under 0 test/
