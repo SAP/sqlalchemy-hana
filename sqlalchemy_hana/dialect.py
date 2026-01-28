@@ -15,6 +15,7 @@ from sqlalchemy import (
     Computed,
     Identity,
     Integer,
+    Pool,
     PrimaryKeyConstraint,
     Sequence,
     exc,
@@ -22,7 +23,12 @@ from sqlalchemy import (
     types,
     util,
 )
+from sqlalchemy.connectors.asyncio import (
+    AsyncAdapt_dbapi_connection,
+    AsyncAdapt_dbapi_cursor,
+)
 from sqlalchemy.engine import Connection, default, reflection
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlalchemy.schema import CreateColumn
 from sqlalchemy.sql import Select, compiler, functions, sqltypes
 from sqlalchemy.sql.ddl import _DropView as BaseDropView
@@ -1298,3 +1304,54 @@ class HANAHDBCLIDialect(default.DefaultDialect):
             # does no longer exist
             return
         super().do_rollback_to_savepoint(connection, name)
+
+
+class AsyncCursor(AsyncAdapt_dbapi_cursor):
+    """Async adapted cursor for SAP HANA."""
+
+
+class AsyncConnection(AsyncAdapt_dbapi_connection):
+    """Async adapted connection for SAP HANA."""
+
+    _cursor_cls = AsyncCursor
+
+
+class async_dbapi:
+    """Async adapted dbapi wrapper for SAP HANA."""
+
+    def __init__(self, dbapi: ModuleType) -> None:
+        for attr in dir(dbapi):
+            setattr(self, attr, getattr(dbapi, attr))
+
+        self.Connection = dbapi.AsyncConnection
+        self.LOB = dbapi.AsyncLob
+        self.connect = dbapi.async_connect
+        self.Cursor = dbapi.AsyncCursor
+
+
+class AsyncHANAHDBCLIDialect(HANAHDBCLIDialect):
+    """Async adapted dialect for SAP HANA."""
+
+    driver = "aiohdbcli"
+    is_async = True
+    supports_statement_cache = True
+
+    @classmethod
+    @override
+    def import_dbapi(cls) -> ModuleType:
+        dbapi = super().import_dbapi()
+        return async_dbapi(dbapi)
+
+    @classmethod
+    @override
+    def get_pool_class(cls, url: URL) -> type[Pool]:
+        return AsyncAdaptedQueuePool
+
+    @override
+    def connect(self, *args: Any, **kw: Any) -> DBAPIConnection:
+        conn = AsyncConnection(
+            self,
+            util.await_only(self.loaded_dbapi.connect(*args, **kw)),
+        )
+        conn._connection.setautocommit(False)
+        return conn

@@ -59,6 +59,8 @@ Repository = "https://github.com/SAP/sqlalchemy-hana"
 [project.entry-points."sqlalchemy.dialects"]
 hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 "hana.hdbcli" = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
+"hana.aiohdbcli" = "sqlalchemy_hana.dialect:AsyncHANAHDBCLIDialect"
+
 
 [dependency-groups]
 dev = [

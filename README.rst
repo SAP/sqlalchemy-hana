@@ -382,6 +382,13 @@ an auto-increment behavior, as followed:
 Note, that on SAP HANA side, the column and the sequence are not linked, meaning that the sequence
 can be e.g. be incremented w/o an actual insert into the table.
 
+asyncio support
+---------------
+asyncio is supported via the
+`SQLAlchemy asyncio extension <https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html>`_.
+For this, use the ``hana+aiohdbcli`` dialect name.
+The support is still in preview mode, therefore some features might not work as expected.
+
 Alembic
 -------
 The sqlalchemy-hana dialect also contains a dialect for ``alembic``.

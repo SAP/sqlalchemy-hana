@@ -1,8 +1,19 @@
 Changelog
 =========
 
+4.3.0
+-----
+
+Features
+~~~~~~~~
+
+- Beta release of asyncio support
+
 4.2.0
 -----
+
+Features
+~~~~~~~~
 
 - Added ``NumberOfTransactionsExceededError`` to ``sqlalchemy_hana.errors``
 - Added ``DistributedTransactionCommitFailureError`` to ``sqlalchemy_hana.errors``
