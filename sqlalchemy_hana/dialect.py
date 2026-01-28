@@ -1315,6 +1315,9 @@ class AsyncConnection(AsyncAdapt_dbapi_connection):
 
     _cursor_cls = AsyncCursor
 
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._connection, name)
+
 
 class async_dbapi:
     """Async adapted dbapi wrapper for SAP HANA."""
