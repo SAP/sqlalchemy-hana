@@ -1323,6 +1323,7 @@ class async_dbapi:
         for attr in dir(dbapi):
             setattr(self, attr, getattr(dbapi, attr))
 
+        # pylint: disable=invalid-name
         self.Connection = dbapi.AsyncConnection
         self.LOB = dbapi.AsyncLob
         self.connect = dbapi.async_connect
@@ -1340,7 +1341,7 @@ class AsyncHANAHDBCLIDialect(HANAHDBCLIDialect):
     @override
     def import_dbapi(cls) -> ModuleType:
         dbapi = super().import_dbapi()
-        return async_dbapi(dbapi)
+        return async_dbapi(dbapi)  # type: ignore[return-value]
 
     @classmethod
     @override
@@ -1354,4 +1355,4 @@ class AsyncHANAHDBCLIDialect(HANAHDBCLIDialect):
             util.await_only(self.loaded_dbapi.connect(*args, **kw)),
         )
         conn._connection.setautocommit(False)
-        return conn
+        return conn  # type: ignore[return-value]
