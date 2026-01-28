@@ -4,7 +4,7 @@ SPDX-PackageName = "sqlalchemy-hana"
 version = 1
 
 [[annotations]]
-SPDX-FileCopyrightText = "2015-2025 SAP SE or an SAP affiliate company and sqlalchemy-hana contributors"
+SPDX-FileCopyrightText = "2015-2026 SAP SE or an SAP affiliate company and sqlalchemy-hana contributors"
 SPDX-License-Identifier = "Apache-2.0"
 path = "**"
 precedence = "aggregate"

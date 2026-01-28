@@ -458,7 +458,7 @@ By participating in this project, you agree to abide by its
 
 Licensing
 ---------
-Copyright 2025 SAP SE or an SAP affiliate company and sqlalchemy-hana contributors.
+Copyright 2026 SAP SE or an SAP affiliate company and sqlalchemy-hana contributors.
 Please see our `LICENSE <https://github.com/SAP/sqlalchemy-hana/blob/main/LICENSE>`_
 for copyright and license information.
 Detailed information including third-party components and their licensing/copyright information
