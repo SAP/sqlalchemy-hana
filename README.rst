@@ -387,7 +387,7 @@ asyncio support
 asyncio is supported via the
 `SQLAlchemy asyncio extension <https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html>`_.
 For this, use the ``hana+aiohdbcli`` dialect name.
-The support is still in preview mode, therefore some features might not work as expected.
+The support is still experimental, therefore some features might not work as expected.
 
 Alembic
 -------

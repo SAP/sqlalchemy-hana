@@ -7,7 +7,7 @@ Changelog
 Features
 ~~~~~~~~
 
-- Beta release of asyncio support
+- Release of experimental asyncio support
 
 4.2.0
 -----
