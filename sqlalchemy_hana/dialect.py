@@ -1316,6 +1316,7 @@ class AsyncConnection(AsyncAdapt_dbapi_connection):
     _cursor_cls = AsyncCursor
 
     def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the underlying synchronous connection."""
         return getattr(self._connection, name)
 
 
