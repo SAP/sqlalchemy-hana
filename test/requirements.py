@@ -338,3 +338,7 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def temp_table_comment_reflection(self) -> compound:
         return exclusions.open()
+
+    @property
+    def asyncio_support(self) -> compound:
+        return exclusions.open()

@@ -20,7 +20,7 @@ def random_string(length: int) -> str:
     )
 
 
-def setup(dburi: str) -> str:
+def setup(dburi: str, is_async: bool) -> str:
     url = urlsplit(dburi)
     user = f"PYTEST_{random_string(10)}"
     # always fulfill the password policy
@@ -37,7 +37,8 @@ def setup(dburi: str) -> str:
         )
         cursor.execute(f"GRANT CREATE SCHEMA TO {user}")
 
-    return f"hana://{user}:{password}@{url.hostname}:{url.port}"
+    schema = "hana+aiohdbcli" if is_async else "hana"
+    return f"{schema}://{user}:{password}@{url.hostname}:{url.port}"
 
 
 def teardown(dburi: str, test_dburi: str) -> None:
@@ -55,7 +56,8 @@ def teardown(dburi: str, test_dburi: str) -> None:
 
 if __name__ == "__main__":
     if sys.argv[1] == "setup":
-        print(setup(sys.argv[2]))  # noqa: FTP050
+        is_async = sys.argv[3] == "async"
+        print(setup(sys.argv[2], is_async))  # noqa: FTP050
     elif sys.argv[1] == "teardown":
         teardown(sys.argv[2], sys.argv[3])
     else:
