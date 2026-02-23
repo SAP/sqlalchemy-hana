@@ -30,4 +30,7 @@ ftp-pytest-parametrize-names-type = csv
 ftp-distribution-name = sqlalchemy-hana
 ftp-requirements-packages = test,sqlalchemy_hana
 ftp-requirements-ignore-type-checking-block = true
+ftp-requirements-module-extra-mapping =
+    test | *,
+    sqlalchemy_hana.alembic | alembic,
 ftp-pyproject-toml-file = pyproject.toml

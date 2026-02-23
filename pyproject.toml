@@ -28,6 +28,7 @@ classifiers = [
 dependencies = [
     "sqlalchemy>=2,<3",
     "hdbcli~=2.10",
+    "typing_extensions~=4.15",
 ]
 description = "SQLAlchemy dialect for SAP HANA"
 keywords = [
@@ -67,7 +68,7 @@ dev = [
     "black==26.1.0",
     "pre-commit==4.5.1",
     "flake8==7.3.0",
-    "flake8-tergeo==26.1.28.0",
+    "flake8-tergeo==26.2.20.0",
     "pylint==4.0.5",
     "mypy==1.19.1",
     "types-hdbcli==2.25.0.20250915",

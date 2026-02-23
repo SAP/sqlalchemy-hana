@@ -402,7 +402,7 @@ wheels = [
 
 [[package]]
 name = "flake8-tergeo"
-version = "26.1.28.0"
+version = "26.2.20.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dependency-groups" },
@@ -417,9 +417,9 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/12/ff/718aebb5553d87d104e024212d6eccb80b3b95e9dab90976a8b1b80835b8/flake8_tergeo-26.1.28.0.tar.gz", hash = "sha256:c00f8bb4e7c830f1631475e060a9fa2d6f91a6dd88fa2ca5485b59422e09826a", size = 51812, upload-time = "2026-01-28T09:38:53.014Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/cf/3524803a727e4a038c64187cd36a42f2f0068160f8f5c5429aaef330e127/flake8_tergeo-26.2.20.0.tar.gz", hash = "sha256:8943272c1b4f499ebd5afefc69f271e01bfb3a43190dc8777f6db61ea54df7d7", size = 181597, upload-time = "2026-02-20T14:30:16.499Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/16/c2bc429b3bd5b228614d2842339331baa63e1d437924a8d45de4cdd0983f/flake8_tergeo-26.1.28.0-py3-none-any.whl", hash = "sha256:140cfa4bb77ed977208865a0fc5dca632bac20825a78b3f1b7c9a5bf91b9b3c8", size = 59299, upload-time = "2026-01-28T09:38:51.928Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/8d/afa2245ebb8dd1c1288c4888480800595826515545ee7350bd4aa970cb26/flake8_tergeo-26.2.20.0-py3-none-any.whl", hash = "sha256:0d2184d3a42166e788e68865592a62f69bba565a81f5e6ebf67860a040e6322a", size = 59305, upload-time = "2026-02-20T14:30:14.878Z" },
 ]
 
 [[package]]
@@ -1129,6 +1129,7 @@ source = { editable = "." }
 dependencies = [
     { name = "hdbcli" },
     { name = "sqlalchemy" },
+    { name = "typing-extensions" },
 ]
 
 [package.optional-dependencies]
@@ -1166,6 +1167,7 @@ requires-dist = [
     { name = "alembic", marker = "extra == 'alembic'", specifier = "~=1.12" },
     { name = "hdbcli", specifier = "~=2.10" },
     { name = "sqlalchemy", specifier = ">=2,<3" },
+    { name = "typing-extensions", specifier = "~=4.15" },
 ]
 provides-extras = ["alembic"]
 
@@ -1173,7 +1175,7 @@ provides-extras = ["alembic"]
 dev = [
     { name = "black", specifier = "==26.1.0" },
     { name = "flake8", specifier = "==7.3.0" },
-    { name = "flake8-tergeo", specifier = "==26.1.28.0" },
+    { name = "flake8-tergeo", specifier = "==26.2.20.0" },
     { name = "isort", specifier = "==8.0.0" },
     { name = "mypy", specifier = "==1.19.1" },
     { name = "pre-commit", specifier = "==4.5.1" },

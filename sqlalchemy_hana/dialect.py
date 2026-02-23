@@ -74,7 +74,7 @@ if TYPE_CHECKING:
 
 with contextlib.suppress(ImportError):
     # pylint: disable=unused-import
-    import alembic  # noqa: F401
+    import alembic  # noqa: F401, FTP041
 
     import sqlalchemy_hana.alembic  # noqa: F401
 
