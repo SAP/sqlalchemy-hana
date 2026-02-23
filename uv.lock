@@ -1129,6 +1129,7 @@ source = { editable = "." }
 dependencies = [
     { name = "hdbcli" },
     { name = "sqlalchemy" },
+    { name = "typing-extensions" },
 ]
 
 [package.optional-dependencies]
@@ -1166,6 +1167,7 @@ requires-dist = [
     { name = "alembic", marker = "extra == 'alembic'", specifier = "~=1.12" },
     { name = "hdbcli", specifier = "~=2.10" },
     { name = "sqlalchemy", specifier = ">=2,<3" },
+    { name = "typing-extensions", specifier = "~=4.15" },
 ]
 provides-extras = ["alembic"]
 

@@ -28,6 +28,7 @@ classifiers = [
 dependencies = [
     "sqlalchemy>=2,<3",
     "hdbcli~=2.10",
+    "typing_extensions~=4.15",
 ]
 description = "SQLAlchemy dialect for SAP HANA"
 keywords = [
