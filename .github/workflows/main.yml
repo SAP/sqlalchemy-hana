@@ -101,8 +101,14 @@ jobs:
   ci-coverage-reporting:
     needs: ci-test
     runs-on: ubuntu-latest
-    if: success()
+    if: always()
     steps:
+    -   name: Fail if predecessor jobs failed
+        if: ${{ needs.ci-test.result != 'success' }}
+        run: |
+          echo "Predecessor job(s) failed:"
+          echo "  ci-test: ${{ needs.ci-test.result }}"
+          exit 1
     -   uses: actions/checkout@v6
         with:
           fetch-depth: 0
