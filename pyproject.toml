@@ -64,7 +64,7 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 
 [dependency-groups]
 dev = [
-    "isort==8.0.0",
+    "isort==8.0.1",
     "black==26.1.0",
     "pre-commit==4.5.1",
     "flake8==7.3.0",
