@@ -48,6 +48,7 @@ repos:
         language: system
         types: [toml]
         args: [--in-place]
+        exclude: ^uv.lock$
     -   id: uv-lock
         name: uv-lock
         entry: uv lock
