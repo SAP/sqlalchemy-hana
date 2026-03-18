@@ -166,6 +166,7 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         in {
             "HANA Cloud region is in maintenance window",
             "HANA Database instance upgrade in progress",
+            "HANA Database instance resize in progress",
         }
         # ERR_URS_INSTANCE_NOT_AVAILABLE: HANA Database service is not available
         or error.errorcode == 1888
