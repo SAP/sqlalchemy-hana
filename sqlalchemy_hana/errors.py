@@ -117,7 +117,11 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
     if not isinstance(error, HdbcliError):
         return dbapi_error
 
-    if error.errorcode in [-10807, -10709]:  # sqldbc error codes for connection errors
+    if error.errorcode in [
+        -10807,  # SQLDBC_ERR_CONNECTION_DOWN
+        -10709,  # SQLDBC_ERR_CONNECTFAILED_INTERNAL
+        -10735,  # SQLDBC_ERR_WRONG_REPLICATION_ROLE
+    ]:
         return ClientConnectionError.from_dbapi_error(dbapi_error)
     if error.errorcode == 613:
         return StatementTimeoutError.from_dbapi_error(dbapi_error)
