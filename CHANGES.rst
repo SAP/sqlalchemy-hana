@@ -1,6 +1,13 @@
 Changelog
 =========
 
+4.4.0
+-----
+
+Features
+~~~~~~~~
+- Handle error code ``-10735`` as ``ClientConnectionError``
+
 4.3.0
 -----
 
