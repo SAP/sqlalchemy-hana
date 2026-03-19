@@ -192,11 +192,7 @@ def convert_dbapi_error(dbapi_error: DBAPIError) -> DBAPIError:
         return WriteInReadOnlyReplicationError.from_dbapi_error(dbapi_error)
     if error.errorcode == 597:
         return SessionContextError.from_dbapi_error(dbapi_error)
-    # 128 -> ERR_TX: Transaction error
-    if (
-        error.errorcode == 128
-        and "exceed maximum number of transactions" in error.errortext
-    ):
+    if "exceed maximum number of transactions" in error.errortext:
         return NumberOfTransactionsExceededError.from_dbapi_error(dbapi_error)
     # 149 -> ERR_TX_DIST_2PC_FAILURE
     if error.errorcode == 149:

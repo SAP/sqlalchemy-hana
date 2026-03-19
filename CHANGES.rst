@@ -8,6 +8,7 @@ Features
 ~~~~~~~~
 - Handle error code ``-10735`` as ``ClientConnectionError``
 - Handle ``HANA Database instance resize in progress`` as ``DatabaseConnectNotPossibleError``
+- Remove error code restriction from ``NumberOfTransactionsExceededError``
 
 4.3.0
 -----
