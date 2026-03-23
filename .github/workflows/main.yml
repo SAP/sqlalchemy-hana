@@ -101,7 +101,8 @@ jobs:
   ci-coverage-reporting:
     needs: ci-test
     runs-on: ubuntu-latest
-    if: always()
+    # for non-PR events, no tests are executed, so we can skip coverage reporting
+    if: ${{ github.event_name == 'pull_request_target' }}
     steps:
     -   name: Fail if predecessor jobs failed
         if: ${{ needs.ci-test.result != 'success' }}
