@@ -9,6 +9,8 @@ from sqlalchemy.testing.fixtures import TestBase
 
 
 class SQLCompileTest(TestBase, AssertsCompiledSQL):
+    __dialect__ = "hana"
+
     def test_sql_with_for_update(self) -> None:
         table1 = table("mytable", column("myid"), column("name"), column("description"))
 
@@ -57,4 +59,33 @@ class SQLCompileTest(TestBase, AssertsCompiledSQL):
     def test_sql_now_function(self) -> None:
         self.assert_compile(
             select(func.now()), "SELECT CURRENT_TIMESTAMP AS now_1 FROM DUMMY"
+        )
+
+    def test_sql_with_statement_hint_single(self) -> None:
+        table1 = table("mytable", column("myid"))
+        self.assert_compile(
+            table1.select().with_statement_hint("NO_CS_JOIN"),
+            "SELECT mytable.myid FROM mytable WITH HINT(NO_CS_JOIN)",
+        )
+
+    def test_sql_with_statement_hint_multiple(self) -> None:
+        table1 = table("mytable", column("myid"))
+        self.assert_compile(
+            table1.select()
+            .with_statement_hint("NO_CS_JOIN")
+            .with_statement_hint("HASH_JOIN"),
+            "SELECT mytable.myid FROM mytable WITH HINT(NO_CS_JOIN, HASH_JOIN)",
+        )
+
+    def test_sql_with_statement_hint_dialect_filter(self) -> None:
+        table1 = table("mytable", column("myid"))
+        # hint with dialect_name="*" should be included
+        self.assert_compile(
+            table1.select().with_statement_hint("NO_CS_JOIN", dialect_name="*"),
+            "SELECT mytable.myid FROM mytable WITH HINT(NO_CS_JOIN)",
+        )
+        # hint targeted at another dialect should not appear
+        self.assert_compile(
+            table1.select().with_statement_hint("NO_CS_JOIN", dialect_name="postgresql"),
+            "SELECT mytable.myid FROM mytable",
         )
