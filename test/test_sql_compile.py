@@ -86,6 +86,8 @@ class SQLCompileTest(TestBase, AssertsCompiledSQL):
         )
         # hint targeted at another dialect should not appear
         self.assert_compile(
-            table1.select().with_statement_hint("NO_CS_JOIN", dialect_name="postgresql"),
+            table1.select().with_statement_hint(
+                "NO_CS_JOIN", dialect_name="postgresql"
+            ),
             "SELECT mytable.myid FROM mytable",
         )

@@ -341,7 +341,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
 
     @override
     def get_statement_hint_text(self, hint_texts: list[str]) -> str:
-        return "WITH HINT(%s)" % ", ".join(hint_texts)
+        return f"WITH HINT({', '.join(hint_texts)})"
 
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
