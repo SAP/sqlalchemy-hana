@@ -339,6 +339,10 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     def visit_now_func(self, fn: functions.now, **kw: Any) -> str:
         return "CURRENT_TIMESTAMP"
 
+    @override
+    def get_statement_hint_text(self, hint_texts: list[str]) -> str:
+        return f"WITH HINT({', '.join(hint_texts)})"
+
 
 class HANATypeCompiler(compiler.GenericTypeCompiler):
     @override

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+4.5.0
+-----
+
+Features
+~~~~~~~~
+
+- Added support for ``with_statement_hint`` by rendering hints as ``WITH HINT(...)``
+
 4.4.0
 -----
 
