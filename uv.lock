@@ -1242,7 +1242,7 @@ dev = [
     { name = "pylint-per-file-ignores", specifier = "==3.2.1" },
     { name = "pyupgrade", specifier = "==3.21.2" },
     { name = "toml-sort", specifier = "==0.24.4" },
-    { name = "types-hdbcli", specifier = "==2.25.0.20250915" },
+    { name = "types-hdbcli", specifier = "==2.25.0.20260408" },
     { name = "typing-extensions", specifier = "==4.15.0" },
     { name = "uv", specifier = "==0.11.3" },
     { name = "yesqa", specifier = "==1.5.0" },
@@ -1341,11 +1341,11 @@ wheels = [
 
 [[package]]
 name = "types-hdbcli"
-version = "2.25.0.20250915"
+version = "2.25.0.20260408"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0a/32/a04f8b2dee8f19f4325d16790342cce8c9aff4da4e5d10dd6d77a1c84d83/types_hdbcli-2.25.0.20250915.tar.gz", hash = "sha256:a3525817cd5ae65b098b91723881cebc4b8b12aa63ab6def74ff305ed43d162b", size = 10447, upload-time = "2025-09-15T03:00:56.403Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/59/ec/75a20daba35e193a1b41eff23f62dc3253bd2677066a0e14aa332f75ccd0/types_hdbcli-2.25.0.20260408.tar.gz", hash = "sha256:62fbdcaa71b52dc3adf680722b1cfc470bd4bcba386ba9f7469918366357704a", size = 10465, upload-time = "2026-04-08T04:26:50.392Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/1c/5c9c27aafc7b2097fadbb06ccc529e231f8c99e946b95b6d74b5fc51f993/types_hdbcli-2.25.0.20250915-py3-none-any.whl", hash = "sha256:8f46dca68b600d19bc8259ff23901a597871ca99202b186cca7c761e9100c5aa", size = 9485, upload-time = "2025-09-15T03:00:55.322Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/ac/b696473ebb240de89096eb66b46fd9037d759ab14043a42116dcfcb7e75f/types_hdbcli-2.25.0.20260408-py3-none-any.whl", hash = "sha256:4a2f241f80c7c8b34f7773a48bcc811aaf4195f098d948ecec3f51c052f465cb", size = 9486, upload-time = "2026-04-08T04:26:49.348Z" },
 ]
 
 [[package]]
