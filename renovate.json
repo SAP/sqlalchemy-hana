@@ -5,6 +5,9 @@
         "pre-commit",
         "github-actions"
     ],
+    "minimumReleaseAge": "3 days",
+    "minimumReleaseAgeBehaviour": "timestamp-optional",
+    "configMigration": true,
     "extends": [
         "config:recommended",
         ":disableDependencyDashboard",
@@ -61,6 +64,13 @@
                 "major"
             ],
             "automerge": false
+        },
+        {
+            "description": "Disable minimumReleaseAge for lock file maintenance updates and delegate age checks to uv",
+            "matchUpdateTypes": [
+                "lockFileMaintenance"
+            ],
+            "minimumReleaseAge": null
         }
     ]
 }
