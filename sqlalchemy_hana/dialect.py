@@ -11,6 +11,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 import hdbcli.dbapi
+import sqlalchemy
 from sqlalchemy import (
     Computed,
     Identity,
@@ -41,7 +42,6 @@ from typing_extensions import override
 
 from sqlalchemy_hana import types as hana_types
 from sqlalchemy_hana.elements import CreateView, DropView, Upsert
-import sqlalchemy
 
 if TYPE_CHECKING:
     from typing import ParamSpec, TypeVar
@@ -76,7 +76,9 @@ if sqlalchemy.__version__ < "2.1":
     from sqlalchemy.sql.ddl import _DropView as BaseDropView
 else:
     # In SQLAlchemy 2.1, the _DropView class was renamed to DropView.
-    from sqlalchemy.sql.ddl import DropView as BaseDropView
+    from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined,no-redef]
+        DropView as BaseDropView,
+    )
 
 with contextlib.suppress(ImportError):
     # pylint: disable=unused-import
