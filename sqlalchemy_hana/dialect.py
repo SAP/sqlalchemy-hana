@@ -75,10 +75,15 @@ if TYPE_CHECKING:
 if sqlalchemy.__version__ < "2.1":
     from sqlalchemy.sql.ddl import _DropView as BaseDropView
 else:
+    # isort moves the comments around leading to issues
+    # isort: off
     # In SQLAlchemy 2.1, the _DropView class was renamed to DropView.
+    # pylint:disable-next=no-name-in-module
     from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined,no-redef]
         DropView as BaseDropView,
     )
+
+    # isort: on
 
 with contextlib.suppress(ImportError):
     # pylint: disable=unused-import
