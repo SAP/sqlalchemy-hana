@@ -11,6 +11,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 import hdbcli.dbapi
+import sqlalchemy
 from sqlalchemy import (
     Computed,
     Identity,
@@ -31,7 +32,6 @@ from sqlalchemy.engine import Connection, default, reflection
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlalchemy.schema import CreateColumn
 from sqlalchemy.sql import Select, compiler, functions, sqltypes
-from sqlalchemy.sql.ddl import _DropView as BaseDropView
 from sqlalchemy.sql.elements import (
     BinaryExpression,
     BindParameter,
@@ -71,6 +71,19 @@ if TYPE_CHECKING:
 
     RET = TypeVar("RET")
     PARAM = ParamSpec("PARAM")
+
+if sqlalchemy.__version__ < "2.1":
+    from sqlalchemy.sql.ddl import _DropView as BaseDropView
+else:
+    # isort moves the comments around leading to issues
+    # isort: off
+    # In SQLAlchemy 2.1, the _DropView class was renamed to DropView.
+    # pylint:disable-next=no-name-in-module
+    from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined,no-redef]
+        DropView as BaseDropView,
+    )
+
+    # isort: on
 
 with contextlib.suppress(ImportError):
     # pylint: disable=unused-import
