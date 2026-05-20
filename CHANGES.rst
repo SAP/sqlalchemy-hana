@@ -1,6 +1,14 @@
 Changelog
 =========
 
+4.6.0
+-----
+
+Features
+~~~~~~~~
+
+- Fixed import issue with SQLAlchemy 2.1 preview
+
 4.5.0
 -----
 
