@@ -79,6 +79,9 @@ else:
     # isort: off
     # In SQLAlchemy 2.1, the _DropView class was renamed to DropView.
     # pylint:disable-next=no-name-in-module
+    from sqlalchemy.sql.ddl import CreateView as BaseCreateView
+
+    # pylint:disable-next=no-name-in-module
     from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined,no-redef]
         DropView as BaseDropView,
     )
@@ -454,6 +457,11 @@ class HANADDLCompiler(compiler.DDLCompiler):
         text += self.define_constraint_deferrability(constraint)
         return text
 
+    def visit_create_table_as(self, element: Any, **kw: Any) -> str:
+        result = super().visit_create_table_as(element, **kw)
+        prefix, sep, select_sql = result.partition(" AS ")
+        return f"{prefix}{sep}({select_sql})"
+
     @override
     def visit_create_table(self, create: CreateTable, **kw: Any) -> str:
         table = create.element
@@ -497,9 +505,10 @@ class HANADDLCompiler(compiler.DDLCompiler):
         )
         return f"{clause} ({expression})"
 
-    def visit_create_view(self, create: CreateView, **kw: Any) -> str:
+    def visit_create_view(self, create: CreateView | BaseCreateView, **kw: Any) -> str:
+        name = getattr(create, "name", getattr(create, "table_name"))  # noqa: FTB009
         selectable = self.sql_compiler.process(create.selectable, literal_binds=True)
-        return f"CREATE VIEW {create.name} AS {selectable}"
+        return f"CREATE VIEW {name} AS {selectable}"
 
     @override
     def visit_drop_view(self, drop: DropView | BaseDropView, **kw: Any) -> str:
