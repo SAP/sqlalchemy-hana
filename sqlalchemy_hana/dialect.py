@@ -80,7 +80,7 @@ else:
     # isort moves the comments around leading to issues
     # isort: off
     # pylint:disable-next=no-name-in-module
-    from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined,no-redef]
+    from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined]
         CreateView as BaseCreateView,
     )
 
