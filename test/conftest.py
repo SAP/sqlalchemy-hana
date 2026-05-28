@@ -4,8 +4,7 @@
 from __future__ import annotations
 
 import logging
-import random
-import string
+from test.util import random_string
 from typing import Any
 
 import pytest
@@ -43,11 +42,6 @@ def _get_main_config() -> Config:
     return list(Config.all_configs())[0]
 
 
-def _random_string(length: int) -> str:
-    """Create a random string with the given length."""
-    return "ci_" + "".join(random.choices(string.ascii_lowercase, k=length))
-
-
 @post
 def randomize_test_schemas(*args: Any, **kwargs: Any) -> None:
     """Set random schema names for the testing schemas."""
@@ -55,10 +49,10 @@ def randomize_test_schemas(*args: Any, **kwargs: Any) -> None:
     global TEST_SCHEMA, TEST_SCHEMA2
 
     config = _get_main_config()
-    config.test_schema = TEST_SCHEMA = _random_string(10)
-    config.test_schema_2 = TEST_SCHEMA2 = _random_string(10)
+    config.test_schema = TEST_SCHEMA = "ci_" + random_string(10)
+    config.test_schema_2 = TEST_SCHEMA2 = "ci_" + random_string(10)
     Config.set_as_current(config, testing)
-    testing.config.ident = _random_string(5)
+    testing.config.ident = "ci_" + random_string(5)
 
     # we don't need to drop the schemas later,
     # because the user is dropped later and with it the schemas
