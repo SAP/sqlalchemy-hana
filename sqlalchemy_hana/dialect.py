@@ -237,8 +237,11 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
 
         if for_update.of:
+            # see https://github.com/sqlalchemy/sqlalchemy/discussions/13330
+            # copy to avoid unintended side-effects
+            process_kw = kw | {"ashint": True}
             tmp += " OF " + ", ".join(
-                self.process(elem, **kw) for elem in for_update.of
+                self.process(elem, **process_kw) for elem in for_update.of
             )
         if for_update.nowait:
             tmp += " NOWAIT"
