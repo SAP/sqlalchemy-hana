@@ -47,7 +47,7 @@ class SQLCompileTest(TestBase, AssertsCompiledSQL):
         self.assert_compile(
             table1.select().with_for_update(of=table1),
             "SELECT mytable.myid, mytable.name, mytable.description "
-            "FROM mytable FOR UPDATE OF mytable",
+            "FROM mytable FOR UPDATE OF mytable.myid, mytable.name, mytable.description",
         )
 
     def test_sql_unary_boolean(self) -> None:
