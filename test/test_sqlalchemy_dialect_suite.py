@@ -168,16 +168,16 @@ class ComponentReflectionTest(_ComponentReflectionTest):
     @testing.requires.schema_create_delete
     def test_schema_cache(self, connection):
         insp = inspect(connection)
-        schema_name = random_string(10).upper()
+        schema_name = random_string(10).lower()
 
         is_false(schema_name in insp.get_schema_names())
         is_false(insp.has_schema(schema_name))
         connection.execute(DDL(f"CREATE SCHEMA {schema_name}"))
         try:
-            is_false(f"{schema_name}" in insp.get_schema_names())
-            is_false(insp.has_schema(f"{schema_name}"))
+            is_false(schema_name in insp.get_schema_names())
+            is_false(insp.has_schema(schema_name))
             insp.clear_cache()
-            is_true(f"{schema_name}" in insp.get_schema_names())
+            is_true(schema_name in insp.get_schema_names())
             is_true(insp.has_schema(schema_name))
         finally:
             connection.execute(DDL(f"DROP SCHEMA {schema_name}"))
