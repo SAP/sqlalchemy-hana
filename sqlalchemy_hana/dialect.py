@@ -238,7 +238,7 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
 
         if for_update.of:
-            flat_ofs = []
+            flat_ofs: list[Any] = []
             for of_value in for_update.of:
                 if isinstance(of_value, TableClause):
                     flat_ofs.extend(of_value.columns.values())
