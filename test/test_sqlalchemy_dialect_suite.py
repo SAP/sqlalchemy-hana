@@ -168,7 +168,7 @@ class ComponentReflectionTest(_ComponentReflectionTest):
     @testing.requires.schema_create_delete
     def test_schema_cache(self, connection):
         insp = inspect(connection)
-        schema_name = random_string(10)
+        schema_name = random_string(10).upper()
 
         is_false(schema_name in insp.get_schema_names())
         is_false(insp.has_schema(schema_name))
