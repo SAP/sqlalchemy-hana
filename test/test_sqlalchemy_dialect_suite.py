@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from test.util import random_string
+import random
+import string
 from typing import Any
 
 import pytest
@@ -168,7 +169,7 @@ class ComponentReflectionTest(_ComponentReflectionTest):
     @testing.requires.schema_create_delete
     def test_schema_cache(self, connection):
         insp = inspect(connection)
-        schema_name = random_string(10).lower()
+        schema_name = "".join(random.choices(string.ascii_lowercase, k=10))
 
         is_false(schema_name in insp.get_schema_names())
         is_false(insp.has_schema(schema_name))
