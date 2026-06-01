@@ -61,7 +61,6 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
         ("CASCADE", None),
         (None, "SET NULL"),
         (None, "RESTRICT"),
-        (None, "RESTRICT"),
         argnames="ondelete,onupdate",
     )
     def test_get_foreign_key_options(self, connection, metadata, ondelete, onupdate):
