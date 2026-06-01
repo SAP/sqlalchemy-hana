@@ -1,8 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [
-    "setuptools>=64",
-]
+requires = ["setuptools~=82.0"]
 
 [project]
 authors = [
@@ -65,25 +63,25 @@ hana = "sqlalchemy_hana.dialect:HANAHDBCLIDialect"
 [dependency-groups]
 dev = [
     "isort==8.0.1",
-    "black==26.5.0",
+    "black==26.5.1",
     "pre-commit==4.6.0",
     "flake8==7.3.0",
-    "flake8-tergeo==26.4.9.0",
+    "flake8-tergeo==26.5.28.0",
     "pylint==4.0.5",
     "mypy==2.1.0",
-    "types-hdbcli==2.25.0.20260508",
+    "types-hdbcli==2.25.0.20260518",
     "typing-extensions==4.15.0",
     "yesqa==1.5.0",
     "pyupgrade==3.21.2",
     "pylint-per-file-ignores==3.2.1",
     "toml-sort==0.24.4",
-    "uv==0.11.14",
+    "uv==0.11.17",
 ]
 test = [
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
-    "coverage[toml]==7.14.0",
-    "diff-cover[toml]==10.2.0",
+    "coverage[toml]==7.14.1",
+    "diff-cover[toml]==10.2.1",
     "pytest-randomly==4.1.0",
 ]
 
@@ -200,7 +198,6 @@ per-file-ignores = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--strict-markers"
 filterwarnings = [
     "error",
     "ignore:There is no current event loop:DeprecationWarning",
@@ -211,7 +208,8 @@ markers = [
     "sparse_driver_backend: used by sqlalchemy",
     "mypy: used by sqlalchemy",
 ]
-xfail_strict = true
+strict = true
+strict_parametrization_ids = false
 
 [tool.setuptools.package-data]
 sqlalchemy_hana = [

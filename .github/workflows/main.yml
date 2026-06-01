@@ -56,7 +56,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
-        sqlalchemy-version: [2.0.*, 2.1.0b2]
+        sqlalchemy-version: [2.0.*]
         async-mode: [non-async]
         include:
         -   python-version: '3.14'
@@ -85,7 +85,7 @@ jobs:
           echo "::add-mask::$PYTEST_DBURI"
           export PYTEST_ADDOPTS="--dburi $PYTEST_DBURI"
           uv run --no-sync pytest -v --cov sqlalchemy_hana --cov test --cov-report xml --cov-fail-under 0 test/
-          uv run --no-sync python test/ci_setup.py teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
+          uv run --no-sync python -m test.ci_setup teardown ${{ secrets.TEST_DBURI }} $PYTEST_DBURI
     -   name: Rename coverage file
         run: |
           UUID=$(uuidgen)

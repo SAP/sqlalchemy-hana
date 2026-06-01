@@ -3,11 +3,14 @@
 
 from __future__ import annotations
 
+import random
+import string
 from typing import Any
 
 import pytest
 import sqlalchemy.types as sql_types
 from sqlalchemy import (
+    DDL,
     ForeignKey,
     ForeignKeyConstraint,
     Integer,
@@ -16,7 +19,7 @@ from sqlalchemy import (
     testing,
 )
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy.testing.assertions import assert_raises, eq_
+from sqlalchemy.testing.assertions import assert_raises, eq_, is_false, is_true
 from sqlalchemy.testing.provision import temp_table_keyword_args
 from sqlalchemy.testing.schema import Column, Table
 from sqlalchemy.testing.suite import *  # noqa: F401, F403
@@ -57,7 +60,6 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
     @testing.combinations(
         ("CASCADE", None),
         (None, "SET NULL"),
-        (None, "RESTRICT"),
         (None, "RESTRICT"),
         argnames="ondelete,onupdate",
     )
@@ -161,6 +163,24 @@ class ComponentReflectionTest(_ComponentReflectionTest):
         _normalize(result)
         _normalize(exp)
         return super()._check_table_dict(result, exp, req_keys, make_lists)
+
+    @testing.requires.schema_reflection
+    @testing.requires.schema_create_delete
+    def test_schema_cache(self, connection):
+        insp = inspect(connection)
+        schema_name = "".join(random.choices(string.ascii_lowercase, k=10))
+
+        is_false(schema_name in insp.get_schema_names())
+        is_false(insp.has_schema(schema_name))
+        connection.execute(DDL(f"CREATE SCHEMA {schema_name}"))
+        try:
+            is_false(schema_name in insp.get_schema_names())
+            is_false(insp.has_schema(schema_name))
+            insp.clear_cache()
+            is_true(schema_name in insp.get_schema_names())
+            is_true(insp.has_schema(schema_name))
+        finally:
+            connection.execute(DDL(f"DROP SCHEMA {schema_name}"))
 
 
 class CTETest(_CTETest):

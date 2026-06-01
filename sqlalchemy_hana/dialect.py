@@ -19,6 +19,7 @@ from sqlalchemy import (
     Pool,
     PrimaryKeyConstraint,
     Sequence,
+    TableClause,
     exc,
     sql,
     types,
@@ -243,9 +244,13 @@ class HANAStatementCompiler(compiler.SQLCompiler):
         tmp = " FOR SHARE LOCK" if for_update.read else " FOR UPDATE"
 
         if for_update.of:
-            tmp += " OF " + ", ".join(
-                self.process(elem, **kw) for elem in for_update.of
-            )
+            flat_ofs: list[Any] = []
+            for of_value in for_update.of:
+                if isinstance(of_value, TableClause):
+                    flat_ofs.extend(of_value.columns.values())
+                else:
+                    flat_ofs.append(of_value)
+            tmp += " OF " + ", ".join(self.process(elem, **kw) for elem in flat_ofs)
         if for_update.nowait:
             tmp += " NOWAIT"
         if for_update.skip_locked:

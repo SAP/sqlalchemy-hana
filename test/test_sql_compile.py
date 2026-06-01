@@ -44,6 +44,12 @@ class SQLCompileTest(TestBase, AssertsCompiledSQL):
             "FROM mytable FOR UPDATE IGNORE LOCKED",
         )
 
+        self.assert_compile(
+            table1.select().with_for_update(of=table1),
+            "SELECT mytable.myid, mytable.name, mytable.description "
+            "FROM mytable FOR UPDATE OF mytable.myid, mytable.name, mytable.description",
+        )
+
     def test_sql_unary_boolean(self) -> None:
         self.assert_compile(
             select(literal(1)).where(true()),
