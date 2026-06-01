@@ -211,6 +211,7 @@ markers = [
     "mypy: used by sqlalchemy",
 ]
 strict = true
+strict_parametrization_ids = false
 
 [tool.setuptools.package-data]
 sqlalchemy_hana = [
