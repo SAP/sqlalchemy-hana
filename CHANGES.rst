@@ -1,6 +1,15 @@
 Changelog
 =========
 
+4.6.0
+-----
+
+Features
+~~~~~~~~
+
+- Fixed import issue with SQLAlchemy 2.1 preview
+- Fixed an issue causing ``with_for_update`` to fail if ``of`` was not a column list
+
 4.5.0
 -----
 

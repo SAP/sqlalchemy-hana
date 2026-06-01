@@ -231,6 +231,9 @@ class JSONTest(_JSONTest):
     def test_path_typed_comparison(self):
         pytest.skip("Path typed access is not supported")
 
+    def test_index_cross_casts(self):
+        pytest.skip("JSON joins are not supported")
+
 
 class BizarroCharacterTest(_BizarroCharacterTest):
 
