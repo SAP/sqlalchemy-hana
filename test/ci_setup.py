@@ -11,20 +11,18 @@ from urllib.parse import urlsplit
 from hdbcli import dbapi
 
 
-def random_string(length: int) -> str:
+def _random_string(length: int) -> str:
     """Create a random string with the given length."""
     return "".join(
-        random.choices(
-            string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length
-        )
+        random.choices(string.ascii_uppercase + string.ascii_lowercase, k=length)
     )
 
 
 def setup(dburi: str, is_async: bool) -> str:
     url = urlsplit(dburi)
-    user = f"PYTEST_{random_string(10)}"
+    user = f"PYTEST_{_random_string(10)}"
     # always fulfill the password policy
-    password = random_string(15) + "A1a"
+    password = _random_string(15) + "A1a"
 
     with (
         closing(
