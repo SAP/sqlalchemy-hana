@@ -334,7 +334,7 @@ wheels = [
 
 [[package]]
 name = "diff-cover"
-version = "10.2.1"
+version = "10.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "chardet" },
@@ -342,9 +342,9 @@ dependencies = [
     { name = "pluggy" },
     { name = "pygments" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/72/fc43790759f3824801359249611f8785541407541fc756ba6922aa5781ba/diff_cover-10.2.1.tar.gz", hash = "sha256:33bae6a1bdcc8aea2c626bdcff4efb9f4e9cbf00f929060159e7c959306f85bf", size = 102405, upload-time = "2026-05-23T12:55:07.555Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/21/057e816125c162662d2a2cc2ebcd72dd333e78e51678298d07dd3146011a/diff_cover-10.3.0.tar.gz", hash = "sha256:474dbc63e815fbb7567d7b7ca5b104123e96129f25426ebdbc9a1bdbb935b2c6", size = 106546, upload-time = "2026-05-30T14:17:14.32Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/88/037da0abb5241fdb22d786307af6a74e3c4cf27f241e461314893071d19e/diff_cover-10.2.1-py3-none-any.whl", hash = "sha256:1f98191f18953091672598c1cb3eb62efc1288d96f8d92f24c898e993bf3aae1", size = 56744, upload-time = "2026-05-23T12:55:05.99Z" },
+    { url = "https://files.pythonhosted.org/packages/83/0a/a96e57a7a3fca419cd5ceff0d13dee2166520fa67103fb82624ad64700fb/diff_cover-10.3.0-py3-none-any.whl", hash = "sha256:2e47d5ab3868d1e92131c11f364f3f4a8583c97123d3bbc6b6cc8ce0a4cc2202", size = 58989, upload-time = "2026-05-30T14:17:12.858Z" },
 ]
 
 [package.optional-dependencies]
@@ -1306,7 +1306,7 @@ dev = [
 ]
 test = [
     { name = "coverage", extras = ["toml"], specifier = "==7.14.1" },
-    { name = "diff-cover", extras = ["toml"], specifier = "==10.2.1" },
+    { name = "diff-cover", extras = ["toml"], specifier = "==10.3.0" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-randomly", specifier = "==4.1.0" },
