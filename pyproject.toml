@@ -78,7 +78,7 @@ dev = [
     "uv==0.11.21",
 ]
 test = [
-    "pytest==9.0.3",
+    "pytest==9.1.0",
     "pytest-cov==7.1.0",
     "coverage[toml]==7.14.1",
     "diff-cover[toml]==10.3.0",
