@@ -26,7 +26,7 @@ jobs:
     if: ${{ success() || ( needs.ci-approval.result == 'skipped' && github.event_name == 'push' ) }}
     runs-on: ubuntu-latest
     steps:
-    -   uses: actions/checkout@v6
+    -   uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -64,7 +64,7 @@ jobs:
             async-mode: async
     runs-on: ubuntu-latest
     steps:
-    -   uses: actions/checkout@v6
+    -   uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -110,7 +110,7 @@ jobs:
           echo "Predecessor job(s) failed:"
           echo "  ci-test: ${{ needs.ci-test.result }}"
           exit 1
-    -   uses: actions/checkout@v6
+    -   uses: actions/checkout@v7
         with:
           fetch-depth: 0
     -   uses: actions/setup-python@v6
