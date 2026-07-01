@@ -285,16 +285,25 @@ class HANAStatementCompiler(compiler.SQLCompiler):
     # where clause like:
     #   SELECT 1 FROM DUMMY WHERE TRUE
     #   SELECT 1 FROM DUMMY WHERE FALSE
+    # When the dialect is configured with use_native_boolean=False (schemas
+    # that store booleans as integer/tinyint), sql.true()/sql.false() render
+    # as 1/0; comparing those to the boolean literals TRUE/FALSE raises HANA
+    # error 266 (BOOLEAN type is not comparable with INT), so fall back to
+    # an INT compare in that mode.
     @override
     def visit_is_true_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
+        if not self.dialect.supports_native_boolean:
+            return f"{self.process(element.element, **kw)} = 1"
         return f"{self.process(element.element, **kw)} = TRUE"
 
     @override
     def visit_is_false_unary_operator(
         self, element: UnaryExpression[Any], operator: Any, **kw: Any
     ) -> str:
+        if not self.dialect.supports_native_boolean:
+            return f"{self.process(element.element, **kw)} = 0"
         return f"{self.process(element.element, **kw)} = FALSE"
 
     # SAP HANA does not support JSON based operations

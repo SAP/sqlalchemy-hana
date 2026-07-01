@@ -1,6 +1,19 @@
 Changelog
 =========
 
+4.6.1
+-----
+
+Fixes
+~~~~~
+
+- Fixed an issue causing ``WHERE 0 = TRUE``/``WHERE 1 = TRUE`` to be
+  emitted for ``sql.false()``/``sql.true()`` predicates when the dialect
+  was configured with ``use_native_boolean=False``, which SAP HANA
+  rejects with error 266 ("BOOLEAN type is not comparable with INT").
+  ``visit_is_true_unary_operator``/``visit_is_false_unary_operator`` now
+  emit an INT compare (``= 1``/``= 0``) in that mode.
+
 4.6.0
 -----
 
