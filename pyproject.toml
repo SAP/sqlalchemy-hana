@@ -70,7 +70,7 @@ dev = [
     "pylint==4.0.6",
     "mypy==2.1.0",
     "types-hdbcli==2.25.0.20260518",
-    "typing-extensions==4.15.0",
+    "typing-extensions==4.16.0",
     "yesqa==1.5.0",
     "pyupgrade==3.21.2",
     "pylint-per-file-ignores==3.2.1",
