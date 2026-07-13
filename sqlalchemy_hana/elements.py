@@ -45,7 +45,7 @@ def view(name: str, selectable: AnySelect) -> TableClause:
             iter_.append(
                 col._make_proxy(
                     clause,
-                    clause.primary_key,  # type: ignore[arg-type,misc]
+                    clause.primary_key,  # type: ignore[arg-type,call-arg]
                     clause.foreign_keys,  # type: ignore[arg-type]
                 )
             )
