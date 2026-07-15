@@ -80,7 +80,7 @@ dev = [
 test = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "coverage[toml]==7.15.0",
+    "coverage[toml]==7.15.1",
     "diff-cover[toml]==10.3.0",
     "pytest-randomly==4.1.0",
 ]
