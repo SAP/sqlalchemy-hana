@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
           allow-unsafe-pr-checkout: true
           ref: ${{ github.event.pull_request.head.sha }}
-    -   uses: actions/setup-python@v6
+    -   uses: actions/setup-python@v7
         with:
           python-version-file: .python-version
     -   name: Install uv
@@ -70,7 +70,7 @@ jobs:
           fetch-depth: 0
           allow-unsafe-pr-checkout: true
           ref: ${{ github.event.pull_request.head.sha }}
-    -   uses: actions/setup-python@v6
+    -   uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
     -   name: Install uv
@@ -116,7 +116,7 @@ jobs:
         with:
           fetch-depth: 0
           allow-unsafe-pr-checkout: true
-    -   uses: actions/setup-python@v6
+    -   uses: actions/setup-python@v7
         with:
           python-version-file: .python-version
     -   name: Install uv
