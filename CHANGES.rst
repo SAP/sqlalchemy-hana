@@ -1,6 +1,21 @@
 Changelog
 =========
 
+4.6.2
+-----
+
+Fixes
+~~~~~
+
+- Fixed negation of a grouped boolean predicate (e.g. ``~or_(...)``,
+  ``~and_(...)`` or ``not_()`` of a grouping) compiling to
+  ``(<predicate>) = FALSE`` (or ``(<predicate>) = 0`` with
+  ``use_native_boolean=False``), which SAP HANA rejects with error 257
+  ("incorrect syntax near '='"). Such implicitly-boolean expressions now
+  render as ``NOT (...)``. Bare boolean literals and boolean columns keep
+  the explicit ``= TRUE``/``= FALSE`` (``= 1``/``= 0``) comparison that
+  SAP HANA requires.
+
 4.6.1
 -----
 
