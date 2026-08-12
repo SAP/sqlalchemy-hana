@@ -67,7 +67,7 @@ dev = [
     "pre-commit==4.6.1",
     "flake8==7.3.0",
     "flake8-tergeo==26.6.10.0",
-    "pylint==4.0.6",
+    "pylint==4.0.7",
     "mypy==2.3.0",
     "types-hdbcli==2.29.0.20260716",
     "typing-extensions==4.16.0",
