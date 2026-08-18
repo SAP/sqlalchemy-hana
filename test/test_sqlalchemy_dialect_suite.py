@@ -136,9 +136,10 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
         eq_(typ.length, 52)
         assert isinstance(typ.length, int)
 
-    def _cc_by_name(self, reflected, name):
-        """Overwritten to avoid lower conversion"""
-        # pylint: disable=inconsistent-return-statements
+    def _cc_by_name(  # pylint: disable=inconsistent-return-statements
+        self, reflected, name
+    ):
+        """Overwritten to avoid lower conversion."""
         for rec in reflected:
             if rec["name"] == name:
                 return rec["sqltext"]
