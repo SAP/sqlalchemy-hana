@@ -138,6 +138,7 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
 
     def _cc_by_name(self, reflected, name):
         """Overwritten to avoid lower conversion"""
+        # pylint: disable=inconsistent-return-statements
         for rec in reflected:
             if rec["name"] == name:
                 return rec["sqltext"]
