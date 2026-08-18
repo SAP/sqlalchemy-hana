@@ -136,6 +136,15 @@ class ComponentReflectionTestExtra(_ComponentReflectionTestExtra):
         eq_(typ.length, 52)
         assert isinstance(typ.length, int)
 
+    def _cc_by_name(  # pylint: disable=inconsistent-return-statements
+        self, reflected, name
+    ):
+        """Overwritten to avoid lower conversion."""
+        for rec in reflected:
+            if rec["name"] == name:
+                return rec["sqltext"]
+        pytest.fail(f"Could not find constraint {name!r} in reflected constraints")
+
 
 class ComponentReflectionTest(_ComponentReflectionTest):
     def _check_table_dict(self, result, exp, req_keys=None, make_lists=False):
