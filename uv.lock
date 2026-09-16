@@ -1428,7 +1428,7 @@ dev = [
     { name = "pylint", specifier = "==4.0.8" },
     { name = "pylint-per-file-ignores", specifier = "==3.2.1" },
     { name = "pyupgrade", specifier = "==3.21.2" },
-    { name = "toml-sort", specifier = "==0.24.4" },
+    { name = "toml-sort", specifier = "==0.25.0" },
     { name = "types-hdbcli", specifier = "==2.29.0.20260716" },
     { name = "typing-extensions", specifier = "==4.16.0" },
     { name = "uv", specifier = "==0.12.13" },
@@ -1453,14 +1453,14 @@ wheels = [
 
 [[package]]
 name = "toml-sort"
-version = "0.24.4"
+version = "0.25.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "tomlkit" },
+    { name = "tomlrt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/47/c5/d6f650fdcf8e1f83096815fa67fb13a9a345b99da6015c60c4b7e4a8ea2b/toml_sort-0.24.4.tar.gz", hash = "sha256:429b69f5b98b7047a11380c80ecf0838556bdea1a8902d0be564961c48841423", size = 17793, upload-time = "2026-03-24T14:05:53.637Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/f4/7221164c2984af53c18dd9f1d267ca7da660b40bc6b9a436b67ae17fc3ff/toml_sort-0.25.0.tar.gz", hash = "sha256:08ffe893feba7dc1773c61046b76f63561a6204e0162cd067c4a0d681d9198c7", size = 13197, upload-time = "2026-09-12T21:58:05.097Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/5a/1f0e54df4eacf0f4d8f94ba50cf72be33d2a3f04babdfb1931bead48a0ab/toml_sort-0.24.4-py3-none-any.whl", hash = "sha256:125aa5fb94f33c542c6901040456145dd38f79bbb310b56b436a93057d30a739", size = 16577, upload-time = "2026-03-24T14:05:54.757Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/b8/dc28651955aa2fdb24ef6f7ac7bcc6784f60d31630a0af1bd6d3626e4db8/toml_sort-0.25.0-py3-none-any.whl", hash = "sha256:96de33d49795a730297a1a5cba75ad9f251a7b07e75002f8a2fcc127fa7d43bd", size = 12561, upload-time = "2026-09-12T21:58:05.916Z" },
 ]
 
 [[package]]
@@ -1524,6 +1524,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/96/e07752635b98536177fa1f37671c8f3cdde2e724c6bcf6034b2cfb571565/tomlkit-0.15.1.tar.gz", hash = "sha256:e25bbf38843005246210a12982776f27f99cb9be67160e14434d0c0d21ee1e97", size = 180129, upload-time = "2026-07-17T01:48:04.562Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/13/bc/8c13eb66537dce1d2bd3a57132902f38d0e7f5bb46fa9f4daed9fe9d76ee/tomlkit-0.15.1-py3-none-any.whl", hash = "sha256:177a05aece5a8ca5266fd3c448abb47b8d352f09d477d3ca8332db4d89b24304", size = 49449, upload-time = "2026-07-17T01:48:05.728Z" },
+]
+
+[[package]]
+name = "tomlrt"
+version = "2.2.12"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0f/b8/e7c537b92f9177a62ba34724c37cff1dee5f10365136c8e73817e3c5f4e4/tomlrt-2.2.12.tar.gz", hash = "sha256:feaa4bb44fc59e62a602262003efd21cebea1d24e121fedcd5db6a68d43b9db5", size = 469756, upload-time = "2026-09-15T20:39:39.776Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/86/20/5b8da020ea89e009dc404064e214bcd0b6d811a2344e5e5bbecdaab8a0d3/tomlrt-2.2.12-py3-none-any.whl", hash = "sha256:80e8299398f6f1d81be49b59aef96a8a0e7f8b76b616f1c570404cb8b9462de6", size = 154312, upload-time = "2026-09-15T20:39:37.85Z" },
 ]
 
 [[package]]
