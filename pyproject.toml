@@ -4,7 +4,7 @@ requires = ["setuptools~=84.0"]
 
 [project]
 authors = [
-    {name = "Christoph Heer", email = "christoph.heer@sap.com"},
+    { name = "Christoph Heer", email = "christoph.heer@sap.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -39,8 +39,8 @@ license-files = [
     "LICENSE",
 ]
 maintainers = [
-    {name = "Christoph Heer", email = "christoph.heer@sap.com"},
-    {name = "Kai Harder", email = "kai.harder@sap.com"},
+    { name = "Christoph Heer", email = "christoph.heer@sap.com" },
+    { name = "Kai Harder", email = "kai.harder@sap.com" },
 ]
 name = "sqlalchemy-hana"
 readme = "README.rst"
