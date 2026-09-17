@@ -4,7 +4,7 @@ requires = ["setuptools~=84.0"]
 
 [project]
 authors = [
-    {name = "Christoph Heer", email = "christoph.heer@sap.com"},
+    { name = "Christoph Heer", email = "christoph.heer@sap.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -39,8 +39,8 @@ license-files = [
     "LICENSE",
 ]
 maintainers = [
-    {name = "Christoph Heer", email = "christoph.heer@sap.com"},
-    {name = "Kai Harder", email = "kai.harder@sap.com"},
+    { name = "Christoph Heer", email = "christoph.heer@sap.com" },
+    { name = "Kai Harder", email = "kai.harder@sap.com" },
 ]
 name = "sqlalchemy-hana"
 readme = "README.rst"
@@ -74,7 +74,7 @@ dev = [
     "yesqa==1.5.0",
     "pyupgrade==3.21.2",
     "pylint-per-file-ignores==3.2.1",
-    "toml-sort==0.24.4",
+    "toml-sort==0.25.0",
     "uv==0.12.13",
 ]
 test = [
