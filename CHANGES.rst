@@ -1,6 +1,15 @@
 Changelog
 =========
 
+5.0.0
+-----
+
+Removals
+--------
+
+- Removed support for python3.10
+
+
 4.6.2
 -----
 
