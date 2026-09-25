@@ -41,7 +41,7 @@ repos:
         entry: pyupgrade
         language: system
         types: [python]
-        args: [--py310-plus]
+        args: [--py311-plus]
     -   id: tomlsort
         name: tomlsort
         entry: toml-sort

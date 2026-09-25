@@ -11,7 +11,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -44,7 +44,7 @@ maintainers = [
 ]
 name = "sqlalchemy-hana"
 readme = "README.rst"
-requires-python = "~=3.10"
+requires-python = ">=3.11,<4"
 version = "4.6.1"
 
 [project.optional-dependencies]
