@@ -7,13 +7,10 @@ exception if possible.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import Self, cast
 
 from hdbcli.dbapi import Error as HdbcliError
 from sqlalchemy.exc import DBAPIError
-
-if TYPE_CHECKING:
-    from typing_extensions import Self
 
 
 class HANAError(DBAPIError):
