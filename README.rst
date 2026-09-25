@@ -288,7 +288,9 @@ If ``Computed(persisted=False)`` is used, a fully virtual column using ``AS`` is
 
 Views
 ~~~~~
-sqlalchemy-hana supports the creation and usage of SQL views.
+sqlalchemy-hana supports the creation and usage of SQL views for SQLAlchemy 2.0.
+SQLAlchemy 2.1 adds native support which should be preferred over the custom view handling provided
+by sqlalchemy-hana.
 
 The views are not bound to the metadata object, therefore each needs to be created/dropped manually
 using ``CreateView`` and ``DropView``.
