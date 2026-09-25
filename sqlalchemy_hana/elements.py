@@ -8,12 +8,13 @@ from sqlalchemy import table as table_clause
 from sqlalchemy.sql.ddl import DDLElement
 from sqlalchemy.sql.dml import DMLWhereBase, Insert
 from sqlalchemy.sql.selectable import Select, TableClause
-from typing_extensions import override
+from typing_extensions import deprecated, override
 
 if TYPE_CHECKING:
     AnySelect = Select[Any]
 
 
+@deprecated("CreateView is deprecated; Use CreateView from SQLAlchemy 2.1 instead.")
 class CreateView(DDLElement):
     """CREATE VIEW element for SAP HANA."""
 
@@ -24,6 +25,7 @@ class CreateView(DDLElement):
         self.selectable = selectable
 
 
+@deprecated("DropView is deprecated; Use DropView from SQLAlchemy 2.1 instead.")
 class DropView(DDLElement):
     """DROP VIEW element for SAP HANA."""
 
@@ -33,6 +35,7 @@ class DropView(DDLElement):
         self.name = name
 
 
+@deprecated("view is deprecated; Use CreateView.table from SQLAlchemy 2.1 instead.")
 def view(name: str, selectable: AnySelect) -> TableClause:
     """Helper function to create a view clause element."""
     clause = table_clause(name)

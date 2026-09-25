@@ -74,23 +74,12 @@ if TYPE_CHECKING:
     PARAM = ParamSpec("PARAM")
 
 if sqlalchemy.__version__ < "2.1":
-    from sqlalchemy.sql.ddl import _DropView as BaseDropView
+    # pylint:disable-next=no-name-in-module
+    from sqlalchemy.sql.ddl import _DropView as BaseDropView  # type: ignore[attr-defined]
 else:
-    # In SQLAlchemy 2.1, the _DropView class was renamed to DropView.
-    # Also CreateView was added
-    # isort moves the comments around leading to issues
-    # isort: off
-    # pylint:disable-next=no-name-in-module
-    from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined]
-        CreateView as BaseCreateView,
-    )
+    from sqlalchemy.sql.ddl import CreateView as BaseCreateView
+    from sqlalchemy.sql.ddl import DropView as BaseDropView
 
-    # pylint:disable-next=no-name-in-module
-    from sqlalchemy.sql.ddl import (  # type: ignore[attr-defined,no-redef]
-        DropView as BaseDropView,
-    )
-
-    # isort: on
 
 with contextlib.suppress(ImportError):
     # pylint: disable=unused-import
@@ -486,8 +475,9 @@ class HANADDLCompiler(compiler.DDLCompiler):
         text += self.define_constraint_deferrability(constraint)
         return text
 
+    @override
     def visit_create_table_as(self, element: Any, **kw: Any) -> str:
-        result = super().visit_create_table_as(element, **kw)  # type: ignore[misc]
+        result = super().visit_create_table_as(element, **kw)
         prefix, sep, select_sql = result.partition(" AS ")
         return f"{prefix}{sep}({select_sql})"
 
@@ -534,11 +524,14 @@ class HANADDLCompiler(compiler.DDLCompiler):
         )
         return f"{clause} ({expression})"
 
-    def visit_create_view(self, create: CreateView | BaseCreateView, **kw: Any) -> str:
-        name = getattr(create, "name", getattr(create, "table_name", None))
+    @override
+    def visit_create_view(self, element: CreateView | BaseCreateView, **kw: Any) -> str:
+        name = getattr(element, "name", getattr(element, "table_name", None))
         assert name, "Missing view name"
-        selectable = self.sql_compiler.process(create.selectable, literal_binds=True)
-        return f"CREATE VIEW {name} AS {selectable}"
+        schema = getattr(element, "schema", None)
+        location = f"{schema}.{name}" if schema else name
+        selectable = self.sql_compiler.process(element.selectable, literal_binds=True)
+        return f"CREATE VIEW {location} AS {selectable}"
 
     @override
     def visit_drop_view(self, drop: DropView | BaseDropView, **kw: Any) -> str:

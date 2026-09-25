@@ -342,3 +342,54 @@ class Requirements(SQLAlchemyRequirements, AlembicRequirements):
     @property
     def asyncio_support(self) -> compound:
         return exclusions.open()
+
+    @property
+    def repeated_column_foreign_keys(self) -> compound:
+        # not supported by SAP HANA
+        return exclusions.closed()
+
+    @property
+    def column_collation_reflection(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def indexes_check_column_order(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def inline_check_constraint_reflection(self) -> compound:
+        # inline check constraints are not supported
+        return exclusions.closed()
+
+    @property
+    def server_defaults(self) -> compound:
+        # computed defaults require special syntax which we don't support
+        return exclusions.closed()
+
+    @property
+    def expression_server_defaults(self) -> compound:
+        return exclusions.open()
+
+    @property
+    def supports_bitwise_or(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def supports_bitwise_and(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def supports_bitwise_not(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def supports_bitwise_xor(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def supports_bitwise_shift(self) -> compound:
+        return exclusions.closed()
+
+    @property
+    def like_escapes(self) -> compound:
+        return exclusions.open()
