@@ -65,7 +65,7 @@ dev = [
     "isort==9.0.1",
     "black==26.5.1",
     "pre-commit==4.6.2",
-    "flake8==7.4.0",
+    "flake8==7.4.1",
     "flake8-tergeo==26.9.10.0",
     "pylint==4.0.8",
     "mypy==2.3.1",
