@@ -206,6 +206,7 @@ filterwarnings = [
     # ignore our own deprecation warnings
     "ignore:CreateView is deprecated.*",
     "ignore:DropView is deprecated.*",
+    "ignore:view is deprecated.*",
 ]
 log_level = "DEBUG"
 markers = [
