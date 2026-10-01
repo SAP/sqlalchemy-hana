@@ -1048,14 +1048,14 @@ wheels = [
 
 [[package]]
 name = "pylint-per-file-ignores"
-version = "3.2.1"
+version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pylint" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/bc/6d40a3596f91ef23fca7b89983b78bf4b3686323fd98e44e53ae365b1880/pylint_per_file_ignores-3.2.1.tar.gz", hash = "sha256:0a89f3cdc6fa09244a3f5624ad977ac9b026f0b25b2adb48c97c080da8d858f9", size = 81844, upload-time = "2026-04-03T19:35:37.697Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/60/2b/b55895658f31982f39735cdb1633b6b72783e43dce6b7af5119d279d014a/pylint_per_file_ignores-4.0.0.tar.gz", hash = "sha256:0b685cc095c4a9cc37831c23d67c88fdd870c1c7df080c32f93cd5d8cc239cde", size = 94695, upload-time = "2026-09-28T09:41:02.666Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/68/2b0cc27b549fd788caae254752910fe7222ac47c71627c60926895fe8960/pylint_per_file_ignores-3.2.1-py3-none-any.whl", hash = "sha256:aaac8b118791e742ccf7baaf42346978f6cd0440a9090d4087fc8ff26e4a31f2", size = 5699, upload-time = "2026-04-03T19:35:36.524Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/33/d8204dc7048e1f8f7b836a54f734dbd01c28fd955c7b8f8a524878f5d642/pylint_per_file_ignores-4.0.0-py3-none-any.whl", hash = "sha256:e6dd0b1645632986b8481f6e7a1878cdd232de02ee6ce51059b2db6ab8c50955", size = 6001, upload-time = "2026-09-28T09:41:01.319Z" },
 ]
 
 [[package]]
@@ -1319,7 +1319,7 @@ dev = [
     { name = "mypy", specifier = "==2.3.1" },
     { name = "pre-commit", specifier = "==4.6.2" },
     { name = "pylint", specifier = "==4.0.9" },
-    { name = "pylint-per-file-ignores", specifier = "==3.2.1" },
+    { name = "pylint-per-file-ignores", specifier = "==4.0.0" },
     { name = "pyupgrade", specifier = "==3.21.2" },
     { name = "toml-sort", specifier = "==0.25.0" },
     { name = "types-hdbcli", specifier = "==2.30.0.20260923" },
