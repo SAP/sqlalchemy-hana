@@ -4,10 +4,27 @@ Changelog
 5.0.0
 -----
 
+Features
+~~~~~~~~
+
+- Support for SQLAlchemy 2.1
+
 Removals
 --------
 
 - Removed support for python3.10
+
+Deprecations
+------------
+
+* `CreateView` is deprecated; Use `CreateView` from SQLAlchemy 2.1 instead.
+* `DropView` is deprecated; Use `DropView` from SQLAlchemy 2.1 instead.
+* `view` is deprecated; Use `CreateView.table` from SQLAlchemy 2.1 instead.
+
+Fixes
+~~~~~
+
+* Fixed an issue causing schemas of views to be ignored
 
 
 4.6.2

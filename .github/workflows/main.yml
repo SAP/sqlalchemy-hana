@@ -57,11 +57,14 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.11', '3.12', '3.13', '3.14']
-        sqlalchemy-version: [2.0.*]
+        sqlalchemy-version: [2.0.*, 2.1.*]
         async-mode: [non-async]
         include:
         -   python-version: '3.14'
             sqlalchemy-version: 2.0.*
+            async-mode: async
+        -   python-version: '3.14'
+            sqlalchemy-version: 2.1.*
             async-mode: async
     runs-on: ubuntu-latest
     steps:
