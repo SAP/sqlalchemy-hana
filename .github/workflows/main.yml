@@ -83,7 +83,12 @@ jobs:
     -   name: Install project
         run: uv sync --all-groups --all-extras
     -   name: Install sqlalchemy
-        run: uv pip install sqlalchemy==${{ matrix.sqlalchemy-version }}
+        run: |
+          if [[ "${{ matrix.async-mode }}" == "async" ]]; then
+            uv pip install "sqlalchemy[asyncio]==${{ matrix.sqlalchemy-version }}"
+          else
+            uv pip install "sqlalchemy==${{ matrix.sqlalchemy-version }}"
+          fi
     -   name: run tests (with coverage)
         run: |
           PYTEST_DBURI=$(uv run --no-sync python -m test.ci_setup setup ${{ secrets.TEST_DBURI }} ${{ matrix.async-mode }})
