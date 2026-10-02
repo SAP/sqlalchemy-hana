@@ -435,6 +435,7 @@ The linters and formatters can be executed using ``pre-commit``: ``uv run pre-co
 Testing
 -------
 **Pre-Submit**: Linters, formatters and test matrix
+
 **Post-Submit**: Linters and formatters
 
 Release Actions
