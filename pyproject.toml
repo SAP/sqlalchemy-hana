@@ -71,7 +71,7 @@ dev = [
     "types-hdbcli==2.30.0.20260923",
     "typing-extensions==4.16.0",
     "yesqa==1.5.0",
-    "pyupgrade==3.21.2",
+    "pyupgrade==3.22.0",
     "pylint-per-file-ignores==4.0.0",
     "toml-sort==0.25.0",
     "uv==0.12.23",
