@@ -15,6 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: SQL",
     "Topic :: Database",
     "Topic :: Database :: Front-Ends",
@@ -44,7 +45,7 @@ maintainers = [
 name = "sqlalchemy-hana"
 readme = "README.rst"
 requires-python = ">=3.11,<4"
-version = "5.0.0"
+version = "5.1.0"
 
 [project.optional-dependencies]
 alembic = ["alembic~=1.12"]

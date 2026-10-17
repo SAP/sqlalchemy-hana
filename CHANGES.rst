@@ -1,6 +1,15 @@
 Changelog
 =========
 
+5.1.0
+-----
+
+Features
+~~~~~~~~
+
+- Support for python 3.15
+
+
 5.0.0
 -----
 

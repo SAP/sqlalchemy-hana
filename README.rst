@@ -426,7 +426,7 @@ Development Setup
 -----------------
 This project uses `uv`.
 To setup a venv for development use
-`python3.14 -m venv venv && pip install uv && uv sync --all-groups --all-extras && rm -rf venv/`.
+`python3.15 -m venv venv && source venv/bin/activate && pip install uv && uv sync --all-groups --all-extras && rm -rf venv/`.
 Then use `source .venv/bin/activate` to activate your venv.
 
 To execute the tests, use ``uv run pytest``.
