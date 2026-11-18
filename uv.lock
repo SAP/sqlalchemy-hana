@@ -1349,7 +1349,7 @@ dev = [
     { name = "pylint", specifier = "==4.1.3" },
     { name = "pylint-per-file-ignores", specifier = "==4.0.0" },
     { name = "pyupgrade", specifier = "==3.22.0" },
-    { name = "toml-sort", specifier = "==0.25.0" },
+    { name = "toml-sort", specifier = "==0.26.0" },
     { name = "types-hdbcli", specifier = "==2.30.0.20260923" },
     { name = "typing-extensions", specifier = "==4.16.0" },
     { name = "uv", specifier = "==0.13.8" },
@@ -1374,14 +1374,14 @@ wheels = [
 
 [[package]]
 name = "toml-sort"
-version = "0.25.0"
+version = "0.26.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "tomlrt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1f/f4/7221164c2984af53c18dd9f1d267ca7da660b40bc6b9a436b67ae17fc3ff/toml_sort-0.25.0.tar.gz", hash = "sha256:08ffe893feba7dc1773c61046b76f63561a6204e0162cd067c4a0d681d9198c7", size = 13197, upload-time = "2026-09-12T21:58:05.097Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/10/d5/674285a574e58b403bf16864187a71f9bcd800e3d9365a3f8904ba96feee/toml_sort-0.26.0.tar.gz", hash = "sha256:817472aa1f1aff3d8897db694022e070879ca71cc95ae1216604d00f355c2e8d", size = 13385, upload-time = "2026-11-14T23:14:44.383Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/b8/dc28651955aa2fdb24ef6f7ac7bcc6784f60d31630a0af1bd6d3626e4db8/toml_sort-0.25.0-py3-none-any.whl", hash = "sha256:96de33d49795a730297a1a5cba75ad9f251a7b07e75002f8a2fcc127fa7d43bd", size = 12561, upload-time = "2026-09-12T21:58:05.916Z" },
+    { url = "https://files.pythonhosted.org/packages/56/74/2c3efe9387a9b33c99f789fb6e5776426ed575fb809dd4dade905879fcd7/toml_sort-0.26.0-py3-none-any.whl", hash = "sha256:03090d3d1a3e2c059059090e5be4a6d040ecb070ee44f02f3f44a1dc84a9cde0", size = 12727, upload-time = "2026-11-14T23:14:45.367Z" },
 ]
 
 [[package]]
